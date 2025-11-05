@@ -1,31 +1,50 @@
 <?php
     class Subscription {
         private string $id;
+        private Customer $customer;
+        private Parking $parking;
         private DateTime $startDate;
         private DateTime $endDate;
-        private string $description;
-        private float $price;
+        
+        /** @var array */
+        private array $weeklyTimeSlots = [];
 
-        private Parking $parking;
-
-        public function __construct(string $id, DateTime $startDate, DateTime $endDate, string $description, float $price, Parking $parking) {
+        public function __construct(Customer $customer, Parking $parking, DateTime $startDate, DateTime $endDate, array $weeklyTimeSlots = []) {
             if ($endDate < $startDate) {
                 throw new InvalidArgumentException('endDate must be after startDate');
             }
-            if ($price < 0) {
-                throw new InvalidArgumentException('price must be >= 0');
+            
+            // Vérifier la durée minimale (1 mois) et maximale (1 an)
+            $interval = $startDate->diff($endDate);
+            $totalMonths = ($interval->y * 12) + $interval->m;
+            
+            if ($totalMonths < 1) {
+                throw new InvalidArgumentException('Subscription duration must be at least 1 month');
             }
-            $this->id = $id;
+            
+            if ($totalMonths > 12) {
+                throw new InvalidArgumentException('Subscription duration cannot exceed 1 year');
+            }
+            
+            $this->id = uniqid('', true);
+            $this->customer = $customer;
+            $this->parking = $parking;
             $this->startDate = $startDate;
             $this->endDate = $endDate;
-            $this->description = $description;
-            $this->price = $price;
-            $this->parking = $parking;
+            $this->weeklyTimeSlots = $weeklyTimeSlots;
         }
         
         //getters
         public function getId() : string {
             return $this->id;
+        }
+
+        public function getCustomer() : Customer {
+            return $this->customer;
+        }
+
+        public function getParking() : Parking {
+            return $this->parking;
         }
 
         public function getStartDate() : DateTime {
@@ -36,23 +55,31 @@
             return $this->endDate;
         }
 
-        public function getDescription() : string {
-            return $this->description;
-        }
-
-        public function getPrice() : float {
-            return $this->price;
-        }
-
-        public function getParking() : Parking {
-            return $this->parking;
+        public function getWeeklyTimeSlots() : array {
+            return $this->weeklyTimeSlots;
         }
 
         //setters
+        public function setCustomer(Customer $customer) : void {
+            $this->customer = $customer;
+        }
+
+        public function setParking(Parking $parking) : void {
+            $this->parking = $parking;
+        }
+
         public function setStartDate(DateTime $startDate) : void {
             if ($this->endDate < $startDate) {
                 throw new InvalidArgumentException('startDate must be before endDate');
             }
+            
+            $interval = $startDate->diff($this->endDate);
+            $totalMonths = ($interval->y * 12) + $interval->m;
+            
+            if ($totalMonths < 1) {
+                throw new InvalidArgumentException('Subscription duration must be at least 1 month');
+            }
+            
             $this->startDate = $startDate;
         }
 
@@ -60,22 +87,46 @@
             if ($endDate < $this->startDate) {
                 throw new InvalidArgumentException('endDate must be after startDate');
             }
+            
+            $interval = $this->startDate->diff($endDate);
+            $totalMonths = ($interval->y * 12) + $interval->m;
+            
+            if ($totalMonths < 1) {
+                throw new InvalidArgumentException('Subscription duration must be at least 1 month');
+            }
+            
+            if ($totalMonths > 12) {
+                throw new InvalidArgumentException('Subscription duration cannot exceed 1 year');
+            }
+            
             $this->endDate = $endDate;
         }
 
-        public function setDescription(string $description) : void {
-            $this->description = $description;
+        public function setWeeklyTimeSlots(array $weeklyTimeSlots) : void {
+            $this->weeklyTimeSlots = $weeklyTimeSlots;
         }
 
-        public function setPrice(float $price) : void {
-            if ($price < 0) {
-                throw new InvalidArgumentException('price must be >= 0');
+        // Helper methods
+        public function addTimeSlot(string $dayOfWeek, string $startTime, string $endTime) : void {
+            $validDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            
+            if (!in_array($dayOfWeek, $validDays)) {
+                throw new InvalidArgumentException('Invalid day of week');
             }
-            $this->price = $price;
+            
+            $this->weeklyTimeSlots[] = [
+                'day' => $dayOfWeek,
+                'startTime' => $startTime,
+                'endTime' => $endTime
+            ];
         }
 
-        public function setParking(Parking $parking) : void {
-            $this->parking = $parking;
+        public function removeTimeSlot(int $index) : bool {
+            if (!isset($this->weeklyTimeSlots[$index])) {
+                return false;
+            }
+            array_splice($this->weeklyTimeSlots, $index, 1);
+            return true;
         }
     }
 ?>
