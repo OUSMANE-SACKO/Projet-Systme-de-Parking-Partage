@@ -6,9 +6,6 @@
                 throw new InvalidArgumentException('Password cannot be empty.');
             }
 
-            $dotenv = Dotenv::createImmutable(__DIR__);
-            $dotenv->load();
-
             $pepper = getenv('PEPPER');
             
             $password_peppered = hash_hmac("sha256", $password, $pepper);
