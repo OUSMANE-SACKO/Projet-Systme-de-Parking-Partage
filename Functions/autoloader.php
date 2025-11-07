@@ -1,5 +1,5 @@
 <?php
-// Parser .env manuel (sans Composer/dépendances)
+    // Parser .env manuel (sans Composer/dépendances)
     function loadEnv(string $path): void {
         if (!file_exists($path)) {
             return;
@@ -28,16 +28,40 @@
     // Charger .env
     loadEnv(__DIR__ . '/../.env');
 
-    // Autoloader pour vos entités
+    // Autoloader intelligent multi-dossiers
     spl_autoload_register(function (string $class) {
+        // Extraire le nom court de la classe (sans namespace)
         $short = $class;
         if (false !== ($pos = strrpos($class, '\\'))) {
             $short = substr($class, $pos + 1);
         }
-
-        $file = __DIR__ . '/../Entities/' . $short . '.php';
-        if (file_exists($file)) {
-            require_once $file;
+        
+        // Répertoires à scanner (dans l'ordre de priorité)
+        $directories = [
+            // Structure actuelle (compatibilité)
+            __DIR__ . '/../Entities/',
+            __DIR__ . '/../UseCase/',
+            __DIR__ . '/../Infrastructure/Database/',
+            __DIR__ . '/../Infrastructure/Database/Factories/',
+            __DIR__ . '/../Infrastructure/Repositories/',
+            __DIR__ . '/../Domain/Repositories/',
+            
+            // Structure future (src/)
+            __DIR__ . '/../src/Domain/Entities/',
+            __DIR__ . '/../src/Domain/Repositories/',
+            __DIR__ . '/../src/Application/UseCases/',
+            __DIR__ . '/../src/Infrastructure/Database/',
+            __DIR__ . '/../src/Infrastructure/Database/Factories/',
+            __DIR__ . '/../src/Infrastructure/Repositories/',
+        ];
+        
+        // Chercher le fichier dans tous les répertoires
+        foreach ($directories as $dir) {
+            $file = $dir . $short . '.php';
+            if (file_exists($file)) {
+                require_once $file;
+                return;
+            }
         }
     });
 ?>
