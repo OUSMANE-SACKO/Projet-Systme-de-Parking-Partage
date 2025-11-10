@@ -15,6 +15,9 @@
         
         /** @var ParkingSpace[] */
         private array $parkingSpaces = [];
+        
+        /** @var Subscription[] */
+        private array $subscriptions = [];
 
         public function __construct(array $location, int $capacity, array $openingHours = []) {
             if ($capacity < 0) {
@@ -25,8 +28,7 @@
             $this->capacity = $capacity;
             $this->openingHours = $openingHours;
         }
-
-        //getters
+        
         public function getId() : string {
             return $this->id;
         }
@@ -55,7 +57,10 @@
             return $this->parkingSpaces;
         }
 
-        //setters
+        public function getSubscriptions() : array {
+            return $this->subscriptions;
+        }
+
         public function setId(string $id) : void {
             $this->id = $id;
         }
@@ -75,7 +80,6 @@
             $this->openingHours = $openingHours;
         }
 
-        // PricingSchedule methods
         public function addPricingSchedule(PricingSchedule $schedule) : void {
             $this->pricingSchedules[] = $schedule;
         }
@@ -98,7 +102,6 @@
             $this->pricingSchedules = array_values($schedules);
         }
 
-        // Reservation methods
         public function addReservation(Reservation $reservation) : void {
             $this->reservations[] = $reservation;
         }
@@ -112,7 +115,6 @@
             return true;
         }
 
-        // ParkingSpace methods
         public function addParkingSpace(ParkingSpace $parkingSpace) : void {
             $this->parkingSpaces[] = $parkingSpace;
         }
@@ -123,6 +125,19 @@
                 return false;
             }
             array_splice($this->parkingSpaces, $index, 1);
+            return true;
+        }
+
+        public function addSubscription(Subscription $subscription) : void {
+            $this->subscriptions[] = $subscription;
+        }
+
+        public function removeSubscription(Subscription $subscription) : bool {
+            $index = array_search($subscription, $this->subscriptions, true);
+            if ($index === false) {
+                return false;
+            }
+            array_splice($this->subscriptions, $index, 1);
             return true;
         }
     }
