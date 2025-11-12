@@ -13,17 +13,21 @@
         /** @var ParkingSpace[] */
         private array $parkingSpaces = [];
         
-        /** @var Subscription[] */
-        private array $subscriptions = [];
+        /** @var SubscriptionType[] */
+        private array $subscriptionsTypes = [];
 
-        public function __construct(array $location, int $capacity, array $openingHours = []) {
+        public function __construct(array $location, int $capacity) {
             if ($capacity < 0) {
                 throw new InvalidArgumentException('capacity must be >= 0');
             }
             $this->id = uniqid('', true);
             $this->location = $location;
             $this->capacity = $capacity;
-            $this->openingHours = $openingHours;
+
+            $this->subscriptionsTypes = [];
+            $this->pricingSchedules = [];
+            $this->reservations = [];
+            $this->parkingSpaces = [];
         }
         
         //getters
@@ -43,10 +47,6 @@
             return $this->pricingSchedules;
         }
 
-        public function getOpeningHours() : array {
-            return $this->openingHours;
-        }
-
         public function getReservations() : array {
             return $this->reservations;
         }
@@ -56,7 +56,7 @@
         }
 
         public function getSubscriptions() : array {
-            return $this->subscriptions;
+            return $this->subscriptionsType;
         }
 
         //setters
@@ -120,16 +120,16 @@
             return true;
         }
 
-        public function addSubscription(Subscription $subscription) : void {
-            $this->subscriptions[] = $subscription;
+        public function addSubscriptionType(SubscriptionType $subscriptionType) : void {
+            $this->subscriptionsType[] = $subscriptionType;
         }
 
-        public function removeSubscription(Subscription $subscription) : bool {
-            $index = array_search($subscription, $this->subscriptions, true);
+        public function removeSubscriptionType(SubscriptionType $subscriptionType) : bool {
+            $index = array_search($subscriptionType, $this->subscriptionsType, true);
             if ($index === false) {
                 return false;
             }
-            array_splice($this->subscriptions, $index, 1);
+            array_splice($this->subscriptionsType, $index, 1);
             return true;
         }
     }
