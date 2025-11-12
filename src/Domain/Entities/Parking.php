@@ -7,9 +7,6 @@
         /** @var PricingSchedule[] */
         private array $pricingSchedules = [];
         
-        /** @var array */
-        private array $openingHours = [];
-        
         /** @var Reservation[] */
         private array $reservations = [];
         
@@ -29,6 +26,7 @@
             $this->openingHours = $openingHours;
         }
         
+        //getters
         public function getId() : string {
             return $this->id;
         }
@@ -61,10 +59,7 @@
             return $this->subscriptions;
         }
 
-        public function setId(string $id) : void {
-            $this->id = $id;
-        }
-
+        //setters
         public function setLocation(array $location) : void {
             $this->location = $location;
         }
@@ -76,10 +71,7 @@
             $this->capacity = $capacity;
         }
 
-        public function setOpeningHours(array $openingHours) : void {
-            $this->openingHours = $openingHours;
-        }
-
+        //helpers
         public function addPricingSchedule(PricingSchedule $schedule) : void {
             $this->pricingSchedules[] = $schedule;
         }
