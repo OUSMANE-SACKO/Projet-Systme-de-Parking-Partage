@@ -7,12 +7,18 @@
             
             foreach ($parking->getSubscriptions() as $subscription) {
                 if ($subscription->getId() === $subscriptionId) {
+                    if (method_exists($customer, 'getSubscriptions')) {
+                        foreach ($customer->getSubscriptions() as $existing) {
+                            if ($existing->getId() === $subscriptionId) {
+                                return $existing;
+                            }
+                        }
+                    }
                     $customer->addSubscription($subscription);
                     return $subscription;
-                } else {
-                    throw new InvalidArgumentException('Subscription not found in this parking');
                 }
             }
+            throw new InvalidArgumentException('Subscription not found in this parking');
         }
     }
 ?>
