@@ -1,9 +1,9 @@
 <?php
     class AddParkingSubscriptionUseCase {
-        public function execute(Parking $parking, Customer $customer, DateTime $startDate, DateTime $endDate, array $weeklyTimeSlots = []): Subscription {
-            $subscription = new SubscriptionType($customer, $startDate, $endDate, $weeklyTimeSlots);
+        public function execute(Parking $parking, string $name, string $description, float $monthlyPrice, array $weeklyTimeSlots): Subscription {
+            $subscription = new SubscriptionType($name, $description, $monthlyPrice, $weeklyTimeSlots);
 
-            $parking->addSubscription($subscription);
+            $parking->addSubscriptionType($subscription);
 
             return $subscription;
         }

@@ -16,6 +16,8 @@
         /** @var SubscriptionType[] */
         private array $subscriptionsTypes = [];
 
+        private array $openingHours = [];
+
         public function __construct(array $location, int $capacity) {
             if ($capacity < 0) {
                 throw new InvalidArgumentException('capacity must be >= 0');
@@ -131,6 +133,18 @@
             }
             array_splice($this->subscriptionsType, $index, 1);
             return true;
+        }
+
+        public function getOccupiedSpacesCount(): int {
+            $occupiedSpaces = 0;
+            
+            foreach ($this->parkingSpaces as $space) {
+                if ($space->getEndTime() === null) {
+                    $occupiedSpaces++;
+                }
+            }
+            
+            return $occupiedSpaces;
         }
     }
 ?>

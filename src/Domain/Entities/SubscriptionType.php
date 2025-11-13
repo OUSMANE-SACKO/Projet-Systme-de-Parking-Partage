@@ -4,8 +4,7 @@
         private string $name;             
         private string $description;        
         private float $monthlyPrice;              
-        private array $weeklyTimeSlots;             
-        private int $durationMonths; // number of months the subscription lasts
+        private array $weeklyTimeSlots;
 
         public function __construct(string $name, string $description, float $monthlyPrice, int $durationMonths, array $weeklyTimeSlots = []) {
             // weeklyTimeSlots structure (opening hours by day):
@@ -15,7 +14,6 @@
             $this->description = $description;
             $this->monthlyPrice = $monthlyPrice;
             $this->weeklyTimeSlots = $weeklyTimeSlots;
-            $this->durationMonths = $durationMonths;
         }
         
         //Getter

@@ -5,8 +5,9 @@
         private DateTime $startDate;
         private DateTime $endDate;
         private SubscriptionType $subscriptionType;
+        private int $durationMonths;
 
-        public function __construct(Customer $customer, DateTime $startDate, DateTime $endDate, SubscriptionType $subscriptionType) {
+        public function __construct(Customer $customer, DateTime $startDate, DateTime $endDate, SubscriptionType $subscriptionType, int $durationMonths) {
             if ($endDate < $startDate) {
                 throw new InvalidArgumentException('endDate must be after startDate');
             }
@@ -27,6 +28,7 @@
             $this->startDate = $startDate;
             $this->endDate = $endDate;
             $this->subscriptionType = $subscriptionType;
+            $this->durationMonths = $durationMonths;
         }
         
         //getters
@@ -48,6 +50,10 @@
 
         public function getSubscriptionType(): SubscriptionType {
             return $this->subscriptionType;
+        }
+
+        public function getDurationMonths(): int {
+            return $this->durationMonths;
         }
 
         //setters
@@ -87,6 +93,18 @@
             }
             
             $this->endDate = $endDate;
+        }
+
+        public function setDurationMonths(int $durationMonths): void {
+            if ($durationMonths < 1) {
+                throw new InvalidArgumentException('Subscription duration must be at least 1 month');
+            }
+            
+            if ($durationMonths > 12) {
+                throw new InvalidArgumentException('Subscription duration cannot exceed 1 year');
+            }
+            
+            $this->durationMonths = $durationMonths;
         }
 
         // Helper

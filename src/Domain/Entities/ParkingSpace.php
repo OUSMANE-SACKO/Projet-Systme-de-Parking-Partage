@@ -1,12 +1,12 @@
 <?php
     class ParkingSpace {
         private string $id;
-        private Customer $customer;
+        private ?Customer $customer;
         private DateTime $startTime;
         private ?DateTime $endTime;
         private Parking $parking;
 
-        public function __construct(Customer $customer, DateTime $startTime, Parking $parking, ?DateTime $endTime = null) {
+        public function __construct(?Customer $customer = null, DateTime $startTime, Parking $parking, ?DateTime $endTime = null) {
             $this->id = uniqid('', true);
             $this->customer = $customer;
             $this->startTime = $startTime;
@@ -19,7 +19,7 @@
             return $this->id;
         }
 
-        public function getCustomer() : Customer {
+        public function getCustomer() : ?Customer {
             return $this->customer;
         }
 
