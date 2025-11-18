@@ -100,36 +100,3 @@ class RegisterCustomerUseCase {
         $hash = $this->passwordHasher->hash($password);
     }
 }
-```
-
-## Utilisation
-
-```php
-// Configuration
-$userRepository = new MySQLUserRepository($dbManager);
-$passwordHasher = new PasswordHasher(getenv('PEPPER'));
-
-// Injection de dépendances
-$useCase = new RegisterCustomerUseCase($userRepository, $passwordHasher);
-
-// Exécution
-$customer = $useCase->execute('Dupont', 'Jean', 'email@test.com', 'password123');
-```
-
-## Avantages
-
-1. **Testabilité**: Mock facile des dépendances pour tests unitaires
-2. **Maintenabilité**: Changement de BDD sans toucher à la logique métier
-3. **Évolutivité**: Ajout de nouvelles implémentations sans modification
-4. **Découplage**: Domain ne dépend pas de l'Infrastructure
-5. **Flexibilité**: Configuration différente par environnement
-
-## Requêtes BDD
-
-Le hash du mot de passe est récupéré automatiquement via:
-```php
-$user = $userRepository->findByEmail($email);
-$hash = $user->getPasswordHash(); // Récupéré de la BDD
-```
-
-Pas besoin de passer le hash manuellement, le repository s'en charge!
