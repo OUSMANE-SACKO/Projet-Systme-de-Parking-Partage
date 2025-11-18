@@ -58,7 +58,7 @@
         }
 
         public function getSubscriptions() : array {
-            return $this->subscriptionsType;
+            return $this->subscriptionsTypes;
         }
 
         //setters
@@ -123,15 +123,15 @@
         }
 
         public function addSubscriptionType(SubscriptionType $subscriptionType) : void {
-            $this->subscriptionsType[] = $subscriptionType;
+            $this->subscriptionsTypes[] = $subscriptionType;
         }
 
         public function removeSubscriptionType(SubscriptionType $subscriptionType) : bool {
-            $index = array_search($subscriptionType, $this->subscriptionsType, true);
+            $index = array_search($subscriptionType, $this->subscriptionsTypes, true);;
             if ($index === false) {
                 return false;
             }
-            array_splice($this->subscriptionsType, $index, 1);
+            array_splice($this->subscriptionsTypes, $index, 1);
             return true;
         }
 

@@ -33,10 +33,6 @@
             return $this->monthlyPrice; 
         }
 
-        public function getDurationMonths(): int {
-            return $this->durationMonths; 
-        }
-
         public function getWeeklyTimeSlots(): array { 
             return $this->weeklyTimeSlots; 
         }

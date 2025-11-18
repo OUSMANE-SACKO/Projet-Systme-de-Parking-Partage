@@ -31,6 +31,10 @@
             return $this->email;
         }
 
+        public function getPasswordHash() : string {
+            return $this->passwordHash;
+        }
+
         //setters
         public function setName(string $name) : void {
             $this->name = $name;
