@@ -24,7 +24,7 @@
         public function setReservations(array $reservations) : void {
             foreach ($reservations as $r) {
                 if (!$r instanceof Reservation) {
-                    throw new InvalidArgumentException('Tous les éléments doivent être des instances de Reservation');
+                    throw new InvalidArgumentException('All elements must be instances of Reservation');
                 }
             }
             $this->reservations = array_values($reservations);
@@ -33,7 +33,7 @@
         public function setParkingSpaces(array $parkingSpaces) : void {
             foreach ($parkingSpaces as $p) {
                 if (!$p instanceof ParkingSpace) {
-                    throw new InvalidArgumentException('Tous les éléments doivent être des instances de ParkingSpace');
+                    throw new InvalidArgumentException('All elements must be instances of ParkingSpace');
                 }
             }
             $this->parkingSpaces = array_values($parkingSpaces);
@@ -42,7 +42,7 @@
         public function setSubscriptions(array $subscriptions) : void {
             foreach ($subscriptions as $s) {
                 if (!$s instanceof Subscription) {
-                    throw new InvalidArgumentException('Tous les éléments doivent être des instances de Subscription');
+                    throw new InvalidArgumentException('All elements must be instances of Subscription');
                 }
             }
             $this->subscriptions = array_values($subscriptions);

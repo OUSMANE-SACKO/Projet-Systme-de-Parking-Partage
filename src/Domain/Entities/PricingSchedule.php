@@ -4,11 +4,11 @@
         private DateTime $time;
         private float $price;
 
-        public function __construct(string $id, DateTime $time, float $price) {
+        public function __construct(DateTime $time, float $price) {
             if ($price < 0) {
                 throw new InvalidArgumentException('price must be >= 0');
             }
-            $this->id = $id;
+            $this->id = uniqid('', true);
             $this->time = $time;
             $this->price = $price;
         }

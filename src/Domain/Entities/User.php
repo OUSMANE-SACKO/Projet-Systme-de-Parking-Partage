@@ -6,8 +6,8 @@
         private string $email;
         private string $passwordHash;
 
-        public function __construct(string $id, string $name, string $forename, string $email, string $passwordHash) {
-            $this->id = $id;
+        public function __construct(string $name, string $forename, string $email, string $passwordHash) {
+            $this->id = uniqid('', true);
             $this->name = $name;
             $this->forename = $forename;
             $this->email = $email;
@@ -29,6 +29,10 @@
 
         public function getEmail() : string {
             return $this->email;
+        }
+
+        public function getPasswordHash() : string {
+            return $this->passwordHash;
         }
 
         //setters

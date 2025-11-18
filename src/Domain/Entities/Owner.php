@@ -25,7 +25,7 @@
         public function setParkings(array $parkings): void {
             foreach ($parkings as $p) {
                 if (!$p instanceof Parking) {
-                    throw new InvalidArgumentException('Tous les éléments doivent être des instances de Parking');
+                    throw new InvalidArgumentException('All elements must be instances of Parking');
                 }
             }
             $this->parkings = array_values($parkings);

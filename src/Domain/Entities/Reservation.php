@@ -1,28 +1,33 @@
 <?php
     class Reservation {
         private string $id;
+        private Customer $customer;
+        private Parking $parking;
         private DateTime $startTime;
         private DateTime $endTime;
-        private float $price;
-        private Parking $parking;
 
-        public function __construct(string $id, DateTime $startTime, DateTime $endTime, float $price, Parking $parking) {
+        public function __construct(Customer $customer, Parking $parking, DateTime $startTime, DateTime $endTime) {
             if ($endTime < $startTime) {
                 throw new InvalidArgumentException('endTime must be after startTime');
             }
-            if ($price < 0) {
-                throw new InvalidArgumentException('price must be >= 0');
-            }
-            $this->id = $id;
+            $this->id = uniqid('', true);
+            $this->customer = $customer;
+            $this->parking = $parking;
             $this->startTime = $startTime;
             $this->endTime = $endTime;
-            $this->price = $price;
-            $this->parking = $parking;
         }
         
         //getters
         public function getId() : string {
             return $this->id;
+        }
+
+        public function getCustomer() : Customer {
+            return $this->customer;
+        }
+
+        public function getParking() : Parking {
+            return $this->parking;
         }
 
         public function getStartTime() : DateTime {
@@ -33,15 +38,15 @@
             return $this->endTime;
         }
 
-        public function getPrice() : float {
-            return $this->price;
-        }
-
-        public function getParking() : Parking {
-            return $this->parking;
-        }
-
         //setters
+        public function setCustomer(Customer $customer) : void {
+            $this->customer = $customer;
+        }
+
+        public function setParking(Parking $parking) : void {
+            $this->parking = $parking;
+        }
+
         public function setStartTime(DateTime $startTime) : void {
             if ($this->endTime < $startTime) {
                 throw new InvalidArgumentException('startTime must be before endTime');
@@ -54,17 +59,6 @@
                 throw new InvalidArgumentException('endTime must be after startTime');
             }
             $this->endTime = $endTime;
-        }
-
-        public function setPrice(float $price) : void {
-            if ($price < 0) {
-                throw new InvalidArgumentException('price must be >= 0');
-            }
-            $this->price = $price;
-        }
-
-        public function setParking(Parking $parking) : void {
-            $this->parking = $parking;
         }
     }
 ?>
