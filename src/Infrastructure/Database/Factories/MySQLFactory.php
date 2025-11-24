@@ -1,7 +1,7 @@
 <?php
     require_once __DIR__ . '/DatabaseFactoryInterface.php';
 
-    class MySQLFactory implements DatabaseFactoryInterface {
+    class MySQLFactory implements IDatabaseFactory {
         private static ?PDO $instance = null;
         
         private function __construct() {}
