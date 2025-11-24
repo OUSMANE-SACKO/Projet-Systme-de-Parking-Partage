@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/DatabaseFactoryInterface.php';
 
-class MongoDBFactory implements DatabaseFactoryInterface {
+class MongoDBFactory implements IDatabaseFactory {
     private static ?MongoDB\Driver\Manager $instance = null;
     
     private function __construct() {}
