@@ -5,6 +5,7 @@
         private DateTime $startTime;
         private ?DateTime $endTime;
         private Parking $parking;
+        private ?Reservation $reservation = null;
 
         public function __construct(?Customer $customer = null, DateTime $startTime, Parking $parking, ?DateTime $endTime = null) {
             $this->id = uniqid('', true);
@@ -35,6 +36,14 @@
             return $this->parking;
         }
 
+        public function getReservation() : ?Reservation {
+            return $this->reservation;
+        }
+
+        public function getPenaltyAmount() : float {
+            return $this->penaltyAmount;
+        }
+
         //setters
         public function setId(string $id) : void {
             $this->id = $id;
@@ -54,6 +63,17 @@
 
         public function setParking(Parking $parking) : void {
             $this->parking = $parking;
+        }
+
+        public function setReservation(?Reservation $reservation) : void {
+            $this->reservation = $reservation;
+        }
+
+        public function setPenaltyAmount(float $amount) : void {
+            if ($amount < 0) {
+                throw new InvalidArgumentException('penaltyAmount must be >= 0');
+            }
+            $this->penaltyAmount = $amount;
         }
     }
 ?>
