@@ -1,0 +1,28 @@
+# Composer dependencies
+/vendor/
+composer.lock
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# PHPUnit
+/tests/cache/
+/tests/build/
+/tests/reports/
+/.phpunit.result.cache
+phpunit.xml.bak
+/coverage/
+
+# Infection mutation testing
+infection.log
+
+# Xdebug
+/xdebug/
+*.xml
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

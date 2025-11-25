@@ -1,0 +1,25 @@
+{
+    "$schema": "vendor/infection/infection/resources/schema.json",
+    "source": {
+        "directories": [
+            "src/Domain",
+            "src/Application",
+            "src/Infrastructure"
+        ],
+        "excludes": [
+            "src/Functions"
+        ]
+    },
+    "logs": {
+        "text": "tests/reports/infection/infection.log",
+        "html": "tests/reports/infection/index.html"
+    },
+    "mutators": {
+        "@default": true
+    },
+    "testFramework": "phpunit",
+    "bootstrap": "src/Functions/autoloader.php",
+    "minMsi": 70,
+    "minCoveredMsi": 80,
+    "tmpDir": "tests/build/infection"
+}
