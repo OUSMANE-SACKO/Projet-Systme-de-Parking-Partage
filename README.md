@@ -5,6 +5,7 @@ Deux commandes simples (définies comme scripts composer) :
 ```bash
 composer coverage   # runs tests with coverage
 composer mutation   # runs mutation testing (Infection)
+composer open-mutation # runs the html results
 ```
 
 Exemples d'implémentation pour ces scripts (si besoin) :

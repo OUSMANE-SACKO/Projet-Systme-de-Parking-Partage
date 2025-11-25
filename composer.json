@@ -20,6 +20,10 @@
             "phpunit -c phpunit.xml --coverage-xml=tests/build/coverage-xml --log-junit=tests/build/junit.xml",
             "infection --configuration=infection.json5 --threads=4",
             "@open-mutation"
+        ],
+        "full-test": [
+            "@coverage",
+            "@mutation"
         ]
     }
 }

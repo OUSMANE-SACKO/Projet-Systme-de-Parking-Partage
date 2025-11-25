@@ -1,7 +1,6 @@
 <?php
     class UpdateParkingPricingUseCase {
         /**
-         * Modifie les grilles tarifaires d'un parking
          * 
          * @param Parking
          * @param array

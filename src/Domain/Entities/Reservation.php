@@ -38,6 +38,12 @@
             return $this->endTime;
         }
 
+        // computed helpers
+        public function getDurationMinutes() : int {
+            $seconds = max(0, $this->endTime->getTimestamp() - $this->startTime->getTimestamp());
+            return (int) ceil($seconds / 60);
+        }
+
         //setters
         public function setCustomer(Customer $customer) : void {
             $this->customer = $customer;
