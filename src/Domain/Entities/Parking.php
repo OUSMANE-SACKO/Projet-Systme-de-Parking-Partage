@@ -110,7 +110,11 @@
         }
 
         public function addParkingSpace(ParkingSpace $parkingSpace) : void {
-            $this->parkingSpaces[] = $parkingSpace;
+            if (count($this->parkingSpaces) >= $this->capacity) {
+                throw new RuntimeException('Cannot add more parking spaces than the capacity allows');
+            } else {
+                $this->parkingSpaces[] = $parkingSpace;
+            }
         }
 
         public function removeParkingSpace(ParkingSpace $parkingSpace) : bool {

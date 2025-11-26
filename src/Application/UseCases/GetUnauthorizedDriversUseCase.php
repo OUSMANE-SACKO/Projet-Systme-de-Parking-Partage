@@ -56,7 +56,7 @@
                 $start = $subscription->getStartDate();
                 $end = $subscription->getEndDate();
                 
-                if ($checkTime >= $start && $checkTime <= $end) {
+                if ($checkTime >= $start && !if_exists($end)) {
                     $subscriptionType = $subscription->getSubscriptionType();
                     $timeSlots = $subscriptionType->getWeeklyTimeSlots();
                     
