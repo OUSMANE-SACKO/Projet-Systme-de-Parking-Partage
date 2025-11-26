@@ -37,6 +37,6 @@
 
         public function setPrice(float $price) : void {
             $this->price = $price;
-        }
+        }    
     }
 ?>

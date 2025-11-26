@@ -19,23 +19,68 @@ class ExitParkingUseCase {
     private function getHourlyRate(Parking $parking, DateTime $reservationEnd, DateTime $exitTime): float {
         $schedules = $parking->getPricingSchedules();
         
-        $overtimeSeconds = $exitTime->getTimestamp() - $reservationEnd->getTimestamp();
-        $overtimeHours = (int) ceil($overtimeSeconds / 3600);
+        $overtimeMinutes = (int) ceil(($exitTime->getTimestamp() - $reservationEnd->getTimestamp()) / 60);
         
-        // Trouver le créneau tarifaire applicable au moment de la fin de réservation
-        $applicableSchedule = null;
+        if (empty($schedules)) {
+            return $overtimeMinutes * 0.1; // tarif par défaut
+        }
+
+        // Trier les schedules par time
+        $sortedSchedules = [];
         foreach ($schedules as $schedule) {
             if ($schedule instanceof PricingSchedule) {
-                if ($schedule->getTime() <= $reservationEnd) {
-                    $applicableSchedule = $schedule;
-                }
+                $sortedSchedules[] = $schedule;
             }
         }
         
-        if ($applicableSchedule) {
-            return $applicableSchedule->getPrice() * $overtimeHours;
+        usort($sortedSchedules, function($a, $b) {
+            return $a->getTime() <=> $b->getTime();
+        });
+        
+        // Créer les tranches : chaque schedule représente une durée croissante
+        // schedule 1 = 15 min, schedule 2 = 30 min, schedule 3 = 60 min, etc.
+        $tiers = [];
+        $duration = 15; // commence à 15 minutes
+        foreach ($sortedSchedules as $schedule) {
+            $tiers[$duration] = $schedule->getPrice();
+            $duration *= 2; // double à chaque fois: 15, 30, 60, 120...
+        }
+        
+        if (empty($tiers)) {
+            return $sortedSchedules[0]->getPrice() * ceil($overtimeMinutes / 60);
         }
 
-        return $overtimeHours; // tarif par défaut
+        // Trier les tranches par durée croissante
+        ksort($tiers);
+        
+        // Trouver la tranche immédiatement supérieure ou égale
+        $selectedTier = null;
+        $selectedMinutes = 0;
+        
+        foreach ($tiers as $minutes => $price) {
+            if ($overtimeMinutes <= $minutes) {
+                $selectedTier = $price;
+                $selectedMinutes = $minutes;
+                break;
+            }
+        }
+        
+        // Si aucune tranche ne convient, utiliser la plus grande
+        if ($selectedTier === null) {
+            krsort($tiers);
+            foreach ($tiers as $minutes => $price) {
+                $selectedTier = $price;
+                $selectedMinutes = $minutes;
+                break;
+            }
+        }
+        
+        // Calculer le nombre de tranches nécessaires
+        if ($selectedMinutes > 0) {
+            $neededTiers = (int) ceil($overtimeMinutes / $selectedMinutes);
+            return $selectedTier * $neededTiers;
+        }
+        
+        return 0.0;
     }
 }

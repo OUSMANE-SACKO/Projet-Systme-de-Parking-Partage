@@ -34,9 +34,13 @@ class ExitParkingTest extends TestCase
         $parking = new Parking($location, 10);
         $customer = new Customer('Bob', 'Brown', 'bob@test.com', 'password', '0601020305');
         
-        // Grille tarifaire: 8€/heure à partir de 10h
-        $schedule = new PricingSchedule(new DateTime('2025-11-25 10:00:00'), 8.0);
-        $parking->addPricingSchedule($schedule);
+        // Grille tarifaire avec plusieurs PricingSchedule
+        $schedule1 = new PricingSchedule(new DateTime('2025-11-25 10:00:00'), 2.0);   // 15 min
+        $schedule2 = new PricingSchedule(new DateTime('2025-11-25 10:15:00'), 4.5);   // 30 min
+        $schedule3 = new PricingSchedule(new DateTime('2025-11-25 10:30:00'), 10.0);  // 60 min
+        $parking->addPricingSchedule($schedule1);
+        $parking->addPricingSchedule($schedule2);
+        $parking->addPricingSchedule($schedule3);
         
         $start = new DateTime('2025-11-25 10:00:00');
         $end = new DateTime('2025-11-25 12:00:00');
@@ -45,13 +49,14 @@ class ExitParkingTest extends TestCase
         $space = new ParkingSpace($customer, $start, $parking);
         $space->setReservation($reservation);
         
-        // Sortie en retard de 2 heures
-        $exitTime = new DateTime('2025-11-25 14:00:00');
+        // Sortie en retard de 45 minutes
+        $exitTime = new DateTime('2025-11-25 12:45:00');
         
         $useCase = new ExitParkingUseCase();
         $useCase->execute($space, $exitTime);
         
-        $this->assertEquals(36.0, $space->getPenaltyAmount());
+        // Vérification: pénalité = 20 + 10 (1×60min) = 30€
+        $this->assertEquals(30.0, $space->getPenaltyAmount());
     }
 
     public function testExitLateOnLastSchedule(): void
@@ -61,10 +66,10 @@ class ExitParkingTest extends TestCase
         $parking = new Parking($location, 10);
         $customer = new Customer('Charlie', 'Davis', 'charlie@test.com', 'password', '0601020306');
         
-        // Plusieurs créneaux horaires
-        $schedule1 = new PricingSchedule(new DateTime('2025-11-25 08:00:00'), 4.0);
-        $schedule2 = new PricingSchedule(new DateTime('2025-11-25 14:00:00'), 6.0);
-        $schedule3 = new PricingSchedule(new DateTime('2025-11-25 18:00:00'), 10.0);
+        // Plusieurs créneaux horaires (chaque période a ses tranches)
+        $schedule1 = new PricingSchedule(new DateTime('2025-11-25 18:00:00'), 3.0);   // 15 min
+        $schedule2 = new PricingSchedule(new DateTime('2025-11-25 18:15:00'), 6.0);   // 30 min
+        $schedule3 = new PricingSchedule(new DateTime('2025-11-25 18:30:00'), 12.0);  // 60 min
         $parking->addPricingSchedule($schedule1);
         $parking->addPricingSchedule($schedule2);
         $parking->addPricingSchedule($schedule3);
@@ -76,13 +81,13 @@ class ExitParkingTest extends TestCase
         $space = new ParkingSpace($customer, $start, $parking);
         $space->setReservation($reservation);
         
-        // Sortie en retard sur le dernier créneau (22h au lieu de 20h)
-        $exitTime = new DateTime('2025-11-25 22:00:00');
+        // Sortie en retard de 30 minutes
+        $exitTime = new DateTime('2025-11-25 20:30:00');
         
         $useCase = new ExitParkingUseCase();
         $useCase->execute($space, $exitTime);
         
-        // Vérification: pénalité = 20 + (10 * 2) = 40€
-        $this->assertEquals(40.0, $space->getPenaltyAmount());
+        // Vérification: pénalité = 20 + 6 (1×30min) = 26€
+        $this->assertEquals(26.0, $space->getPenaltyAmount());
     }
 }
