@@ -25,5 +25,8 @@
             "@coverage",
             "@mutation"
         ]
+    },
+    "require": {
+        "fpdf/fpdf": "^1.86"
     }
 }

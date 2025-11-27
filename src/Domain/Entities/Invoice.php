@@ -37,7 +37,39 @@
         }
 
         public function toPdfBinary(): string {
-            return '%PDF-FAKE-INVOICE-'.$this->id; 
+            // Utiliser l'autoloader de Composer pour FPDF
+            if (!class_exists('Fpdf\\Fpdf')) {
+                require_once __DIR__ . '/../../../vendor/autoload.php';
+            }
+            
+            $pdf = new \Fpdf\Fpdf();
+            $pdf->AddPage();
+            $pdf->SetFont('Arial', 'B', 16);
+            
+            // Titre
+            $pdf->Cell(0, 10, 'Facture #' . $this->id, 0, 1, 'C');
+            $pdf->Ln(10);
+            
+            // Informations
+            $pdf->SetFont('Arial', '', 12);
+            $r = $this->reservation;
+            
+            $pdf->Cell(0, 8, 'Client: ' . $r->getCustomer()->getId(), 0, 1);
+            $pdf->Cell(0, 8, 'Parking: ' . $r->getParking()->getId(), 0, 1);
+            $pdf->Cell(0, 8, 'Du: ' . $r->getStartTime()->format('Y-m-d H:i'), 0, 1);
+            $pdf->Cell(0, 8, 'Au: ' . $r->getEndTime()->format('Y-m-d H:i'), 0, 1);
+            $pdf->Ln(5);
+            
+            // Montant
+            $pdf->SetFont('Arial', 'B', 14);
+            $pdf->Cell(0, 10, 'Montant: ' . number_format($this->amount, 2, ',', ' ') . ' ' . $this->currency, 0, 1);
+            $pdf->Ln(5);
+            
+            // Date de génération
+            $pdf->SetFont('Arial', '', 10);
+            $pdf->Cell(0, 8, 'Généré le: ' . $this->generatedAt->format('Y-m-d H:i'), 0, 1);
+            
+            return $pdf->Output('S');
         }
     }
 ?>
