@@ -15,7 +15,7 @@ class CustomerTest extends TestCase {
         
         // Create test entities
         $this->reservation = new Reservation($this->customer, $this->parking, new DateTime('2024-01-01 10:00'), new DateTime('2024-01-01 12:00'));
-        $this->parkingSpace = new ParkingSpace($this->customer, new DateTime('2024-01-01'), $this->parking);
+        $this->parkingSpace = new ParkingSpace(new DateTime('2024-01-01'), $this->parking, $this->customer);
         $type = new SubscriptionType('Monthly', 'Monthly access', 50.0, 1);
         $this->subscription = new Subscription($this->customer, new DateTime('2024-01-01'), new DateTime('2024-02-01'), $type, 1);
     }

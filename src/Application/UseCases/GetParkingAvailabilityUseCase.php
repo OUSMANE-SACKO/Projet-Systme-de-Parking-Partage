@@ -40,10 +40,7 @@
             
             foreach ($parking->getReservations() as $reservation) {
                 if ($this->isReservationActiveAt($reservation, $dateTime)) {
-                    // Vérifier que cette réservation n'est pas déjà comptée dans les stationnements
-                    if (!$this->hasActiveParking($parking, $reservation, $dateTime)) {
-                        $count++;
-                    }
+                    $count++;
                 }
             }
             

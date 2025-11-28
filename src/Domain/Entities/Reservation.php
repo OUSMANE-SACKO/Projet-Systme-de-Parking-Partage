@@ -44,6 +44,13 @@
             return (int) ceil($seconds / 60);
         }
 
+        public function getAmount() : float {
+            // Montant simple basé sur la durée
+            $durationMinutes = $this->getDurationMinutes();
+            $durationHours = ceil($durationMinutes / 60.0);
+            return 10 + ($durationHours * 2); // 10 euros de base + 2 euros par heure
+        }
+
         //setters
         public function setCustomer(Customer $customer) : void {
             $this->customer = $customer;

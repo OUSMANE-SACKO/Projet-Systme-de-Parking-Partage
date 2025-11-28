@@ -28,9 +28,7 @@
                 $endTime = $reservation->getEndTime();
                 // Réservation terminée dans le mois
                 if ($endTime >= $monthStart && $endTime <= $monthEnd) {
-                    $invoiceUseCase = new GetReservationInvoiceUseCase();
-                    $invoiceData = $invoiceUseCase->execute($reservation, 'html', false);
-                    $revenue += $invoiceData['invoice']->getAmount();
+                    $revenue += $reservation->getAmount();
                 }
             }
 

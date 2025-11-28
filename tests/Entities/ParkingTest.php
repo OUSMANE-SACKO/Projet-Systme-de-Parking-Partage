@@ -58,8 +58,8 @@ class ParkingTest extends TestCase {
     
     public function testParkingSpaces(): void {
         $customer = new Customer('Smith', 'Jane', 'jane@test.com', 'hash');
-        $space1 = new ParkingSpace($customer, new DateTime(), $this->parking);
-        $space2 = new ParkingSpace($customer, new DateTime('2024-01-01 10:00'), $this->parking);
+        $space1 = new ParkingSpace(new DateTime(), $this->parking, $customer);
+        $space2 = new ParkingSpace(new DateTime('2024-01-01 10:00'), $this->parking, $customer);
         $space2->setEndTime(new DateTime('2024-01-01 11:00')); // Free space
         
         $this->parking->addParkingSpace($space1); // Occupied (no endTime)
@@ -103,14 +103,14 @@ class ParkingTest extends TestCase {
             $this->parking->setCapacity(0);
             $this->fail('Expected InvalidArgumentException for capacity = 0');
         } catch (InvalidArgumentException $e) {
-            $this->assertEquals('capacity must be >= 0', $e->getMessage());
+            $this->assertEquals('capacity must be > 0', $e->getMessage());
         }
         
         try {
             $this->parking->setCapacity(-25);
             $this->fail('Expected InvalidArgumentException for negative capacity');
         } catch (InvalidArgumentException $e) {
-            $this->assertEquals('capacity must be >= 0', $e->getMessage());
+            $this->assertEquals('capacity must be > 0', $e->getMessage());
         }
         
         $this->parking->setCapacity(100);
