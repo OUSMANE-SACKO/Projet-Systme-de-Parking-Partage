@@ -1,17 +1,20 @@
 <?php
-    class GetParkingSubscriptionsUseCase {
+    class GetActiveParkingSuscriptionUseCase {
         public function execute(Parking $parking): array {
             // Récupère tous les abonnements du parking
             return $parking->getSubscriptions();
         }
         
-        public function getActiveSubscriptions(Parking $parking): array {
+        public function getActiveSubscriptions(Parking $parking, ?DateTime $dateTime = null): array {
             $subscriptions = $parking->getSubscriptions();
             $activeSubscriptions = [];
-            $now = new DateTime();
+            $now = $dateTime ?? new DateTime();
             
             foreach ($subscriptions as $subscription) {
-                if ($subscription->getStartDate() <= $now && $subscription->getEndDate() >= $now) {
+                $startDate = $subscription->getStartDate();
+                $endDate = $subscription->getEndDate();
+                
+                if ($startDate <= $now && $endDate >= $now) {
                     $activeSubscriptions[] = $subscription;
                 }
             }

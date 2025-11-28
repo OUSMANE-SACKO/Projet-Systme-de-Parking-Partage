@@ -19,8 +19,8 @@
         private array $openingHours = [];
 
         public function __construct(array $location, int $capacity) {
-            if ($capacity < 0) {
-                throw new InvalidArgumentException('capacity must be >= 0');
+            if ($capacity <= 0) {
+                throw new InvalidArgumentException('capacity must be > 0');
             }
             $this->id = uniqid('', true);
             $this->location = $location;
@@ -61,6 +61,10 @@
             return $this->subscriptionsTypes;
         }
 
+        public function getActiveSubscriptions() : array {
+            return $this->subscriptionsTypes; // Pour l'instant, retourner tous les types de subscription
+        }
+
         //setters
         public function setLocation(array $location) : void {
             if (empty($location) || !isset($location['longitude']) || !isset($location['latitude'])) {
@@ -71,7 +75,7 @@
 
         public function setCapacity(int $capacity) : void {
             if ($capacity <= 0) {
-                throw new InvalidArgumentException('capacity must be >= 0');
+                throw new InvalidArgumentException('capacity must be > 0');
             }
             $this->capacity = $capacity;
         }
@@ -148,6 +152,10 @@
             }
             
             return $occupiedSpaces;
+        }
+
+        public function hasAvailableSpace(): bool {
+            return $this->getOccupiedSpacesCount() < $this->capacity;
         }
     }
 ?>
