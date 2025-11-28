@@ -63,11 +63,14 @@
 
         //setters
         public function setLocation(array $location) : void {
+            if (empty($location) || !isset($location['longitude']) || !isset($location['latitude'])) {
+                throw new InvalidArgumentException('location must contain longitude and latitude');
+            }
             $this->location = $location;
         }
 
         public function setCapacity(int $capacity) : void {
-            if ($capacity < 0) {
+            if ($capacity <= 0) {
                 throw new InvalidArgumentException('capacity must be >= 0');
             }
             $this->capacity = $capacity;

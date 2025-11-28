@@ -22,12 +22,6 @@ class ParkingTest extends TestCase {
         
         $this->expectException(InvalidArgumentException::class);
         new Parking(['address' => 'Test'], -5);
-        
-        $this->parking->setCapacity(200);
-        $this->assertEquals(200, $this->parking->getCapacity());
-        
-        $this->expectException(InvalidArgumentException::class);
-        $this->parking->setCapacity(-10);
     }
     
     public function testPricingSchedules(): void {
@@ -88,5 +82,38 @@ class ParkingTest extends TestCase {
         $this->assertTrue($this->parking->removeSubscriptionType($type));
         $this->assertEmpty($this->parking->getSubscriptions());
         $this->assertFalse($this->parking->removeSubscriptionType($type));
+    }
+
+    public function testGeneralFunctions(): void {
+        // Test setLocation with valid coordinates
+        $this->parking->setLocation(['longitude' => 40.7128, 'latitude' => -74.0060]);
+        $this->assertEquals(['longitude' => 40.7128, 'latitude' => -74.0060], $this->parking->getLocation());
+        
+        // Test setCapacity with valid value
+        $this->parking->setCapacity(75);
+        $this->assertEquals(75, $this->parking->getCapacity());
+        
+        // Test setLocation with invalid data
+        $this->expectException(InvalidArgumentException::class);
+        $this->parking->setLocation(['longitude' => 40.7128]); // Missing latitude
+    }
+    
+    public function testSetCapacityValidation(): void {
+        try {
+            $this->parking->setCapacity(0);
+            $this->fail('Expected InvalidArgumentException for capacity = 0');
+        } catch (InvalidArgumentException $e) {
+            $this->assertEquals('capacity must be >= 0', $e->getMessage());
+        }
+        
+        try {
+            $this->parking->setCapacity(-25);
+            $this->fail('Expected InvalidArgumentException for negative capacity');
+        } catch (InvalidArgumentException $e) {
+            $this->assertEquals('capacity must be >= 0', $e->getMessage());
+        }
+        
+        $this->parking->setCapacity(100);
+        $this->assertEquals(100, $this->parking->getCapacity());
     }
 }

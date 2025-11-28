@@ -45,11 +45,6 @@
             return $this->penaltyAmount;
         }
 
-        //setters
-        public function setId(string $id) : void {
-            $this->id = $id;
-        }
-
         public function setCustomer(Customer $customer) : void {
             $this->customer = $customer;
         }

@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use PHPUnit\Framework\TestCase;
 
@@ -22,7 +23,6 @@ class ParkingSpaceTest extends TestCase {
         $this->assertEquals($startTime, $parkingSpace->getStartTime());
         $this->assertNull($parkingSpace->getEndTime());
         $this->assertSame($this->parking, $parkingSpace->getParking());
-        // Remove penalty amount test as it might not be initialized
     }
     
     public function testSetters(): void {
@@ -78,5 +78,23 @@ class ParkingSpaceTest extends TestCase {
         $parkingSpace->setEndTime(new DateTime());
         
         $this->assertNotNull($parkingSpace->getEndTime());
+    }
+
+    public function testPenaltyAmount(): void {
+        $parkingSpace = new ParkingSpace($this->customer, new DateTime(), $this->parking);
+        
+        $this->assertEquals(0.0, $parkingSpace->getPenaltyAmount());
+        
+        // Test setting valid penalty amount
+        $parkingSpace->setPenaltyAmount(25.0);
+        $this->assertEquals(25.0, $parkingSpace->getPenaltyAmount());
+        
+        // Test exception for negative penalty amount
+        try {
+            $parkingSpace->setPenaltyAmount(-25);
+            $this->fail('Expected InvalidArgumentException for negative penalty amount');
+        } catch (InvalidArgumentException $e) {
+            $this->assertEquals('penaltyAmount must be >= 0', $e->getMessage());
+        }
     }
 }
