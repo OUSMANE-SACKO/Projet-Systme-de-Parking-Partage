@@ -50,8 +50,8 @@
                 }
             }
             if (!$applyPenalty) {
-                $basePrice = $previous ? $previous->getPrice() : $schedules[0]->getPrice();
-                return round($durationHours * $basePrice, 2);
+                $hourlyRate = $previous ? $previous->getPrice() : $schedules[0]->getPrice();
+                return round($durationHours * $hourlyRate, 2);
             }
 
             $priceSchedule = $next ?? $previous ?? $schedules[0];

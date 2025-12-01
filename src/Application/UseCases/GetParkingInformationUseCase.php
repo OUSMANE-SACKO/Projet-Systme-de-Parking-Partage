@@ -30,9 +30,8 @@
             
             foreach ($pricingSchedules as $schedule) {
                 $formatted[] = [
-                    'startTime' => $schedule->getStartTime()->format('H:i'),
-                    'endTime' => $schedule->getEndTime()->format('H:i'),
-                    'pricePerHour' => $schedule->getPricePerHour()
+                    'time' => $schedule->getTime()->format('H:i'),
+                    'price' => $schedule->getPrice()
                 ];
             }
             

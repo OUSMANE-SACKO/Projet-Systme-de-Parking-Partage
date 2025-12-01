@@ -8,7 +8,7 @@
         private ?Reservation $reservation = null;
         private float $penaltyAmount = 0.0;
 
-        public function __construct(?Customer $customer = null, DateTime $startTime, Parking $parking, ?DateTime $endTime = null) {
+        public function __construct(DateTime $startTime, Parking $parking, ?Customer $customer = null, ?DateTime $endTime = null) {
             $this->id = uniqid('', true);
             $this->customer = $customer;
             $this->startTime = $startTime;
@@ -43,11 +43,6 @@
 
         public function getPenaltyAmount() : float {
             return $this->penaltyAmount;
-        }
-
-        //setters
-        public function setId(string $id) : void {
-            $this->id = $id;
         }
 
         public function setCustomer(Customer $customer) : void {

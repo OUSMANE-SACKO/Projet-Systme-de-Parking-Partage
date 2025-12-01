@@ -1,7 +1,7 @@
 <?php
     class SubscribeToSubscriptionUseCase {
         public function execute(Customer $customer, string $subscriptionId, Parking $parking): Subscription {
-            if ($subscriptionId === '') {
+            if (trim($subscriptionId) === '') {
                 throw new InvalidArgumentException('subscriptionId must not be empty');
             }
             

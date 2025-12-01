@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use PHPUnit\Framework\TestCase;
 
@@ -15,18 +16,17 @@ class ParkingSpaceTest extends TestCase {
     public function testParkingSpaceConstruction(): void {
         $startTime = new DateTime('2024-01-01 10:00:00');
         
-        $parkingSpace = new ParkingSpace($this->customer, $startTime, $this->parking);
+        $parkingSpace = new ParkingSpace($startTime, $this->parking, $this->customer);
         
         $this->assertNotEmpty($parkingSpace->getId());
         $this->assertSame($this->customer, $parkingSpace->getCustomer());
         $this->assertEquals($startTime, $parkingSpace->getStartTime());
         $this->assertNull($parkingSpace->getEndTime());
         $this->assertSame($this->parking, $parkingSpace->getParking());
-        // Remove penalty amount test as it might not be initialized
     }
     
     public function testSetters(): void {
-        $parkingSpace = new ParkingSpace($this->customer, new DateTime(), $this->parking);
+        $parkingSpace = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
         
         $newCustomer = new Customer('Smith', 'Jane', 'jane@test.com', 'hash2');
         $newStartTime = new DateTime('2024-01-02 09:00:00');
@@ -45,7 +45,7 @@ class ParkingSpaceTest extends TestCase {
     }
     
     public function testReservationLink(): void {
-        $parkingSpace = new ParkingSpace($this->customer, new DateTime(), $this->parking);
+        $parkingSpace = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
         
         $reservation = new Reservation(
             $this->customer,
@@ -60,23 +60,41 @@ class ParkingSpaceTest extends TestCase {
     }
     
     public function testUniqueIds(): void {
-        $space1 = new ParkingSpace($this->customer, new DateTime(), $this->parking);
-        $space2 = new ParkingSpace($this->customer, new DateTime(), $this->parking);
+        $space1 = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
+        $space2 = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
         
         $this->assertNotEquals($space1->getId(), $space2->getId());
     }
     
     public function testIsOccupiedWhenEndTimeIsNull(): void {
-        $parkingSpace = new ParkingSpace($this->customer, new DateTime(), $this->parking);
+        $parkingSpace = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
         
         // No end time means occupied
         $this->assertNull($parkingSpace->getEndTime());
     }
     
     public function testIsNotOccupiedWhenEndTimeIsSet(): void {
-        $parkingSpace = new ParkingSpace($this->customer, new DateTime(), $this->parking);
+        $parkingSpace = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
         $parkingSpace->setEndTime(new DateTime());
         
         $this->assertNotNull($parkingSpace->getEndTime());
+    }
+
+    public function testPenaltyAmount(): void {
+        $parkingSpace = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
+        
+        $this->assertEquals(0.0, $parkingSpace->getPenaltyAmount());
+        
+        // Test setting valid penalty amount
+        $parkingSpace->setPenaltyAmount(25.0);
+        $this->assertEquals(25.0, $parkingSpace->getPenaltyAmount());
+        
+        // Test exception for negative penalty amount
+        try {
+            $parkingSpace->setPenaltyAmount(-25);
+            $this->fail('Expected InvalidArgumentException for negative penalty amount');
+        } catch (InvalidArgumentException $e) {
+            $this->assertEquals('penaltyAmount must be >= 0', $e->getMessage());
+        }
     }
 }

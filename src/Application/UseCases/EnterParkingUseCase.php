@@ -1,16 +1,8 @@
 <?php
-    class ParkingCheckInUseCase {
-        public function execute(Customer $customer, Parking $parking, DateTime $entryTime): ParkingSpace {
-            // Crée un nouveau stationnement (ParkingSpace)
-            $parkingSpace = new ParkingSpace($customer, $entryTime, $parking);
-
-            // Ajoute le stationnement à la liste du parking
-            $parking->addParkingSpace($parkingSpace);
-
-            // Ajoute le stationnement à la liste du client
-            $customer->addParkingSpace($parkingSpace);
-
-            return $parkingSpace;
+    class EnterParkingUseCase {
+        public function execute(Customer $customer, Parking $parking, DateTime $entryTime): void {
+            // This use case is now deprecated - use ReserveParkingSpaceUseCase instead
+            // Entry is tracked via Reservation entities
         }
     }
 ?>

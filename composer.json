@@ -9,15 +9,15 @@
         }
     },
     "scripts": {
-        "test": "phpunit -c phpunit.xml",
+        "test": "./vendor/bin/phpunit -c phpunit.xml",
         "coverage": [
-            "phpunit -c phpunit.xml --coverage-html tests/reports/coverage --coverage-text",
+            "./vendor/bin/phpunit -c phpunit.xml --coverage-html tests/reports/coverage --coverage-text",
             "@open-coverage"
         ],
         "open-coverage": "start tests/reports/coverage/index.html",
         "open-mutation": "start tests/reports/infection/index.html",
         "mutation": [
-            "phpunit -c phpunit.xml --coverage-xml=tests/build/coverage-xml --log-junit=tests/build/junit.xml",
+            "./vendor/bin/phpunit -c phpunit.xml --coverage-xml=tests/build/coverage-xml --log-junit=tests/build/junit.xml",
             "infection --configuration=infection.json5 --threads=4",
             "@open-mutation"
         ],
