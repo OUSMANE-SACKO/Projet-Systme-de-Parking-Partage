@@ -1,13 +1,8 @@
 <?php
     class MySQLParkingRepository implements IParkingRepository {
-        private DatabaseManager $db;
-
-        public function __construct(DatabaseManager $db) {
-            $this->db = $db;
-        }
 
         public function findById(string $id): ?Parking {
-            $connection = $this->db->getConnection();
+            $connection = MySQLFactory::getConnection();
             $stmt = $connection->prepare("SELECT * FROM parkings WHERE id = ? LIMIT 1");
             $stmt->execute([$id]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -20,16 +15,16 @@
         }
 
         public function save(Parking $parking): void {
-            $connection = $this->db->getConnection();
+            $connection = MySQLFactory::getConnection();
             
             $locationJson = json_encode($parking->getLocation());
             
             $stmt = $connection->prepare(
-                "INSERT INTO parkings (id, location, capacity) 
-                 VALUES (?, ?, ?)
-                 ON DUPLICATE KEY UPDATE 
-                 location = VALUES(location), 
-                 capacity = VALUES(capacity)"
+            "INSERT INTO parkings (id, location, capacity) 
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE 
+                location = VALUES(location), 
+                capacity = VALUES(capacity)"
             );
 
             $stmt->execute([
@@ -40,7 +35,7 @@
         }
 
         public function findAll(): array {
-            $connection = $this->db->getConnection();
+            $connection = MySQLFactory::getConnection();
             $stmt = $connection->query("SELECT * FROM parkings");
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -53,16 +48,16 @@
         }
 
         public function findByLocation(float $latitude, float $longitude, float $radiusKm): array {
-            $connection = $this->db->getConnection();
+            $connection = MySQLFactory::getConnection();
             
             $stmt = $connection->prepare(
                 "SELECT *, 
-                 (6371 * acos(cos(radians(?)) * cos(radians(JSON_EXTRACT(location, '$.latitude'))) * 
-                 cos(radians(JSON_EXTRACT(location, '$.longitude')) - radians(?)) + 
-                 sin(radians(?)) * sin(radians(JSON_EXTRACT(location, '$.latitude'))))) AS distance 
-                 FROM parkings 
-                 HAVING distance <= ? 
-                 ORDER BY distance"
+                (6371 * acos(cos(radians(?)) * cos(radians(JSON_EXTRACT(location, '$.latitude'))) * 
+                cos(radians(JSON_EXTRACT(location, '$.longitude')) - radians(?)) + 
+                sin(radians(?)) * sin(radians(JSON_EXTRACT(location, '$.latitude'))))) AS distance 
+                FROM parkings 
+                HAVING distance <= ? 
+                ORDER BY distance"
             );
 
             $stmt->execute([$latitude, $longitude, $latitude, $radiusKm]);
@@ -77,7 +72,7 @@
         }
 
         public function findByOwnerId(string $ownerId): array {
-            $connection = $this->db->getConnection();
+            $connection = MySQLFactory::getConnection();
             $stmt = $connection->prepare("SELECT * FROM parkings WHERE owner_id = ?");
             $stmt->execute([$ownerId]);
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);

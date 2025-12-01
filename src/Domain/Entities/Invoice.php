@@ -8,7 +8,7 @@
 
         public function __construct(Reservation $reservation, float $amount, string $currency = 'EUR') {
             if ($amount < 0) {
-                throw new InvalidArgumentException('amount must be >= 0');
+                throw new InvalidArgumentException('amount must be > 0');
             }
             $this->id = uniqid('', true);
             $this->reservation = $reservation;

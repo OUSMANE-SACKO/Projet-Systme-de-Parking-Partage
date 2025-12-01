@@ -22,6 +22,7 @@
          * @param string $email
          * @return bool
          */
-        public function existsByEmail(string $email): bool;
+        // ça aurrait pu aussi s'appeler findByEmail pour rester cohérent avec le nom de la méthode
+        public function existsByEmail(string $email): bool;  
     }
 ?>
