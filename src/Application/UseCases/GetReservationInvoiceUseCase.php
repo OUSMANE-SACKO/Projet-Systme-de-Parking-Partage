@@ -54,8 +54,8 @@
                 return round($durationHours * $basePrice, 2);
             }
 
-            $priceSchedule = $next ?? $previous ?? $tiers[0];
-            $amount = 20 + ($durationHours * $priceSchedule->getPrice());
+            $priceTier = $next ?? $previous ?? $tiers[0];
+            $amount = 20 + ($durationHours * $priceTier->getPrice());
             return round($amount, 2);
         }
     }

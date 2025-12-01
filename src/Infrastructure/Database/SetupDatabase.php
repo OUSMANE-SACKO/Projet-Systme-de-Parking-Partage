@@ -50,7 +50,7 @@ try {
     
     // Table des horaires d'ouverture (un parking peut avoir plusieurs plages)
     $pdo->exec("
-        CREATE TABLE IF NOT EXISTS parking_schedules (
+        CREATE TABLE IF NOT EXISTS parking_tiers (
             id INT AUTO_INCREMENT PRIMARY KEY,
             parking_id INT NOT NULL,
             day_of_week TINYINT NOT NULL COMMENT '0=Dimanche, 1=Lundi...6=Samedi',
@@ -60,7 +60,7 @@ try {
             FOREIGN KEY (parking_id) REFERENCES parkings(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     ");
-    echo "✓ Table parking_schedules created\n";
+    echo "✓ Table parking_tiers created\n";
     
     // Table des grilles tarifaires (tarifs progressifs)
     $pdo->exec("

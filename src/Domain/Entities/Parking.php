@@ -6,7 +6,7 @@
         private float $longitude;
         private int $capacity;
         
-        /** @var PricingSchedule[] */
+        /** @var PricingTier[] */
         private array $pricingTiers = [];
         
         /** @var Reservation[] */
@@ -101,7 +101,7 @@
         public function setPricingTiers(array $tiers) : void {
             foreach ($tiers as $tier) {
                 if (!$tier instanceof PricingTier) {
-                    throw new InvalidArgumentException('All elements must be instances of PricingSchedule');
+                    throw new InvalidArgumentException('All elements must be instances of PricingTier');
                 }
             }
             $this->pricingTiers = array_values($tiers);

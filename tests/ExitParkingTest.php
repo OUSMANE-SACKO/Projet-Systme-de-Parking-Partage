@@ -35,8 +35,8 @@ class ExitParkingTest extends TestCase
         $customer = new Customer('Bob', 'Brown', 'bob@test.com', 'password', '0601020305');
         
         // Grille tarifaire: 8€/heure à partir de 10h
-        $tier = new PricingSchedule(new DateTime('2025-11-25 10:00:00'), 8.0);
-        $parking->addPricingSchedule($tier);
+        $tier = new PricingTier(new DateTime('2025-11-25 10:00:00'), 8.0);
+        $parking->addPricingTier($tier);
         
         $start = new DateTime('2025-11-25 10:00:00');
         $end = new DateTime('2025-11-25 12:00:00');
@@ -54,7 +54,7 @@ class ExitParkingTest extends TestCase
         $this->assertEquals(36.0, $space->getPenaltyAmount());
     }
 
-    public function testExitLateOnLastSchedule(): void
+    public function testExitLateOnLastTier(): void
     {
         // Setup
         $location = ['latitude' => 48.8566, 'longitude' => 2.3522];
@@ -62,12 +62,12 @@ class ExitParkingTest extends TestCase
         $customer = new Customer('Charlie', 'Davis', 'charlie@test.com', 'password', '0601020306');
         
         // Plusieurs créneaux horaires
-        $tier1 = new PricingSchedule(new DateTime('2025-11-25 08:00:00'), 4.0);
-        $tier2 = new PricingSchedule(new DateTime('2025-11-25 14:00:00'), 6.0);
-        $tier3 = new PricingSchedule(new DateTime('2025-11-25 18:00:00'), 10.0);
-        $parking->addPricingSchedule($tier1);
-        $parking->addPricingSchedule($tier2);
-        $parking->addPricingSchedule($tier3);
+        $tier1 = new PricingTier(new DateTime('2025-11-25 08:00:00'), 4.0);
+        $tier2 = new PricingTier(new DateTime('2025-11-25 14:00:00'), 6.0);
+        $tier3 = new PricingTier(new DateTime('2025-11-25 18:00:00'), 10.0);
+        $parking->addPricingTier($tier1);
+        $parking->addPricingTier($tier2);
+        $parking->addPricingTier($tier3);
         
         $start = new DateTime('2025-11-25 18:00:00');
         $end = new DateTime('2025-11-25 20:00:00');
