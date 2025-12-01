@@ -17,23 +17,23 @@ class ExitParkingUseCase {
     }
 
     private function getHourlyRate(Parking $parking, DateTime $reservationEnd, DateTime $exitTime): float {
-        $schedules = $parking->getPricingSchedules();
+        $tiers = $parking->getPricingTiers();
         
         $overtimeSeconds = $exitTime->getTimestamp() - $reservationEnd->getTimestamp();
         $overtimeHours = (int) ceil($overtimeSeconds / 3600);
         
         // Trouver le créneau tarifaire applicable au moment de la fin de réservation
-        $applicableSchedule = null;
-        foreach ($schedules as $schedule) {
-            if ($schedule instanceof PricingSchedule) {
-                if ($schedule->getTime() <= $reservationEnd) {
-                    $applicableSchedule = $schedule;
+        $applicablePricingTier = null;
+    foreach ($tiers as $tier) {
+            if ($tier instanceof PricingTier) {
+                if ($tier->getTime() <= $reservationEnd) {
+                    $applicablePricingTier = $tier;
                 }
             }
         }
         
-        if ($applicableSchedule) {
-            return $applicableSchedule->getPrice() * $overtimeHours;
+        if ($applicablePricingTier) {
+            return $applicablePricingTier->getPrice() * $overtimeHours;
         }
 
         return $overtimeHours; // tarif par défaut

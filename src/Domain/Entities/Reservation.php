@@ -1,6 +1,6 @@
 <?php
     class Reservation {
-        private string $id;
+        private ?int $id = null;
         private Customer $customer;
         private Parking $parking;
         private DateTime $startTime;
@@ -10,7 +10,6 @@
             if ($endTime < $startTime) {
                 throw new InvalidArgumentException('endTime must be after startTime');
             }
-            $this->id = uniqid('', true);
             $this->customer = $customer;
             $this->parking = $parking;
             $this->startTime = $startTime;
@@ -18,7 +17,7 @@
         }
         
         //getters
-        public function getId() : string {
+        public function getId() : ?int {
             return $this->id;
         }
 
@@ -45,6 +44,10 @@
         }
 
         //setters
+        public function setId(int $id) : void {
+            $this->id = $id;
+        }
+
         public function setCustomer(Customer $customer) : void {
             $this->customer = $customer;
         }

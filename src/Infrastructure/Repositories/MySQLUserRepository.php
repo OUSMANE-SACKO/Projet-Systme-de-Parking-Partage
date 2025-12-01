@@ -38,26 +38,44 @@
         public function save(User $user): void {
             $connection = MySQLFactory::getConnection();
             
-            $stmt = $connection->prepare(
-                "INSERT INTO users (id, name, forename, email, password_hash, user_type) 
-                VALUES (?, ?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE 
-                name = VALUES(name), 
-                forename = VALUES(forename), 
-                email = VALUES(email), 
-                password_hash = VALUES(password_hash)"
-            );
+            // Déterminer la table cible selon le type d'objet
+            $table = ($user instanceof Owner) ? 'parking_owners' : 'users';
 
-            $userType = $user instanceof Customer ? 'customer' : 'owner';
+            if ($user->getId() === null) {
+                // CAS 1 : INSERTION (Nouvel utilisateur)
+                // On ne mentionne PAS la colonne 'id', la BDD le fera auto-incrémenter
+                $stmt = $connection->prepare(
+                    "INSERT INTO {$table} (first_name, last_name, email, password) 
+                    VALUES (?, ?, ?, ?)"
+                );
 
-            $stmt->execute([
-                $user->getId(),
-                $user->getName(),
-                $user->getForename(),
-                $user->getEmail(),
-                $user->getPasswordHash(),
-                $userType
-            ]);
+                $stmt->execute([
+                    $user->getForename(),    // Mapping: forename -> first_name
+                    $user->getName(),        // Mapping: name -> last_name
+                    $user->getEmail(),
+                    $user->getPasswordHash() // Mapping: passwordHash -> password
+                ]);
+
+                // CRUCIAL : On récupère l'ID généré par la BDD et on le met dans l'objet
+                $newId = (int) $connection->lastInsertId();
+                $user->setId($newId);
+
+            } else {
+                // CAS 2 : MISE À JOUR (Utilisateur existant avec ID)
+                $stmt = $connection->prepare(
+                    "UPDATE {$table} 
+                    SET first_name = ?, last_name = ?, email = ?, password = ? 
+                    WHERE id = ?"
+                );
+
+                $stmt->execute([
+                    $user->getForename(),
+                    $user->getName(),
+                    $user->getEmail(),
+                    $user->getPasswordHash(),
+                    $user->getId()
+                ]);
+            }
         }
 
         private function hydrate(array $row): User {

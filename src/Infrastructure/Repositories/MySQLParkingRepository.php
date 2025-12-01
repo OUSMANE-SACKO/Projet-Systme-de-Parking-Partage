@@ -1,7 +1,12 @@
 <?php
-    class MySQLParkingRepository implements IParkingRepository {
+    require_once __DIR__ . '/../Database/Factories/MySQLFactory.php';
 
-        public function findById(string $id): ?Parking {
+    class MySQLParkingRepository implements IParkingRepository {
+        /**
+         * @param int $id
+         * @return Parking|null
+         */
+        public function findById(int $id): ?Parking {
             $connection = MySQLFactory::getConnection();
             $stmt = $connection->prepare("SELECT * FROM parkings WHERE id = ? LIMIT 1");
             $stmt->execute([$id]);
@@ -14,26 +19,50 @@
             return $this->hydrate($row);
         }
 
+        /**
+         * @param Parking $parking
+         * @return void
+         */
         public function save(Parking $parking): void {
             $connection = MySQLFactory::getConnection();
             
-            $locationJson = json_encode($parking->getLocation());
+            $latitude = $parking->getLocation()['latitude'] ?? 0.0;
+            $longitude = $parking->getLocation()['longitude'] ?? 0.0;
             
-            $stmt = $connection->prepare(
-            "INSERT INTO parkings (id, location, capacity) 
-                VALUES (?, ?, ?)
-                ON DUPLICATE KEY UPDATE 
-                location = VALUES(location), 
-                capacity = VALUES(capacity)"
-            );
+            if ($parking->getId() === null) {
+                $stmt = $connection->prepare(
+                    "INSERT INTO parkings (latitude, longitude, total_spaces, hourly_rate, owner_id) 
+                    VALUES (?, ?, ?, ?, ?)" 
+                );
+                
+                
+                $stmt->execute([
+                    $latitude,
+                    $longitude,
+                    $parking->getCapacity(),
+                    0.0, // hourly_rate temporaire
+                    1    // owner_id temporaire (TODO: Lier au vrai owner)
+                ]);
 
-            $stmt->execute([
-                $parking->getId(),
-                $locationJson,
-                $parking->getCapacity()
-            ]);
+                $newId = (int) $connection->lastInsertId();
+                $parking->setId($newId);
+            } else {
+                // UPDATE
+                $stmt = $connection->prepare(
+                    "UPDATE parkings SET latitude = ?, longitude = ?, total_spaces = ? WHERE id = ?"
+                );
+                $stmt->execute([
+                    $latitude, 
+                    $longitude, 
+                    $parking->getCapacity(), 
+                    $parking->getId()
+                ]);
+            }
         }
 
+        /**
+         * @return Parking[]
+         */
         public function findAll(): array {
             $connection = MySQLFactory::getConnection();
             $stmt = $connection->query("SELECT * FROM parkings");
@@ -47,14 +76,21 @@
             return $parkings;
         }
 
+        /**
+         * @param float $latitude
+         * @param float $longitude
+         * @param float $radiusKm
+         * @return Parking[]
+         */
         public function findByLocation(float $latitude, float $longitude, float $radiusKm): array {
             $connection = MySQLFactory::getConnection();
             
+            // Formule Haversine SQL adaptée aux colonnes latitude/longitude
             $stmt = $connection->prepare(
                 "SELECT *, 
-                (6371 * acos(cos(radians(?)) * cos(radians(JSON_EXTRACT(location, '$.latitude'))) * 
-                cos(radians(JSON_EXTRACT(location, '$.longitude')) - radians(?)) + 
-                sin(radians(?)) * sin(radians(JSON_EXTRACT(location, '$.latitude'))))) AS distance 
+                (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * 
+                cos(radians(longitude) - radians(?)) + 
+                sin(radians(?)) * sin(radians(latitude)))) AS distance 
                 FROM parkings 
                 HAVING distance <= ? 
                 ORDER BY distance"
@@ -71,7 +107,11 @@
             return $parkings;
         }
 
-        public function findByOwnerId(string $ownerId): array {
+        /**
+         * @param int $ownerId
+         * @return Parking[]
+         */
+        public function findByOwnerId(int $ownerId): array {
             $connection = MySQLFactory::getConnection();
             $stmt = $connection->prepare("SELECT * FROM parkings WHERE owner_id = ?");
             $stmt->execute([$ownerId]);
@@ -85,9 +125,24 @@
             return $parkings;
         }
 
+        /**
+         * @param array $row
+         * @return Parking
+         */
         private function hydrate(array $row): Parking {
-            $location = json_decode($row['location'], true);
-            return new Parking($location, (int)$row['capacity']);
+            // Reconstitution de l'array location depuis les colonnes SQL
+            $location = [
+                'latitude' => (float)$row['latitude'], 
+                'longitude' => (float)$row['longitude']
+            ];
+            
+            // Mapping 'total_spaces' (BDD) vers 'capacity' (Entité)
+            $parking = new Parking($location, (int)$row['total_spaces']);
+            
+            // IMPORTANT : On remplit l'ID !
+            $parking->setId((int)$row['id']);
+            
+            return $parking;
         }
     }
 ?>

@@ -1,6 +1,6 @@
 <?php
     class SubscriptionType {
-        private string $id;
+        private ?int $id = null;
         private string $name;             
         private string $description;        
         private float $monthlyPrice;              
@@ -9,7 +9,6 @@
         public function __construct(string $name, string $description, float $monthlyPrice, int $durationMonths, array $weeklyTimeSlots = []) {
             // weeklyTimeSlots structure (opening hours by day):
             // [ ['day' => 'Monday'..'Sunday', 'startTime' => 'HH:MM', 'endTime' => 'HH:MM'], ... ]
-            $this->id = uniqid('', true);
             $this->name = $name;
             $this->description = $description;
             $this->monthlyPrice = $monthlyPrice;
@@ -17,7 +16,7 @@
         }
         
         //Getter
-        public function getId(): string { 
+        public function getId(): ?int { 
             return $this->id;
         }
 
@@ -40,6 +39,10 @@
         //Setter
         public function setName(string $name): void { 
             $this->name = $name; 
+        }
+
+        public function setId(int $id) : void {
+            $this->id = $id;
         }
     }
 ?>

@@ -1,14 +1,13 @@
 <?php
     class ParkingSpace {
-        private string $id;
+        private ?int $id = null;
         private ?Customer $customer;
         private DateTime $startTime;
         private ?DateTime $endTime;
         private Parking $parking;
         private ?Reservation $reservation = null;
-
+        private float $penaltyAmount = 0.0;
         public function __construct(?Customer $customer = null, DateTime $startTime, Parking $parking, ?DateTime $endTime = null) {
-            $this->id = uniqid('', true);
             $this->customer = $customer;
             $this->startTime = $startTime;
             $this->endTime = $endTime;
@@ -16,7 +15,7 @@
         }
 
         //getters
-        public function getId() : string {
+        public function getId() : ?int {
             return $this->id;
         }
 
@@ -45,7 +44,7 @@
         }
 
         //setters
-        public function setId(string $id) : void {
+        public function setId(int $id) : void {
             $this->id = $id;
         }
 

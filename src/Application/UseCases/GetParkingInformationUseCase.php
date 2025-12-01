@@ -8,7 +8,7 @@
                 'location' => $parking->getLocation(),
                 'capacity' => $parking->getCapacity(),
                 'availableSpaces' => $this->calculateAvailableSpaces($parking),
-                'pricingSchedules' => $this->formatPricingSchedules($parking->getPricingSchedules()),
+                'pricingTiers' => $this->formatPricingTiers($parking->getPricingTiers()),
                 'subscriptionTypes' => $this->formatSubscriptionTypes($parking->getSubscriptions()),
             ];
         }
@@ -25,14 +25,14 @@
             return $parking->getCapacity() - $occupiedSpaces;
         }
         
-        private function formatPricingSchedules(array $pricingSchedules): array {
+        private function formatPricingTiers(array $pricingTiers): array {
             $formatted = [];
             
-            foreach ($pricingSchedules as $schedule) {
+            foreach ($pricingTiers as $tier) {
                 $formatted[] = [
-                    'startTime' => $schedule->getStartTime()->format('H:i'),
-                    'endTime' => $schedule->getEndTime()->format('H:i'),
-                    'pricePerHour' => $schedule->getPricePerHour()
+                    'startTime' => $tier->getStartTime()->format('H:i'),
+                    'endTime' => $tier->getEndTime()->format('H:i'),
+                    'pricePerHour' => $tier->getPricePerHour()
                 ];
             }
             

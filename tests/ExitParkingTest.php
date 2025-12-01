@@ -35,8 +35,8 @@ class ExitParkingTest extends TestCase
         $customer = new Customer('Bob', 'Brown', 'bob@test.com', 'password', '0601020305');
         
         // Grille tarifaire: 8€/heure à partir de 10h
-        $schedule = new PricingSchedule(new DateTime('2025-11-25 10:00:00'), 8.0);
-        $parking->addPricingSchedule($schedule);
+        $tier = new PricingSchedule(new DateTime('2025-11-25 10:00:00'), 8.0);
+        $parking->addPricingSchedule($tier);
         
         $start = new DateTime('2025-11-25 10:00:00');
         $end = new DateTime('2025-11-25 12:00:00');
@@ -62,12 +62,12 @@ class ExitParkingTest extends TestCase
         $customer = new Customer('Charlie', 'Davis', 'charlie@test.com', 'password', '0601020306');
         
         // Plusieurs créneaux horaires
-        $schedule1 = new PricingSchedule(new DateTime('2025-11-25 08:00:00'), 4.0);
-        $schedule2 = new PricingSchedule(new DateTime('2025-11-25 14:00:00'), 6.0);
-        $schedule3 = new PricingSchedule(new DateTime('2025-11-25 18:00:00'), 10.0);
-        $parking->addPricingSchedule($schedule1);
-        $parking->addPricingSchedule($schedule2);
-        $parking->addPricingSchedule($schedule3);
+        $tier1 = new PricingSchedule(new DateTime('2025-11-25 08:00:00'), 4.0);
+        $tier2 = new PricingSchedule(new DateTime('2025-11-25 14:00:00'), 6.0);
+        $tier3 = new PricingSchedule(new DateTime('2025-11-25 18:00:00'), 10.0);
+        $parking->addPricingSchedule($tier1);
+        $parking->addPricingSchedule($tier2);
+        $parking->addPricingSchedule($tier3);
         
         $start = new DateTime('2025-11-25 18:00:00');
         $end = new DateTime('2025-11-25 20:00:00');

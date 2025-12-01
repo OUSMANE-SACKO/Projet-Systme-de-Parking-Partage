@@ -1,6 +1,6 @@
 <?php
     class Invoice {
-        private string $id;
+        private ?int $id = null;
         private Reservation $reservation;
         private float $amount;
         private string $currency;
@@ -10,18 +10,21 @@
             if ($amount < 0) {
                 throw new InvalidArgumentException('amount must be > 0');
             }
-            $this->id = uniqid('', true);
             $this->reservation = $reservation;
             $this->amount = $amount;
             $this->currency = $currency;
             $this->generatedAt = new DateTime();
         }
 
-        public function getId(): string { return $this->id; }
+        public function getId(): ?int { return $this->id; }
         public function getReservation(): Reservation { return $this->reservation; }
         public function getAmount(): float { return $this->amount; }
         public function getCurrency(): string { return $this->currency; }
         public function getGeneratedAt(): DateTime { return $this->generatedAt; }
+
+        public function setId(int $id) : void {
+            $this->id = $id;
+        }
 
         public function toHtml(): string {
             $r = $this->reservation;
