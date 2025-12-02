@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion - ParkingApp</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar-rounded">
+    <div class="nav-left">
+      <span class="logo-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="20,5 35,13 35,27 20,35 5,27 5,13" fill="#8e24aa"/>
+          <circle cx="20" cy="20" r="7" fill="#fff" fill-opacity="0.92"/>
+          <circle cx="20" cy="20" r="3.5" fill="#8e24aa"/>
+        </svg>
+      </span>
+      <span class="logo-text"><a href="index.html" style="text-decoration: none; color: inherit;">TaxawCar </a></span>
+    </div>
+    <ul class="nav-center">
+      <li><a href="#">Réserver</a></li>
+      <li><a href="tarifs.html">Tarifs</a></li>
+      <li><a href="#">Abonnement</a></li>
+    </ul>
+    <div class="nav-right">
+      <span class="account" id="account-area">Connexion</span>
+    </div>
+  </nav>
+  <main class="login-section">
+    <form class="login-form" autocomplete="on">
+      <h2>Connexion à votre compte</h2>
+      <label for="email">Adresse e-mail</label>
+      <input type="email" id="email" name="email" placeholder="Votre e-mail" required autofocus>
+      <label for="password">Mot de passe</label>
+      <input type="password" id="password" name="password" placeholder="Votre mot de passe" required>
+      <button type="submit" class="cta-btn">Se connecter</button>
+      <p class="login-link">Pas encore de compte ? <a href="register.html">Créer un compte</a></p>
+    </form>
+  </main>
+</body>
+</html>
