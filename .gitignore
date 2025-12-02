@@ -30,3 +30,8 @@ phpunit.xml.bak
 .DS_Store
 Thumbs.db
 desktop.ini
+
+/node_modules/
+*.lock
+/package-lock.json
+yarn.lock

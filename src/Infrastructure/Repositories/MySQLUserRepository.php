@@ -18,7 +18,7 @@
             return $this->hydrate($row);
         }
 
-        public function findById(string $id): ?User {
+        public function findById(int $id): ?User {
             $stmt = $this->connection->prepare("SELECT * FROM users WHERE id = ? LIMIT 1");
             $stmt->execute([$id]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);

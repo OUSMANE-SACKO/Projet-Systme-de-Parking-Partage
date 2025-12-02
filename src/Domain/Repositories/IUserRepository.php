@@ -18,10 +18,10 @@
         public function save(User $user): void;
 
         /**
-         * @param string $id
+         * @param int $id
          * @return User|null
          */
-        public function findById(string $id): ?User;
+        public function findById(int $id): ?User;
 
         /**
          * @param string $email
