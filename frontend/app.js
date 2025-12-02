@@ -56,25 +56,7 @@ if (ctaBtn) {
     ctaBtn.style.boxShadow = '0 0 24px 4px #00ffe7';
   });
 }
-// Simuler l'état de connexion (à remplacer par vraie logique plus tard)
-const isLoggedIn = false; // Passe à true pour voir le logo compte
-const accountArea = document.getElementById('account-area');
-if (accountArea) {
-  if (isLoggedIn) {
-    accountArea.innerHTML = `<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="14" cy="14" r="14" fill="#1976d2"/>
-      <circle cx="14" cy="11" r="5" fill="#fff"/>
-      <ellipse cx="14" cy="20.5" rx="7.5" ry="4.5" fill="#fff"/>
-    </svg>`;
-    accountArea.title = "Mon profil";
-    accountArea.style.background = "none";
-    accountArea.style.cursor = "pointer";
-  } else {
-    accountArea.textContent = "Connexion";
-    accountArea.title = "Se connecter";
-    accountArea.style.cursor = "pointer";
-  }
-}
+// (Suppression de la logique qui écrasait le HTML statique de #account-area)
 // --- Carte Google Maps centrée sur Paris ---
 const parkings = [
   { name: 'Parking Indigo - Place Vendôme', lat: 48.867, lng: 2.329 },
