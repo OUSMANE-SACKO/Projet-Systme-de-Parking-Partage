@@ -2,10 +2,7 @@
 
 require_once __DIR__ . '/../../Application/DTO/RegisterCustomerDTO.php';
 require_once __DIR__ . '/../../Application/DTO/AuthenticateUserDTO.php';
-require_once __DIR__ . '/../../Application/DTO/ReserveParkingDTO.php';
-require_once __DIR__ . '/../../Application/DTO/AddParkingSubscriptionDTO.php';
-require_once __DIR__ . '/../../Application/DTO/EnterExitParkingDTO.php';
-require_once __DIR__ . '/../../Application/UseCase/SubscribeToSubscriptionDTO.php';
+// ...ajoute les autres DTOs si besoin
 
 class CustomerController {
     private $registerCustomerUseCase;
@@ -16,14 +13,14 @@ class CustomerController {
         $this->authenticateUserUseCase = $authenticateUserUseCase;
     }
 
-    // Inscription
+    // Exemple d'inscription
     public function register(array $requestData) {
         $dto = RegisterCustomerDTO::fromArray($requestData);
         $dto->validate();
         return $this->registerCustomerUseCase->execute($dto);
     }
 
-    // Authentification
+    // Exemple d'authentification
     public function authenticate(array $requestData) {
         $dto = AuthenticateUserDTO::fromArray($requestData);
         $dto->validate();
