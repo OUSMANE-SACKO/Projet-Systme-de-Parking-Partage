@@ -35,8 +35,14 @@ class GetParkingSpacesUseCase {
         foreach ($parkingSpaces as $space) {
             $isOccupied = ($space->getEndTime() === null || $space->getEndTime() > new DateTime());
             
+            // Calculer la durée selon le statut
             if (!$isOccupied) {
+                // Espace libéré : durée entre début et fin
                 $interval = $space->getStartTime()->diff($space->getEndTime());
+                $duration = ($interval->days * 24 * 60) + ($interval->h * 60) + $interval->i;
+            } else {
+                // Espace occupé : durée depuis le début jusqu'à maintenant
+                $interval = $space->getStartTime()->diff(new DateTime());
                 $duration = ($interval->days * 24 * 60) + ($interval->h * 60) + $interval->i;
             }
             

@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: parking_app
+    ports:
+      - "8080:80"       # http://localhost:8080
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_NAME: parking
+      DB_USER: user
+      DB_PASSWORD: password
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: parking_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: parking
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+
+volumes:
+  db_data:
+    driver: local 
+

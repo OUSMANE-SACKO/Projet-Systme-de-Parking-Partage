@@ -152,6 +152,7 @@ class ComposerStaticInit8ebc8f3537572eb2ebff99658d947405
         ),
         'F' =>
         array (
+            'Fpdf\\' => 5,
             'Fidry\\CpuCoreCounter\\' => 21,
         ),
         'D' =>
@@ -268,6 +269,10 @@ class ComposerStaticInit8ebc8f3537572eb2ebff99658d947405
         'Infection\\' =>
         array (
             0 => __DIR__ . '/..' . '/infection/infection/src',
+        ),
+        'Fpdf\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/fpdf/fpdf/src/Fpdf',
         ),
         'Fidry\\CpuCoreCounter\\' =>
         array (

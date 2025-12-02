@@ -30,9 +30,8 @@
             
             foreach ($pricingTiers as $tier) {
                 $formatted[] = [
-                    'startTime' => $tier->getStartTime()->format('H:i'),
-                    'endTime' => $tier->getEndTime()->format('H:i'),
-                    'pricePerHour' => $tier->getPricePerHour()
+                    'time' => $schedule->getTime()->format('H:i'),
+                    'price' => $schedule->getPrice()
                 ];
             }
             

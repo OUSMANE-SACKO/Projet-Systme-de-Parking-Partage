@@ -3,7 +3,8 @@
         private ?int $id = null;
         private string $name;             
         private string $description;        
-        private float $monthlyPrice;              
+        private float $monthlyPrice;
+        private int $durationMonths;
         private array $weeklyTimeSlots;
 
         public function __construct(string $name, string $description, float $monthlyPrice, int $durationMonths, array $weeklyTimeSlots = []) {
@@ -12,6 +13,7 @@
             $this->name = $name;
             $this->description = $description;
             $this->monthlyPrice = $monthlyPrice;
+            $this->durationMonths = $durationMonths;
             $this->weeklyTimeSlots = $weeklyTimeSlots;
         }
         
@@ -30,6 +32,10 @@
 
         public function getMonthlyPrice(): float { 
             return $this->monthlyPrice; 
+        }
+
+        public function getDurationMonths(): int {
+            return $this->durationMonths;
         }
 
         public function getWeeklyTimeSlots(): array { 

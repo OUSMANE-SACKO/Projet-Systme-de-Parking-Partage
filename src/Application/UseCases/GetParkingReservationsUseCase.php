@@ -29,7 +29,7 @@
                     ],
                     'startTime' => $reservation->getStartTime()->format('Y-m-d H:i:s'),
                     'endTime' => $reservation->getEndTime()->format('Y-m-d H:i:s'),
-                    'duration' => $reservation->getDuration(),
+                    'duration' => $reservation->getDurationMinutes(),
                     'status' => $status
                 ];
             }

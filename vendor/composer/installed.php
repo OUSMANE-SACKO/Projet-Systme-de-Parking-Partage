@@ -3,7 +3,7 @@
         'name' => '__root__',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '795bf2ae25aa13245c90c3e045a9628e20481c69',
+        'reference' => '10ffe2dc14760a44b0350b3ebdfe33637f4f6398',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '__root__' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '795bf2ae25aa13245c90c3e045a9628e20481c69',
+            'reference' => '10ffe2dc14760a44b0350b3ebdfe33637f4f6398',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -54,6 +54,15 @@
             'install_path' => __DIR__ . '/../fidry/cpu-core-counter',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'fpdf/fpdf' => array(
+            'pretty_version' => '1.86.0',
+            'version' => '1.86.0.0',
+            'reference' => 'd2a0cbd9e4b5557b9c6c29ddc8eb2b36d8761e00',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../fpdf/fpdf',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'infection/abstract-testframework-adapter' => array(
             'pretty_version' => '0.5.0',

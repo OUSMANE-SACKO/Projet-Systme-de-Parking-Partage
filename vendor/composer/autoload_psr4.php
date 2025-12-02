@@ -31,6 +31,7 @@ return array(
     'Infection\\ExtensionInstaller\\' => array($vendorDir . '/infection/extension-installer/src'),
     'Infection\\AbstractTestFramework\\' => array($vendorDir . '/infection/abstract-testframework-adapter/src'),
     'Infection\\' => array($vendorDir . '/infection/infection/src'),
+    'Fpdf\\' => array($vendorDir . '/fpdf/fpdf/src/Fpdf'),
     'Fidry\\CpuCoreCounter\\' => array($vendorDir . '/fidry/cpu-core-counter/src'),
     'DuoClock\\' => array($vendorDir . '/sanmai/duoclock/src'),
     'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),

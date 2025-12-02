@@ -9,15 +9,15 @@ class ExitParkingUseCase {
 
         if ($exitTime > $reservation->getEndTime()) {
             $parking = $parkingSpace->getParking();
-            $overtimeCost = $this->getHourlyRate($parking, $reservation->getEndTime(), $exitTime);
+            $overtimeCost = $this->calculateOvertimeCost($parking, $reservation->getEndTime(), $exitTime);
             $parkingSpace->setPenaltyAmount(self::PENALTY_BASE + $overtimeCost);
         } else {
             $parkingSpace->setPenaltyAmount(0.0);
         }
     }
 
-    private function getHourlyRate(Parking $parking, DateTime $reservationEnd, DateTime $exitTime): float {
-        $tiers = $parking->getPricingTiers();
+    private function calculateOvertimeCost(Parking $parking, DateTime $reservationEnd, DateTime $exitTime): float {
+        $schedules = $parking->getPricingSchedules();
         
         $overtimeSeconds = $exitTime->getTimestamp() - $reservationEnd->getTimestamp();
         $overtimeHours = (int) ceil($overtimeSeconds / 3600);
