@@ -1,6 +1,6 @@
 <?php
     class Subscription {
-        private string $id;
+        private ?int $id = null;
         private Customer $customer;
         private DateTime $startDate;
         private DateTime $endDate;
@@ -23,7 +23,6 @@
                 throw new InvalidArgumentException('Subscription duration cannot exceed 1 year');
             }
             
-            $this->id = uniqid('', true);
             $this->customer = $customer;
             $this->startDate = $startDate;
             $this->endDate = $endDate;
@@ -32,7 +31,7 @@
         }
         
         //getters
-        public function getId(): string {
+        public function getId(): ?int {
             return $this->id;
         }
 
@@ -57,6 +56,10 @@
         }
 
         //setters
+        public function setId(int $id) : void {
+            $this->id = $id;
+        }
+
         public function setCustomer(Customer $customer): void {
             $this->customer = $customer;
         }

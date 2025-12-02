@@ -25,12 +25,12 @@
 
         private function computeAmount(Reservation $reservation, bool $applyPenalty): float {
             $parking = $reservation->getParking();
-            $schedules = $parking->getPricingSchedules();
+            $tiers = $parking->getPricingTiers();
             $start = $reservation->getStartTime();
             $end = $reservation->getEndTime();
             $durationHours = max(0.0, ($end->getTimestamp() - $start->getTimestamp()) / 3600);
 
-            if (empty($schedules)) {
+            if (empty($tiers)) {
                 if ($applyPenalty) {
                     return round(20 + ($durationHours * 1.0), 2);
                 }
@@ -39,23 +39,23 @@
 
             $previous = null;
             $next = null;
-            foreach ($schedules as $schedule) {
-                $time = $schedule->getTime();
+            foreach ($tiers as $tier) {
+                $time = $tier->getTime();
                 if ($time <= $start) {
                     if ($previous === null || $time > $previous->getTime()) {
-                        $previous = $schedule;
+                        $previous = $tier;
                     }
                 } elseif ($next === null || $time < $next->getTime()) {
-                    $next = $schedule;
+                    $next = $tier;
                 }
             }
             if (!$applyPenalty) {
-                $hourlyRate = $previous ? $previous->getPrice() : $schedules[0]->getPrice();
-                return round($durationHours * $hourlyRate, 2);
+                $basePrice = $previous ? $previous->getPrice() : $tiers[0]->getPrice();
+                return round($durationHours * $basePrice, 2);
             }
 
-            $priceSchedule = $next ?? $previous ?? $schedules[0];
-            $amount = 20 + ($durationHours * $priceSchedule->getPrice());
+            $priceTier = $next ?? $previous ?? $tiers[0];
+            $amount = 20 + ($durationHours * $priceTier->getPrice());
             return round($amount, 2);
         }
     }

@@ -1,6 +1,6 @@
 <?php
-    class PricingSchedule {
-        private string $id;
+    class PricingTier {
+        private ?int $id = null;
         private DateTime $time;
         private float $price;
 
@@ -8,14 +8,12 @@
             if ($price < 0) {
                 throw new InvalidArgumentException('price must be >= 0');
             }
-
-            $this->id = uniqid('', true);
             $this->time = $time;
             $this->price = $price;
         }
         
         //getters
-        public function getId() : string {
+        public function getId() : ?int {
             return $this->id;
         }
 
@@ -27,9 +25,8 @@
             return $this->price;
         }
 
-
         //setters
-        public function setId(string $id) : void {
+        public function setId(int $id) : void {
             $this->id = $id;
         }
 

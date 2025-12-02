@@ -4,25 +4,16 @@ if (!class_exists('Fpdf\\Fpdf')) {
 }
 
     class Invoice {
-
-        private string $id;
+        private ?int $id = null;
         private Reservation $reservation;
         private float $amount;
         private string $currency;
         private DateTime $generatedAt;
 
         public function __construct(Reservation $reservation, float $amount, string $currency = 'EUR') {
-            if ($amount < 0.0) {
-                throw new InvalidArgumentException('amount must be >= 0');
+            if ($amount < 0) {
+                throw new InvalidArgumentException('amount must be > 0');
             }
-            if (!is_finite($amount)) {
-                throw new InvalidArgumentException('amount must be finite');
-            }
-            if (empty($currency) || strlen($currency) !== 3 || !ctype_alpha($currency)) {
-                throw new InvalidArgumentException('currency must be 3 characters');
-            }
-            $uniquePrefix = 'invoice_';
-            $this->id = uniqid($uniquePrefix, true);
             $this->reservation = $reservation;
             $roundingPrecision = 2;
             $this->amount = round($amount, $roundingPrecision);
@@ -30,24 +21,14 @@ if (!class_exists('Fpdf\\Fpdf')) {
             $this->generatedAt = new DateTime();
         }
 
-        public function getId(): string { 
-            return (string) $this->id; 
-        }
-        
-        public function getReservation(): Reservation { 
-            return $this->reservation; 
-        }
-        
-        public function getAmount(): float { 
-            return (float) $this->amount; 
-        }
-        
-        public function getCurrency(): string { 
-            return (string) $this->currency; 
-        }
-        
-        public function getGeneratedAt(): DateTime { 
-            return clone $this->generatedAt; 
+        public function getId(): ?int { return $this->id; }
+        public function getReservation(): Reservation { return $this->reservation; }
+        public function getAmount(): float { return $this->amount; }
+        public function getCurrency(): string { return $this->currency; }
+        public function getGeneratedAt(): DateTime { return $this->generatedAt; }
+
+        public function setId(int $id) : void {
+            $this->id = $id;
         }
 
         public function toHtml(): string {

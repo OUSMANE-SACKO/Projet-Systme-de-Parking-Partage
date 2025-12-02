@@ -6,28 +6,28 @@
          * @param array
          * @throws InvalidArgumentException
          */
-        public function execute(Parking $parking, array $pricingSchedules): void {
-            foreach ($pricingSchedules as $schedule) {
-                if (!$schedule instanceof PricingSchedule) {
-                    throw new InvalidArgumentException('All elements must be instances of PricingSchedule');
+        public function execute(Parking $parking, array $pricingTiers): void {
+            foreach ($pricingTiers as $tier) {
+                if (!$tier instanceof PricingTier) {
+                    throw new InvalidArgumentException('All elements must be instances of PricingTier');
                 }
             }
             
-            $parking->setPricingSchedules($pricingSchedules);
+            $parking->setPricingTiers($pricingTiers);
         }
         
-        public function addPricingSchedule(Parking $parking, DateTime $time, float $price): PricingSchedule {
-            $schedule = new PricingSchedule($time, $price);
-            $parking->addPricingSchedule($schedule);
-            return $schedule;
+        public function addPricingTier(Parking $parking, DateTime $time, float $price): PricingTier {
+            $tier = new PricingTier($time, $price);
+            $parking->addPricingTier($tier);
+            return $tier;
         }
         
-        public function removePricingSchedule(Parking $parking, PricingSchedule $schedule): bool {
-            return $parking->removePricingSchedule($schedule);
+        public function removePricingTier(Parking $parking, PricingTier $tier): bool {
+            return $parking->removePricingTier($tier);
         }
         
-        public function clearAllPricingSchedules(Parking $parking): void {
-            $parking->setPricingSchedules([]);
+        public function clearAllPricingTiers(Parking $parking): void {
+            $parking->setPricingTiers([]);
         }
     }
 ?>

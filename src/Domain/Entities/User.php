@@ -1,13 +1,12 @@
 <?php
     class User {
-        private string $id;
+        private ?int $id = null;
         private string $name;
         private string $forename;
         private string $email;
         private string $passwordHash;
 
         public function __construct(string $name, string $forename, string $email, string $passwordHash) {
-            $this->id = uniqid('', true);
             $this->name = $name;
             $this->forename = $forename;
             $this->email = $email;
@@ -15,7 +14,7 @@
         }
 
         //getters
-        public function getId() : string {
+        public function getId() : ?int {
             return $this->id;
         }
 
@@ -36,6 +35,10 @@
         }
 
         //setters
+        public function setId(int $id) : void {
+            $this->id = $id;
+        }
+
         public function setName(string $name) : void {
             $this->name = $name;
         }

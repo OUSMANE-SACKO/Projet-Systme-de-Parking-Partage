@@ -1,11 +1,13 @@
 <?php
     class Parking {
-        private string $id;
-        private array $location = [];
+        private ?int $id = null;
+        // private array $location = [];
+        private float $latitude;
+        private float $longitude;
         private int $capacity;
         
-        /** @var PricingSchedule[] */
-        private array $pricingSchedules = [];
+        /** @var PricingTier[] */
+        private array $pricingTiers = [];
         
         /** @var Reservation[] */
         private array $reservations = [];
@@ -19,34 +21,38 @@
         private array $openingHours = [];
 
         public function __construct(array $location, int $capacity) {
-            if ($capacity <= 0) {
-                throw new InvalidArgumentException('capacity must be > 0');
+            if ($capacity < 0) {
+                throw new InvalidArgumentException('capacity must be >= 0');
             }
-            $this->id = uniqid('', true);
-            $this->location = $location;
+            // $this->location = $location;
+            $this->latitude = $location['latitude'];
+            $this->longitude = $location['longitude'];
             $this->capacity = $capacity;
 
             $this->subscriptionsTypes = [];
-            $this->pricingSchedules = [];
+            $this->pricingTiers = [];
             $this->reservations = [];
             $this->parkingSpaces = [];
         }
         
         //getters
-        public function getId() : string {
+        public function getId() : ?int {
             return $this->id;
         }
 
         public function getLocation() : array {
-            return $this->location;
+            return [
+                'latitude' => $this->latitude,
+                'longitude' => $this->longitude
+            ];
         }
 
         public function getCapacity() : int {
             return $this->capacity;
         }
 
-        public function getPricingSchedules() : array {
-            return $this->pricingSchedules;
+        public function getPricingTiers() : array {
+            return $this->pricingTiers;
         }
 
         public function getReservations() : array {
@@ -61,46 +67,44 @@
             return $this->subscriptionsTypes;
         }
 
-        public function getActiveSubscriptions() : array {
-            return $this->subscriptionsTypes; // Pour l'instant, retourner tous les types de subscription
+        //setters
+        public function setId(int $id) : void {
+            $this->id = $id;
         }
 
-        //setters
         public function setLocation(array $location) : void {
-            if (empty($location) || !isset($location['longitude']) || !isset($location['latitude'])) {
-                throw new InvalidArgumentException('location must contain longitude and latitude');
-            }
-            $this->location = $location;
+            $this->latitude = $location['latitude'];
+            $this->longitude = $location['longitude'];
         }
 
         public function setCapacity(int $capacity) : void {
-            if ($capacity <= 0) {
-                throw new InvalidArgumentException('capacity must be > 0');
+            if ($capacity < 0) {
+                throw new InvalidArgumentException('capacity must be >= 0');
             }
             $this->capacity = $capacity;
         }
 
         //helpers
-        public function addPricingSchedule(PricingSchedule $schedule) : void {
-            $this->pricingSchedules[] = $schedule;
+        public function addPricingTier(PricingTier $tier) : void {
+            $this->pricingTiers[] = $tier;
         }
 
-        public function removePricingSchedule(PricingSchedule $schedule) : bool {
-            $index = array_search($schedule, $this->pricingSchedules, true);
+        public function removePricingTier(PricingTier $tier) : bool {
+            $index = array_search($tier, $this->pricingTiers, true);
             if ($index === false) {
                 return false;
             }
-            array_splice($this->pricingSchedules, $index, 1);
+            array_splice($this->pricingTiers, $index, 1);
             return true;
         }
 
-        public function setPricingSchedules(array $schedules) : void {
-            foreach ($schedules as $s) {
-                if (!$s instanceof PricingSchedule) {
-                    throw new InvalidArgumentException('All elements must be instances of PricingSchedule');
+        public function setPricingTiers(array $tiers) : void {
+            foreach ($tiers as $tier) {
+                if (!$tier instanceof PricingTier) {
+                    throw new InvalidArgumentException('All elements must be instances of PricingTier');
                 }
             }
-            $this->pricingSchedules = array_values($schedules);
+            $this->pricingTiers = array_values($tiers);
         }
 
         public function addReservation(Reservation $reservation) : void {
@@ -152,10 +156,6 @@
             }
             
             return $occupiedSpaces;
-        }
-
-        public function hasAvailableSpace(): bool {
-            return $this->getOccupiedSpacesCount() < $this->capacity;
         }
     }
 ?>

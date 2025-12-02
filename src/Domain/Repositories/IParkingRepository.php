@@ -1,10 +1,10 @@
 <?php
     interface IParkingRepository {
         /**
-         * @param string $id
+         * @param int $id
          * @return Parking|null
          */
-        public function findById(string $id): ?Parking;
+        public function findById(int $id): ?Parking;
 
         /**
          * @param Parking $parking
@@ -26,9 +26,9 @@
         public function findByLocation(float $latitude, float $longitude, float $radiusKm): array;
 
         /**
-         * @param string $ownerId
+         * @param int $ownerId
          * @return Parking[]
          */
-        public function findByOwnerId(string $ownerId): array;
+        public function findByOwnerId(int $ownerId): array;
     }
 ?>
