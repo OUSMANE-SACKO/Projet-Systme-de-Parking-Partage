@@ -1,10 +1,13 @@
 <?php
-    require_once __DIR__ . '/../Database/Factories/MySQLFactory.php';
-
     class MySQLUserRepository implements IUserRepository {
+        private PDO $connection;
+
+        public function __construct(PDO $connection) {
+            $this->connection = $connection;
+        }
+
         public function findByEmail(string $email): ?User {
-            $connection = MySQLFactory::getConnection();
-            $stmt = $connection->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
+            $stmt = $this->connection->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
             $stmt->execute([$email]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -16,8 +19,7 @@
         }
 
         public function findById(string $id): ?User {
-            $connection = MySQLFactory::getConnection();
-            $stmt = $connection->prepare("SELECT * FROM users WHERE id = ? LIMIT 1");
+            $stmt = $this->connection->prepare("SELECT * FROM users WHERE id = ? LIMIT 1");
             $stmt->execute([$id]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -29,22 +31,31 @@
         }
 
         public function existsByEmail(string $email): bool {
-            $connection = MySQLFactory::getConnection();
-            $stmt = $connection->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
+            $stmt = $this->connection->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
             $stmt->execute([$email]);
             return $stmt->fetchColumn() > 0;
         }
 
-        public function save(User $user): void {
-            $connection = MySQLFactory::getConnection();
-            
+        public function findAll(): array {
+            $stmt = $this->connection->query("SELECT * FROM users");
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $users = [];
+            foreach ($rows as $row) {
+                $users[] = $this->hydrate($row);
+            }
+
+            return $users;
+        }
+
+        public function save(User $user): void {            
             // Déterminer la table cible selon le type d'objet
             $table = ($user instanceof Owner) ? 'parking_owners' : 'users';
 
             if ($user->getId() === null) {
                 // CAS 1 : INSERTION (Nouvel utilisateur)
                 // On ne mentionne PAS la colonne 'id', la BDD le fera auto-incrémenter
-                $stmt = $connection->prepare(
+                $stmt = $this->connection->prepare(
                     "INSERT INTO {$table} (first_name, last_name, email, password) 
                     VALUES (?, ?, ?, ?)"
                 );
@@ -57,12 +68,12 @@
                 ]);
 
                 // CRUCIAL : On récupère l'ID généré par la BDD et on le met dans l'objet
-                $newId = (int) $connection->lastInsertId();
+                $newId = (int) $this->connection->lastInsertId();
                 $user->setId($newId);
 
             } else {
                 // CAS 2 : MISE À JOUR (Utilisateur existant avec ID)
-                $stmt = $connection->prepare(
+                $stmt = $this->connection->prepare(
                     "UPDATE {$table} 
                     SET first_name = ?, last_name = ?, email = ?, password = ? 
                     WHERE id = ?"

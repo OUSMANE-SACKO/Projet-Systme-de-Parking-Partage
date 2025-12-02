@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/Factories/MySQLFactory.php';
-require_once __DIR__ . '/../../Functions/load_env.php';
 
 try {
     $pdo = MySQLFactory::getConnection();

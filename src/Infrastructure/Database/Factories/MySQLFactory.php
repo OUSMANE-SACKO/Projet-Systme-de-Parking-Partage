@@ -1,8 +1,7 @@
 <?php
-require_once __DIR__ . '/../../../Functions/load_env.php';
 
-// require_once __DIR__ . '/IDatabaseFactory.php';
-class MySQLFactory {
+require_once __DIR__ . '/IDatabaseFactory.php';
+class MySQLFactory implements IDatabaseFactory{
     private static ?PDO $instance = null;
     
     private function __construct() {}

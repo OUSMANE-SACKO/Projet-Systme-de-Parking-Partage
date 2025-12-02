@@ -1,14 +1,17 @@
 <?php
-    require_once __DIR__ . '/../Database/Factories/MySQLFactory.php';
-
     class MySQLParkingRepository implements IParkingRepository {
+        private PDO $connection;
+
+        public function __construct(PDO $connection) {
+            $this->connection = $connection;
+        }
+
         /**
          * @param int $id
          * @return Parking|null
          */
         public function findById(int $id): ?Parking {
-            $connection = MySQLFactory::getConnection();
-            $stmt = $connection->prepare("SELECT * FROM parkings WHERE id = ? LIMIT 1");
+            $stmt = $this->connection->prepare("SELECT * FROM parkings WHERE id = ? LIMIT 1");
             $stmt->execute([$id]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -24,13 +27,13 @@
          * @return void
          */
         public function save(Parking $parking): void {
-            $connection = MySQLFactory::getConnection();
             
             $latitude = $parking->getLocation()['latitude'] ?? 0.0;
             $longitude = $parking->getLocation()['longitude'] ?? 0.0;
             
             if ($parking->getId() === null) {
-                $stmt = $connection->prepare(
+                // INSERT
+                $stmt = $this->connection->prepare(
                     "INSERT INTO parkings (latitude, longitude, total_spaces, hourly_rate, owner_id) 
                     VALUES (?, ?, ?, ?, ?)" 
                 );
@@ -44,11 +47,11 @@
                     1    // owner_id temporaire (TODO: Lier au vrai owner)
                 ]);
 
-                $newId = (int) $connection->lastInsertId();
+                $newId = (int) $this->connection->lastInsertId();
                 $parking->setId($newId);
             } else {
                 // UPDATE
-                $stmt = $connection->prepare(
+                $stmt = $this->connection->prepare(
                     "UPDATE parkings SET latitude = ?, longitude = ?, total_spaces = ? WHERE id = ?"
                 );
                 $stmt->execute([
@@ -64,8 +67,7 @@
          * @return Parking[]
          */
         public function findAll(): array {
-            $connection = MySQLFactory::getConnection();
-            $stmt = $connection->query("SELECT * FROM parkings");
+            $stmt = $this->connection->query("SELECT * FROM parkings");
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $parkings = [];
@@ -83,10 +85,7 @@
          * @return Parking[]
          */
         public function findByLocation(float $latitude, float $longitude, float $radiusKm): array {
-            $connection = MySQLFactory::getConnection();
-            
-            // Formule Haversine SQL adaptée aux colonnes latitude/longitude
-            $stmt = $connection->prepare(
+            $stmt = $this->connection->prepare(
                 "SELECT *, 
                 (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * 
                 cos(radians(longitude) - radians(?)) + 
@@ -112,8 +111,7 @@
          * @return Parking[]
          */
         public function findByOwnerId(int $ownerId): array {
-            $connection = MySQLFactory::getConnection();
-            $stmt = $connection->prepare("SELECT * FROM parkings WHERE owner_id = ?");
+            $stmt = $this->connection->prepare("SELECT * FROM parkings WHERE owner_id = ?");
             $stmt->execute([$ownerId]);
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

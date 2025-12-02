@@ -7,6 +7,11 @@
         public function findByEmail(string $email): ?User;
 
         /**
+         * @return User[]
+         */
+        public function findAll(): array;
+
+        /**
          * @param User $user
          * @return void
          */
