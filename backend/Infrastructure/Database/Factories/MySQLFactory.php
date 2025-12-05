@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../../Functions/load_env.php';
+require_once __DIR__ . '/../../../Functions/autoloader.php';
 
 // require_once __DIR__ . '/IDatabaseFactory.php';
 class MySQLFactory {
