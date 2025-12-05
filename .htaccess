@@ -1,0 +1,21 @@
+# Page d'accueil par défaut
+DirectoryIndex frontend/index.html index.php
+
+# Activer la réécriture d'URL
+RewriteEngine On
+
+# Rediriger /index.html vers la racine
+RewriteRule ^index\.html$ / [R=301,L]
+RewriteRule ^frontend/index\.html$ / [R=301,L]
+
+# Si le fichier ou dossier existe, le servir directement
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Rediriger les fichiers statiques du frontend
+RewriteRule ^(styles\.css|app\.js)$ frontend/$1 [L]
+RewriteRule ^(connexion|register|tarifs)\.html$ frontend/$1.html [L]
+
+# Routes API vers le backend
+RewriteRule ^api/(.*)$ backend/Infrastructure/Controller/$1 [L,QSA]
