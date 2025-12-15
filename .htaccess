@@ -19,3 +19,13 @@ RewriteRule ^(connexion|register|tarifs)\.html$ frontend/$1.html [L]
 
 # Routes API vers le backend
 RewriteRule ^api/(.*)$ backend/Infrastructure/Controller/$1 [L,QSA]
+
+# Protection XSS
+Header set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'"
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "DENY"
+Header set X-XSS-Protection "1; mode=block"
+Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Cookies sécurisés (PHP)
+Header always edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure;SameSite=Strict
