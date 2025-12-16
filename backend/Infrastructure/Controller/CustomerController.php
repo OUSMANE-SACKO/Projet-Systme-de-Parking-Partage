@@ -17,14 +17,22 @@ class CustomerController {
     public function register(array $requestData) {
         $dto = RegisterCustomerDTO::fromArray($requestData);
         $dto->validate();
-        return $this->registerCustomerUseCase->execute($dto);
+        return $this->registerCustomerUseCase->execute(
+            $dto->name,
+            $dto->forename,
+            $dto->email,
+            $dto->password
+        );
     }
 
     // Exemple d'authentification
     public function authenticate(array $requestData) {
         $dto = AuthenticateUserDTO::fromArray($requestData);
         $dto->validate();
-        return $this->authenticateUserUseCase->execute($dto);
+        return $this->authenticateUserUseCase->execute(
+            $dto->email,
+            $dto->password
+        );
     }
 
     // Ajoute ici d'autres méthodes pour réservation, abonnement, etc.

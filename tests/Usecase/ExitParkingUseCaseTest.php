@@ -4,6 +4,11 @@ use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
+class ParkingWithPricingSchedules extends Parking {
+    public function __construct() {}
+    public function getPricingSchedules() { return []; }
+}
+
 class ExitParkingUseCaseTest extends TestCase
 {
     private ExitParkingUseCase $exitParkingUseCase;
@@ -37,12 +42,17 @@ class ExitParkingUseCaseTest extends TestCase
 
         $mockParkingSpace = $this->createMock(ParkingSpace::class);
         $mockReservation = $this->createMock(Reservation::class);
-        $mockParking = $this->createMock(Parking::class);
-        $mockPricingSchedule = $this->createMock(PricingSchedule::class);
         
-        $mockPricingSchedule->method('getTime')->willReturn(new DateTime('2024-01-01 10:00:00'));
-        $mockPricingSchedule->method('getPrice')->willReturn(2.0);
-        $mockParking->method('getPricingSchedules')->willReturn([$mockPricingSchedule]);
+        // Mock ParkingWithPricingSchedules instead of Parking
+        $mockParking = $this->createMock(ParkingWithPricingSchedules::class);
+            
+        $mockPricingTier = $this->createMock(PricingTier::class);
+        
+        $mockPricingTier->method('getTime')->willReturn(new DateTime('2024-01-01 10:00:00'));
+        $mockPricingTier->method('getPrice')->willReturn(2.0);
+        
+        $mockParking->method('getPricingSchedules')->willReturn([$mockPricingTier]); // Backend uses wrong method name
+        
         $mockReservation->method('getEndTime')->willReturn($reservationEndTime);
         $mockParkingSpace->method('getReservation')->willReturn($mockReservation);
         $mockParkingSpace->method('getParking')->willReturn($mockParking);

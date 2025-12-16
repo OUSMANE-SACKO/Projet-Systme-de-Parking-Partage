@@ -27,7 +27,7 @@ class GetReservationInvoiceUseCaseTest extends TestCase
         
         $this->mockReservation->method('getStartTime')->willReturn($startTime);
         $this->mockReservation->method('getEndTime')->willReturn($endTime);
-        $this->mockParking->method('getPricingSchedules')->willReturn([]);
+        $this->mockParking->method('getPricingTiers')->willReturn([]);
 
         $result = $this->getReservationInvoiceUseCase->execute($this->mockReservation);
 
@@ -43,7 +43,7 @@ class GetReservationInvoiceUseCaseTest extends TestCase
         
         $this->mockReservation->method('getStartTime')->willReturn($startTime);
         $this->mockReservation->method('getEndTime')->willReturn($endTime);
-        $this->mockParking->method('getPricingSchedules')->willReturn([]);
+        $this->mockParking->method('getPricingTiers')->willReturn([]);
 
         $result = $this->getReservationInvoiceUseCase->execute($this->mockReservation, 'pdf');
 
@@ -52,14 +52,14 @@ class GetReservationInvoiceUseCaseTest extends TestCase
         $this->assertEquals('pdf', $result['format']);
     }
 
-    public function testExecuteWithNoPricingSchedules(): void
+    public function testExecuteWithNoPricingTiers(): void
     {
         $startTime = new DateTime('2024-01-01 10:00:00');
         $endTime = new DateTime('2024-01-01 13:00:00'); // 3 hours
         
         $this->mockReservation->method('getStartTime')->willReturn($startTime);
         $this->mockReservation->method('getEndTime')->willReturn($endTime);
-        $this->mockParking->method('getPricingSchedules')->willReturn([]);
+        $this->mockParking->method('getPricingTiers')->willReturn([]);
 
         $result = $this->getReservationInvoiceUseCase->execute($this->mockReservation);
 
@@ -68,14 +68,14 @@ class GetReservationInvoiceUseCaseTest extends TestCase
         // 3 hours * 1.0 = 3.0
     }
 
-    public function testExecuteWithNoPricingSchedulesAndPenalty(): void
+    public function testExecuteWithNoPricingTiersAndPenalty(): void
     {
         $startTime = new DateTime('2024-01-01 10:00:00');
         $endTime = new DateTime('2024-01-01 13:00:00'); // 3 hours
         
         $this->mockReservation->method('getStartTime')->willReturn($startTime);
         $this->mockReservation->method('getEndTime')->willReturn($endTime);
-        $this->mockParking->method('getPricingSchedules')->willReturn([]);
+        $this->mockParking->method('getPricingTiers')->willReturn([]);
 
         $result = $this->getReservationInvoiceUseCase->execute($this->mockReservation, 'html', true);
 
@@ -83,18 +83,18 @@ class GetReservationInvoiceUseCaseTest extends TestCase
         // With penalty: 20 + (3 * 1.0) = 23.0
     }
 
-    public function testExecuteWithPricingSchedules(): void
+    public function testExecuteWithPricingTiers(): void
     {
         $startTime = new DateTime('2024-01-01 10:00:00');
         $endTime = new DateTime('2024-01-01 12:00:00'); // 2 hours
         
-        $mockSchedule = $this->createMock(PricingSchedule::class);
-        $mockSchedule->method('getTime')->willReturn(new DateTime('2024-01-01 09:00:00'));
-        $mockSchedule->method('getPrice')->willReturn(2.5);
+        $mockTier = $this->createMock(PricingTier::class);
+        $mockTier->method('getTime')->willReturn(new DateTime('2024-01-01 09:00:00'));
+        $mockTier->method('getPrice')->willReturn(2.5);
         
         $this->mockReservation->method('getStartTime')->willReturn($startTime);
         $this->mockReservation->method('getEndTime')->willReturn($endTime);
-        $this->mockParking->method('getPricingSchedules')->willReturn([$mockSchedule]);
+        $this->mockParking->method('getPricingTiers')->willReturn([$mockTier]);
 
         $result = $this->getReservationInvoiceUseCase->execute($this->mockReservation);
 
@@ -102,22 +102,22 @@ class GetReservationInvoiceUseCaseTest extends TestCase
         // 2 hours * 2.5 = 5.0
     }
 
-    public function testExecuteWithMultiplePricingSchedules(): void
+    public function testExecuteWithMultiplePricingTiers(): void
     {
         $startTime = new DateTime('2024-01-01 10:00:00');
         $endTime = new DateTime('2024-01-01 11:00:00'); // 1 hour
         
-        $mockSchedule1 = $this->createMock(PricingSchedule::class);
-        $mockSchedule1->method('getTime')->willReturn(new DateTime('2024-01-01 08:00:00'));
-        $mockSchedule1->method('getPrice')->willReturn(1.5);
+        $mockTier1 = $this->createMock(PricingTier::class);
+        $mockTier1->method('getTime')->willReturn(new DateTime('2024-01-01 08:00:00'));
+        $mockTier1->method('getPrice')->willReturn(1.5);
         
-        $mockSchedule2 = $this->createMock(PricingSchedule::class);
-        $mockSchedule2->method('getTime')->willReturn(new DateTime('2024-01-01 12:00:00')); // After start
-        $mockSchedule2->method('getPrice')->willReturn(3.0);
+        $mockTier2 = $this->createMock(PricingTier::class);
+        $mockTier2->method('getTime')->willReturn(new DateTime('2024-01-01 12:00:00')); // After start
+        $mockTier2->method('getPrice')->willReturn(3.0);
         
         $this->mockReservation->method('getStartTime')->willReturn($startTime);
         $this->mockReservation->method('getEndTime')->willReturn($endTime);
-        $this->mockParking->method('getPricingSchedules')->willReturn([$mockSchedule1, $mockSchedule2]);
+        $this->mockParking->method('getPricingTiers')->willReturn([$mockTier1, $mockTier2]);
 
         $result = $this->getReservationInvoiceUseCase->execute($this->mockReservation);
 
@@ -133,7 +133,7 @@ class GetReservationInvoiceUseCaseTest extends TestCase
         
         $this->mockReservation->method('getStartTime')->willReturn($startTime);
         $this->mockReservation->method('getEndTime')->willReturn($endTime);
-        $this->mockParking->method('getPricingSchedules')->willReturn([]);
+        $this->mockParking->method('getPricingTiers')->willReturn([]);
 
         $result = $this->getReservationInvoiceUseCase->execute($this->mockReservation);
 
@@ -148,7 +148,7 @@ class GetReservationInvoiceUseCaseTest extends TestCase
         
         $this->mockReservation->method('getStartTime')->willReturn($startTime);
         $this->mockReservation->method('getEndTime')->willReturn($endTime);
-        $this->mockParking->method('getPricingSchedules')->willReturn([]);
+        $this->mockParking->method('getPricingTiers')->willReturn([]);
 
         $result = $this->getReservationInvoiceUseCase->execute($this->mockReservation);
 
@@ -161,13 +161,13 @@ class GetReservationInvoiceUseCaseTest extends TestCase
         $startTime = new DateTime('2024-01-01 10:00:00');
         $endTime = new DateTime('2024-01-01 12:00:00'); // 2 hours
         
-        $mockSchedule = $this->createMock(PricingSchedule::class);
-        $mockSchedule->method('getTime')->willReturn(new DateTime('2024-01-01 09:00:00'));
-        $mockSchedule->method('getPrice')->willReturn(3.0);
+        $mockTier = $this->createMock(PricingTier::class);
+        $mockTier->method('getTime')->willReturn(new DateTime('2024-01-01 09:00:00'));
+        $mockTier->method('getPrice')->willReturn(3.0);
         
         $this->mockReservation->method('getStartTime')->willReturn($startTime);
         $this->mockReservation->method('getEndTime')->willReturn($endTime);
-        $this->mockParking->method('getPricingSchedules')->willReturn([$mockSchedule]);
+        $this->mockParking->method('getPricingTiers')->willReturn([$mockTier]);
 
         $result = $this->getReservationInvoiceUseCase->execute($this->mockReservation, 'html', true);
 
@@ -182,7 +182,7 @@ class GetReservationInvoiceUseCaseTest extends TestCase
         
         $this->mockReservation->method('getStartTime')->willReturn($startTime);
         $this->mockReservation->method('getEndTime')->willReturn($endTime);
-        $this->mockParking->method('getPricingSchedules')->willReturn([]);
+        $this->mockParking->method('getPricingTiers')->willReturn([]);
 
         $result = $this->getReservationInvoiceUseCase->execute($this->mockReservation);
 

@@ -23,8 +23,16 @@
         ],
         "full-test": [
             "@coverage",
-            "@mutation"
+            "@open-coverage",
+            "@mutation",
+            "@open-mutation"
+        ],
+
+        "coverage-test": [
+            "@coverage",
+            "@open-coverage"
         ]
+
     },
     "require": {
         "fpdf/fpdf": "^1.86"

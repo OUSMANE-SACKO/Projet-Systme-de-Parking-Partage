@@ -28,8 +28,12 @@
         $paths = [
             __DIR__ . '/../Domain/Entities/' . $short . '.php',
             __DIR__ . '/../Application/UseCases/' . $short . '.php',
+            __DIR__ . '/../Application/DTO/' . $short . '.php',
             __DIR__ . '/../Domain/Repositories/' . $short . '.php',
             __DIR__ . '/../Infrastructure/Repositories/' . $short . '.php',
+            __DIR__ . '/../Infrastructure/Controller/' . $short . '.php',
+            __DIR__ . '/../Infrastructure/Database/' . $short . '.php',
+            __DIR__ . '/../Infrastructure/Database/Factories/' . $short . '.php',
             __DIR__ . '/../Infrastructure/Security/' . $short . '.php',
         ];
 

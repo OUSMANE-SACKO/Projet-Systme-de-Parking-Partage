@@ -11,7 +11,7 @@ class ReservationTest extends TestCase {
     
     protected function setUp(): void {
         $this->customer = new Customer('Doe', 'John', 'john@test.com', 'hash123');
-        $this->parking = new Parking(['address' => '123 Test St'], 10);
+        $this->parking = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 10);
         $this->start = new DateTime('2024-01-01 10:00:00');
         $this->end = new DateTime('2024-01-01 12:00:00');
         $this->reservation = new Reservation($this->customer, $this->parking, $this->start, $this->end);
@@ -21,17 +21,16 @@ class ReservationTest extends TestCase {
      * Test construction, getters, and date validation
      */
     public function testConstructionAndGetters(): void {
-        // Test all getters and unique ID
-        $this->assertNotEmpty($this->reservation->getId());
-        $this->assertIsString($this->reservation->getId());
+        // Test all getters and null ID (until persisted)
+        $this->assertNull($this->reservation->getId());
         $this->assertSame($this->customer, $this->reservation->getCustomer());
         $this->assertSame($this->parking, $this->reservation->getParking());
         $this->assertEquals($this->start, $this->reservation->getStartTime());
         $this->assertEquals($this->end, $this->reservation->getEndTime());
         
-        // Test unique IDs
+        // Test different instances
         $other = new Reservation($this->customer, $this->parking, $this->start, $this->end);
-        $this->assertNotEquals($this->reservation->getId(), $other->getId());
+        $this->assertNotSame($this->reservation, $other);
         
         // Test invalid construction (end before start)
         $this->expectException(InvalidArgumentException::class);
@@ -44,7 +43,7 @@ class ReservationTest extends TestCase {
      */
     public function testSetters(): void {
         $newCustomer = new Customer('Smith', 'Jane', 'jane@test.com', 'hash456');
-        $newParking = new Parking(['address' => '456 Other St'], 20);
+        $newParking = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 20);
         
         // Test valid setters
         $this->reservation->setCustomer($newCustomer);
@@ -106,3 +105,4 @@ class ReservationTest extends TestCase {
         }
     }
 }
+

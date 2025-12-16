@@ -24,7 +24,7 @@ class ExitParkingUseCase {
         
         // Trouver le créneau tarifaire applicable au moment de la fin de réservation
         $applicablePricingTier = null;
-    foreach ($tiers as $tier) {
+    foreach ($schedules as $tier) {
             if ($tier instanceof PricingTier) {
                 if ($tier->getTime() <= $reservationEnd) {
                     $applicablePricingTier = $tier;

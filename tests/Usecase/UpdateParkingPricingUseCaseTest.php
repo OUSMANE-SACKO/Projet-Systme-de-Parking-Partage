@@ -16,99 +16,99 @@ class UpdateParkingPricingUseCaseTest extends TestCase
         $this->mockParking = $this->createMock(Parking::class);
     }
 
-    public function testExecuteWithValidPricingSchedules(): void
+    public function testExecuteWithValidPricingTiers(): void
     {
-        $mockSchedule1 = $this->createMock(PricingSchedule::class);
-        $mockSchedule2 = $this->createMock(PricingSchedule::class);
-        $pricingSchedules = [$mockSchedule1, $mockSchedule2];
+        $mockTier1 = $this->createMock(PricingTier::class);
+        $mockTier2 = $this->createMock(PricingTier::class);
+        $PricingTiers = [$mockTier1, $mockTier2];
 
         $this->mockParking->expects($this->once())
-            ->method('setPricingSchedules')
-            ->with($pricingSchedules);
+            ->method('setPricingTiers')
+            ->with($PricingTiers);
 
-        $this->updateParkingPricingUseCase->execute($this->mockParking, $pricingSchedules);
+        $this->updateParkingPricingUseCase->execute($this->mockParking, $PricingTiers);
     }
 
-    public function testExecuteWithEmptyPricingSchedules(): void
+    public function testExecuteWithEmptyPricingTiers(): void
     {
-        $pricingSchedules = [];
+        $PricingTiers = [];
 
         $this->mockParking->expects($this->once())
-            ->method('setPricingSchedules')
-            ->with($pricingSchedules);
+            ->method('setPricingTiers')
+            ->with($PricingTiers);
 
-        $this->updateParkingPricingUseCase->execute($this->mockParking, $pricingSchedules);
+        $this->updateParkingPricingUseCase->execute($this->mockParking, $PricingTiers);
     }
 
-    public function testExecuteWithInvalidPricingSchedule(): void
+    public function testExecuteWithInvalidPricingTier(): void
     {
-        $pricingSchedules = ['not_a_pricing_schedule'];
+        $PricingTiers = ['not_a_pricing_schedule'];
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('All elements must be instances of PricingSchedule');
+        $this->expectExceptionMessage('All elements must be instances of PricingTier');
 
-        $this->updateParkingPricingUseCase->execute($this->mockParking, $pricingSchedules);
+        $this->updateParkingPricingUseCase->execute($this->mockParking, $PricingTiers);
     }
 
     public function testExecuteWithMixedValidAndInvalidSchedules(): void
     {
-        $mockSchedule = $this->createMock(PricingSchedule::class);
-        $pricingSchedules = [$mockSchedule, 'invalid_schedule'];
+        $mockTier = $this->createMock(PricingTier::class);
+        $PricingTiers = [$mockTier, 'invalid_schedule'];
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('All elements must be instances of PricingSchedule');
+        $this->expectExceptionMessage('All elements must be instances of PricingTier');
 
-        $this->updateParkingPricingUseCase->execute($this->mockParking, $pricingSchedules);
+        $this->updateParkingPricingUseCase->execute($this->mockParking, $PricingTiers);
     }
 
-    public function testAddPricingSchedule(): void
+    public function testAddPricingTier(): void
     {
         $time = new DateTime('08:00:00');
         $price = 2.5;
 
         $this->mockParking->expects($this->once())
-            ->method('addPricingSchedule')
-            ->with($this->isInstanceOf(PricingSchedule::class));
+            ->method('addPricingTier')
+            ->with($this->isInstanceOf(PricingTier::class));
 
-        $result = $this->updateParkingPricingUseCase->addPricingSchedule($this->mockParking, $time, $price);
+        $result = $this->updateParkingPricingUseCase->addPricingTier($this->mockParking, $time, $price);
 
-        $this->assertInstanceOf(PricingSchedule::class, $result);
+        $this->assertInstanceOf(PricingTier::class, $result);
     }
 
-    public function testRemovePricingSchedule(): void
+    public function testRemovePricingTier(): void
     {
-        $mockSchedule = $this->createMock(PricingSchedule::class);
+        $mockTier = $this->createMock(PricingTier::class);
 
         $this->mockParking->expects($this->once())
-            ->method('removePricingSchedule')
-            ->with($mockSchedule)
+            ->method('removePricingTier')
+            ->with($mockTier)
             ->willReturn(true);
 
-        $result = $this->updateParkingPricingUseCase->removePricingSchedule($this->mockParking, $mockSchedule);
+        $result = $this->updateParkingPricingUseCase->removePricingTier($this->mockParking, $mockTier);
 
         $this->assertTrue($result);
     }
 
-    public function testRemovePricingScheduleNotFound(): void
+    public function testRemovePricingTierNotFound(): void
     {
-        $mockSchedule = $this->createMock(PricingSchedule::class);
+        $mockTier = $this->createMock(PricingTier::class);
 
         $this->mockParking->expects($this->once())
-            ->method('removePricingSchedule')
-            ->with($mockSchedule)
+            ->method('removePricingTier')
+            ->with($mockTier)
             ->willReturn(false);
 
-        $result = $this->updateParkingPricingUseCase->removePricingSchedule($this->mockParking, $mockSchedule);
+        $result = $this->updateParkingPricingUseCase->removePricingTier($this->mockParking, $mockTier);
 
         $this->assertFalse($result);
     }
 
-    public function testClearAllPricingSchedules(): void
+    public function testClearAllPricingTiers(): void
     {
         $this->mockParking->expects($this->once())
-            ->method('setPricingSchedules')
+            ->method('setPricingTiers')
             ->with([]);
 
-        $this->updateParkingPricingUseCase->clearAllPricingSchedules($this->mockParking);
+        $this->updateParkingPricingUseCase->clearAllPricingTiers($this->mockParking);
     }
 }

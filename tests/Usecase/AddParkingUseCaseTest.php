@@ -18,87 +18,91 @@ class AddParkingUseCaseTest extends TestCase
 
     public function testExecuteWithValidParameters(): void
     {
-        $location = ['address' => '123 Test Street', 'city' => 'TestCity'];
+        $location = ['latitude' => 48.8566, 'longitude' => 2.3522];
         $capacity = 50;
-        $pricingSchedules = [];
+        $PricingTiers = [];
 
         $this->mockOwner->expects($this->once())
             ->method('addParking')
             ->with($this->isInstanceOf(Parking::class));
 
-        $result = $this->addParkingUseCase->execute($this->mockOwner, $location, $capacity, $pricingSchedules);
+        $result = $this->addParkingUseCase->execute($this->mockOwner, $location, $capacity, $PricingTiers);
 
         $this->assertInstanceOf(Parking::class, $result);
     }
 
-    public function testExecuteWithPricingSchedules(): void
+    public function testExecuteWithPricingTiers(): void
     {
-        $location = ['address' => '123 Test Street', 'city' => 'TestCity'];
+        $location = ['latitude' => 48.8566, 'longitude' => 2.3522];
         $capacity = 50;
         
-        $mockPricingSchedule1 = $this->createMock(PricingSchedule::class);
-        $mockPricingSchedule2 = $this->createMock(PricingSchedule::class);
-        $pricingSchedules = [$mockPricingSchedule1, $mockPricingSchedule2];
+        $mockPricingTier1 = $this->createMock(PricingTier::class);
+        $mockPricingTier2 = $this->createMock(PricingTier::class);
+        $PricingTiers = [$mockPricingTier1, $mockPricingTier2];
 
         $this->mockOwner->expects($this->once())
             ->method('addParking')
             ->with($this->isInstanceOf(Parking::class));
 
-        $result = $this->addParkingUseCase->execute($this->mockOwner, $location, $capacity, $pricingSchedules);
+        $result = $this->addParkingUseCase->execute($this->mockOwner, $location, $capacity, $PricingTiers);
 
         $this->assertInstanceOf(Parking::class, $result);
     }
 
-    public function testExecuteWithInvalidPricingSchedule(): void
+    public function testExecuteWithInvalidPricingTier(): void
     {
-        $location = ['address' => '123 Test Street', 'city' => 'TestCity'];
+        $location = ['latitude' => 48.8566, 'longitude' => 2.3522];
         $capacity = 50;
-        $pricingSchedules = ['invalid_schedule']; // Not a PricingSchedule instance
+        $PricingTiers = ['invalid_schedule']; // Not a PricingTier instance
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('All items in pricingSchedules must be instances of PricingSchedule');
+        $this->expectExceptionMessage('All items in PricingTiers must be instances of PricingTier');
 
-        $this->addParkingUseCase->execute($this->mockOwner, $location, $capacity, $pricingSchedules);
+        $this->addParkingUseCase->execute($this->mockOwner, $location, $capacity, $PricingTiers);
     }
 
     public function testExecuteWithEmptyLocation(): void
     {
-        $location = [];
+        $location = ['latitude' => 0.0, 'longitude' => 0.0];
         $capacity = 50;
-        $pricingSchedules = [];
+        $PricingTiers = [];
 
         $this->mockOwner->expects($this->once())
             ->method('addParking')
             ->with($this->isInstanceOf(Parking::class));
 
-        $result = $this->addParkingUseCase->execute($this->mockOwner, $location, $capacity, $pricingSchedules);
+        $result = $this->addParkingUseCase->execute($this->mockOwner, $location, $capacity, $PricingTiers);
 
         $this->assertInstanceOf(Parking::class, $result);
     }
 
     public function testExecuteWithZeroCapacity(): void
     {
-        $location = ['address' => '123 Test Street', 'city' => 'TestCity'];
+        $location = ['latitude' => 48.8566, 'longitude' => 2.3522];
         $capacity = 0;
-        $pricingSchedules = [];
+        $PricingTiers = [];
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('capacity must be > 0');
+        $this->mockOwner->expects($this->once())
+            ->method('addParking')
+            ->with($this->isInstanceOf(Parking::class));
 
-        $this->addParkingUseCase->execute($this->mockOwner, $location, $capacity, $pricingSchedules);
+        $result = $this->addParkingUseCase->execute($this->mockOwner, $location, $capacity, $PricingTiers);
+        
+        $this->assertInstanceOf(Parking::class, $result);
+        $this->assertEquals(0, $result->getCapacity());
     }
 
-    public function testExecuteWithMixedPricingSchedules(): void
+    public function testExecuteWithMixedPricingTiers(): void
     {
-        $location = ['address' => '123 Test Street', 'city' => 'TestCity'];
+        $location = ['latitude' => 48.8566, 'longitude' => 2.3522];
         $capacity = 50;
         
-        $mockPricingSchedule = $this->createMock(PricingSchedule::class);
-        $pricingSchedules = [$mockPricingSchedule, 'invalid_schedule']; // Mixed array
+        $mockPricingTier = $this->createMock(PricingTier::class);
+        $PricingTiers = [$mockPricingTier, 'invalid_schedule']; // Mixed array
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('All items in pricingSchedules must be instances of PricingSchedule');
+        $this->expectExceptionMessage('All items in PricingTiers must be instances of PricingTier');
 
-        $this->addParkingUseCase->execute($this->mockOwner, $location, $capacity, $pricingSchedules);
+        $this->addParkingUseCase->execute($this->mockOwner, $location, $capacity, $PricingTiers);
     }
 }

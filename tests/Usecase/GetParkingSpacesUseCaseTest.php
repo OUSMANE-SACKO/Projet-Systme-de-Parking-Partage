@@ -37,17 +37,17 @@ class GetParkingSpacesUseCaseTest extends TestCase
         $capacity = 50;
         
         $mockCustomer = $this->createMock(Customer::class);
-        $mockCustomer->method('getId')->willReturn('cust1');
+        $mockCustomer->method('getId')->willReturn(1);
         $mockCustomer->method('getEmail')->willReturn('test@example.com');
 
         $mockSpace1 = $this->createMock(ParkingSpace::class);
-        $mockSpace1->method('getId')->willReturn('space1');
+        $mockSpace1->method('getId')->willReturn(1);
         $mockSpace1->method('getCustomer')->willReturn($mockCustomer);
         $mockSpace1->method('getStartTime')->willReturn(new DateTime('2024-01-01 10:00:00'));
         $mockSpace1->method('getEndTime')->willReturn(null); // Still occupied
 
         $mockSpace2 = $this->createMock(ParkingSpace::class);
-        $mockSpace2->method('getId')->willReturn('space2');
+        $mockSpace2->method('getId')->willReturn(1);
         $mockSpace2->method('getCustomer')->willReturn($mockCustomer);
         $mockSpace2->method('getStartTime')->willReturn(new DateTime('2024-01-01 08:00:00'));
         $mockSpace2->method('getEndTime')->willReturn(new DateTime('2024-01-01 12:00:00')); // Completed
@@ -71,13 +71,13 @@ class GetParkingSpacesUseCaseTest extends TestCase
         $capacity = 10;
         
         $mockCustomer = $this->createMock(Customer::class);
-        $mockCustomer->method('getId')->willReturn('cust1');
+        $mockCustomer->method('getId')->willReturn(1);
         $mockCustomer->method('getEmail')->willReturn('test@example.com');
 
         $parkingSpaces = [];
         for ($i = 0; $i < 10; $i++) {
             $mockSpace = $this->createMock(ParkingSpace::class);
-            $mockSpace->method('getId')->willReturn('space' . $i);
+            $mockSpace->method('getId')->willReturn($i + 1);
             $mockSpace->method('getCustomer')->willReturn($mockCustomer);
             $mockSpace->method('getStartTime')->willReturn(new DateTime('2024-01-01 10:00:00'));
             $mockSpace->method('getEndTime')->willReturn(null); // All occupied
@@ -100,17 +100,17 @@ class GetParkingSpacesUseCaseTest extends TestCase
         $capacity = 20;
         
         $mockCustomer = $this->createMock(Customer::class);
-        $mockCustomer->method('getId')->willReturn('cust1');
+        $mockCustomer->method('getId')->willReturn(1);
         $mockCustomer->method('getEmail')->willReturn('test@example.com');
 
         $mockOccupiedSpace = $this->createMock(ParkingSpace::class);
-        $mockOccupiedSpace->method('getId')->willReturn('occupied1');
+        $mockOccupiedSpace->method('getId')->willReturn(1);
         $mockOccupiedSpace->method('getCustomer')->willReturn($mockCustomer);
         $mockOccupiedSpace->method('getStartTime')->willReturn(new DateTime('2024-01-01 10:00:00'));
         $mockOccupiedSpace->method('getEndTime')->willReturn(null); // Still occupied
 
         $mockCompletedSpace = $this->createMock(ParkingSpace::class);
-        $mockCompletedSpace->method('getId')->willReturn('completed1');
+        $mockCompletedSpace->method('getId')->willReturn(1);
         $mockCompletedSpace->method('getCustomer')->willReturn($mockCustomer);
         $mockCompletedSpace->method('getStartTime')->willReturn(new DateTime('2024-01-01 08:00:00'));
         $mockCompletedSpace->method('getEndTime')->willReturn(new DateTime('2024-01-01 12:00:00')); // Completed

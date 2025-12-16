@@ -21,8 +21,8 @@ class SubscriptionTest extends TestCase {
      * Test construction, getters, and duration calculation
      */
     public function testConstructionAndGetters(): void {
-        // Test all getters and unique ID
-        $this->assertNotEmpty($this->subscription->getId());
+        // Test all getters and null ID (until persisted)
+        $this->assertNull($this->subscription->getId());
         $this->assertSame($this->customer, $this->subscription->getCustomer());
         $this->assertEquals($this->start, $this->subscription->getStartDate());
         $this->assertEquals($this->end, $this->subscription->getEndDate());
@@ -30,9 +30,9 @@ class SubscriptionTest extends TestCase {
         $this->assertEquals(1, $this->subscription->getDurationMonths());
         $this->assertEquals(1, $this->subscription->getDurationInMonths());
         
-        // Test unique IDs
+        // Test different instances
         $other = new Subscription($this->customer, $this->start, $this->end, $this->type, 1);
-        $this->assertNotEquals($this->subscription->getId(), $other->getId());
+        $this->assertNotSame($this->subscription, $other);
     }
     
     /**
@@ -135,3 +135,4 @@ class SubscriptionTest extends TestCase {
         }
     }
 }
+

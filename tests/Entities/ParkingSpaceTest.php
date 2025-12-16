@@ -10,15 +10,15 @@ class ParkingSpaceTest extends TestCase {
     
     protected function setUp(): void {
         $this->customer = new Customer('Doe', 'John', 'john@test.com', 'hash');
-        $this->parking = new Parking(['address' => '123 Test St'], 10);
+        $this->parking = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 10);
     }
     
     public function testParkingSpaceConstruction(): void {
         $startTime = new DateTime('2024-01-01 10:00:00');
         
-        $parkingSpace = new ParkingSpace($startTime, $this->parking, $this->customer);
+        $parkingSpace = new ParkingSpace($this->customer, $startTime, $this->parking);
         
-        $this->assertNotEmpty($parkingSpace->getId());
+        
         $this->assertSame($this->customer, $parkingSpace->getCustomer());
         $this->assertEquals($startTime, $parkingSpace->getStartTime());
         $this->assertNull($parkingSpace->getEndTime());
@@ -26,12 +26,12 @@ class ParkingSpaceTest extends TestCase {
     }
     
     public function testSetters(): void {
-        $parkingSpace = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
+        $parkingSpace = new ParkingSpace($this->customer, new DateTime(), $this->parking);
         
         $newCustomer = new Customer('Smith', 'Jane', 'jane@test.com', 'hash2');
         $newStartTime = new DateTime('2024-01-02 09:00:00');
         $newEndTime = new DateTime('2024-01-02 10:00:00');
-        $newParking = new Parking(['address' => '456 Other St'], 20);
+        $newParking = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 20);
         
         $parkingSpace->setCustomer($newCustomer);
         $parkingSpace->setStartTime($newStartTime);
@@ -45,7 +45,7 @@ class ParkingSpaceTest extends TestCase {
     }
     
     public function testReservationLink(): void {
-        $parkingSpace = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
+        $parkingSpace = new ParkingSpace($this->customer, new DateTime(), $this->parking);
         
         $reservation = new Reservation(
             $this->customer,
@@ -60,28 +60,32 @@ class ParkingSpaceTest extends TestCase {
     }
     
     public function testUniqueIds(): void {
-        $space1 = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
-        $space2 = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
+        $space1 = new ParkingSpace($this->customer, new DateTime(), $this->parking);
+        $space2 = new ParkingSpace($this->customer, new DateTime(), $this->parking);
         
-        $this->assertNotEquals($space1->getId(), $space2->getId());
+        // IDs are null until persisted to database
+        $this->assertNull($space1->getId());
+        $this->assertNull($space2->getId());
+        // But the objects are different instances
+        $this->assertNotSame($space1, $space2);
     }
     
     public function testIsOccupiedWhenEndTimeIsNull(): void {
-        $parkingSpace = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
+        $parkingSpace = new ParkingSpace($this->customer, new DateTime(), $this->parking);
         
         // No end time means occupied
         $this->assertNull($parkingSpace->getEndTime());
     }
     
     public function testIsNotOccupiedWhenEndTimeIsSet(): void {
-        $parkingSpace = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
+        $parkingSpace = new ParkingSpace($this->customer, new DateTime(), $this->parking);
         $parkingSpace->setEndTime(new DateTime());
         
         $this->assertNotNull($parkingSpace->getEndTime());
     }
 
     public function testPenaltyAmount(): void {
-        $parkingSpace = new ParkingSpace(new DateTime(), $this->parking, $this->customer);
+        $parkingSpace = new ParkingSpace($this->customer, new DateTime(), $this->parking);
         
         $this->assertEquals(0.0, $parkingSpace->getPenaltyAmount());
         
@@ -98,3 +102,4 @@ class ParkingSpaceTest extends TestCase {
         }
     }
 }
+

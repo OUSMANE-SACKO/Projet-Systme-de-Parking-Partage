@@ -22,7 +22,8 @@
 
         
         public function verify(string $password, string $hash): bool {
-            $password_peppered = hash_hmac("sha256", $password, $this->pepper);
+            $pepper = getenv('PEPPER');
+            $password_peppered = hash_hmac("sha256", $password, $pepper);
             return password_verify($password_peppered, $hash);
         }
     }

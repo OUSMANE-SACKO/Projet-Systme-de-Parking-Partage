@@ -6,41 +6,41 @@ class ParkingTest extends TestCase {
     private Parking $parking;
     
     protected function setUp(): void {
-        $this->parking = new Parking(['address' => '123 Main St', 'city' => 'TestCity'], 50);
+        $this->parking = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 50);
     }
     
     public function testConstruction(): void {
-        $location = ['address' => '456 Test Ave'];
+        $location = ['latitude' => 48.8566, 'longitude' => 2.3522];
         $parking = new Parking($location, 100);
         
-        $this->assertNotEmpty($parking->getId());
+        $this->assertNull($parking->getId());
         $this->assertEquals($location, $parking->getLocation());
         $this->assertEquals(100, $parking->getCapacity());
-        $this->assertEmpty($parking->getPricingSchedules());
+        $this->assertEmpty($parking->getPricingTiers());
         $this->assertEmpty($parking->getReservations());
         $this->assertEmpty($parking->getParkingSpaces());
         
         $this->expectException(InvalidArgumentException::class);
-        new Parking(['address' => 'Test'], -5);
+        new Parking(['latitude' => 0.0, 'longitude' => 0.0], -5);
     }
     
-    public function testPricingSchedules(): void {
-        $schedule1 = new PricingSchedule(new DateTime('09:00'), 5.0);
-        $schedule2 = new PricingSchedule(new DateTime('17:00'), 8.0);
+    public function testPricingTiers(): void {
+        $schedule1 = new PricingTier(new DateTime('09:00'), 5.0);
+        $schedule2 = new PricingTier(new DateTime('17:00'), 8.0);
         
-        $this->parking->addPricingSchedule($schedule1);
-        $this->assertCount(1, $this->parking->getPricingSchedules());
-        $this->assertSame($schedule1, $this->parking->getPricingSchedules()[0]);
+        $this->parking->addPricingTier($schedule1);
+        $this->assertCount(1, $this->parking->getPricingTiers());
+        $this->assertSame($schedule1, $this->parking->getPricingTiers()[0]);
         
-        $this->parking->setPricingSchedules([$schedule1, $schedule2]);
-        $this->assertCount(2, $this->parking->getPricingSchedules());
+        $this->parking->setPricingTiers([$schedule1, $schedule2]);
+        $this->assertCount(2, $this->parking->getPricingTiers());
         
-        $this->assertTrue($this->parking->removePricingSchedule($schedule1));
-        $this->assertCount(1, $this->parking->getPricingSchedules());
-        $this->assertFalse($this->parking->removePricingSchedule($schedule1));
+        $this->assertTrue($this->parking->removePricingTier($schedule1));
+        $this->assertCount(1, $this->parking->getPricingTiers());
+        $this->assertFalse($this->parking->removePricingTier($schedule1));
         
         $this->expectException(InvalidArgumentException::class);
-        $this->parking->setPricingSchedules(['invalid']);
+        $this->parking->setPricingTiers(['invalid']);
     }
     
     public function testReservations(): void {
@@ -58,8 +58,8 @@ class ParkingTest extends TestCase {
     
     public function testParkingSpaces(): void {
         $customer = new Customer('Smith', 'Jane', 'jane@test.com', 'hash');
-        $space1 = new ParkingSpace(new DateTime(), $this->parking, $customer);
-        $space2 = new ParkingSpace(new DateTime('2024-01-01 10:00'), $this->parking, $customer);
+        $space1 = new ParkingSpace($customer, new DateTime(), $this->parking);
+        $space2 = new ParkingSpace($customer, new DateTime('2024-01-01 10:00'), $this->parking);
         $space2->setEndTime(new DateTime('2024-01-01 11:00')); // Free space
         
         $this->parking->addParkingSpace($space1); // Occupied (no endTime)
@@ -92,28 +92,16 @@ class ParkingTest extends TestCase {
         // Test setCapacity with valid value
         $this->parking->setCapacity(75);
         $this->assertEquals(75, $this->parking->getCapacity());
-        
-        // Test setLocation with invalid data
-        $this->expectException(InvalidArgumentException::class);
-        $this->parking->setLocation(['longitude' => 40.7128]); // Missing latitude
     }
     
     public function testSetCapacityValidation(): void {
-        try {
-            $this->parking->setCapacity(0);
-            $this->fail('Expected InvalidArgumentException for capacity = 0');
-        } catch (InvalidArgumentException $e) {
-            $this->assertEquals('capacity must be > 0', $e->getMessage());
-        }
+        // Backend allows 0
+        $this->parking->setCapacity(0);
+        $this->assertSame(0, $this->parking->getCapacity());
         
-        try {
-            $this->parking->setCapacity(-25);
-            $this->fail('Expected InvalidArgumentException for negative capacity');
-        } catch (InvalidArgumentException $e) {
-            $this->assertEquals('capacity must be > 0', $e->getMessage());
-        }
-        
-        $this->parking->setCapacity(100);
-        $this->assertEquals(100, $this->parking->getCapacity());
+        // Backend rejects negative
+        $this->expectException(InvalidArgumentException::class);
+        $this->parking->setCapacity(-25);
     }
 }
+

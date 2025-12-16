@@ -13,7 +13,7 @@ class UserTest extends TestCase {
         
         $user = new User($name, $forename, $email, $passwordHash);
         
-        $this->assertNotEmpty($user->getId());
+        $this->assertNull($user->getId());
         $this->assertEquals($name, $user->getName());
         $this->assertEquals($forename, $user->getForename());
         $this->assertEquals($email, $user->getEmail());
@@ -24,7 +24,12 @@ class UserTest extends TestCase {
         $user1 = new User('Smith', 'Alice', 'alice@test.com', 'hash1');
         $user2 = new User('Brown', 'Bob', 'bob@test.com', 'hash2');
         
-        $this->assertNotEquals($user1->getId(), $user2->getId());
+        // IDs are null until persisted
+        $this->assertNull($user1->getId());
+        $this->assertNull($user2->getId());
+        
+        $user1->setId(1);
+        $this->assertEquals(1, $user1->getId());
     }
     
     public function testSetters(): void {
@@ -51,3 +56,4 @@ class UserTest extends TestCase {
         $this->assertEquals('', $user->getPasswordHash());
     }
 }
+
