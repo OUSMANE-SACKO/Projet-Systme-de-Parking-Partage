@@ -7,18 +7,32 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="logo">🅿️ TaxawCar</div>
-            <ul>
-                <li><a href="index.html">Accueil</a></li>
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="mes-reservations.html" class="active">Mes Réservations</a></li>
-                <li><a href="mes-stationnements.html">Mes Stationnements</a></li>
-                <li><a href="#" onclick="logout()">Déconnexion</a></li>
-            </ul>
-        </nav>
-    </header>
+  <nav class="navbar-rounded">
+    <div class="nav-left">
+      <span class="logo-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="20,5 35,13 35,27 20,35 5,27 5,13" fill="#8e24aa"/>
+          <circle cx="20" cy="20" r="7" fill="#fff" fill-opacity="0.92"/>
+          <circle cx="20" cy="20" r="3.5" fill="#8e24aa"/>
+        </svg>
+      </span>
+      <span class="logo-text">TaxawCar</span>
+    </div>
+    <ul class="nav-center">
+      <li><a href="dashboard.html">Accueil</a></li>
+      <li><a href="reserver.html">Réserver</a></li>
+      <li><a href="mes-reservations.html" class="active">Mes Réservations</a></li>
+      <li><a href="mes-stationnements.html">Mes Stationnements</a></li>
+      <li><a href="abonnement.html">Abonnements</a></li>
+    </ul>
+    <div class="nav-right">
+      <span class="user-info">
+        <span class="user-avatar">👤</span>
+        <span class="user-name" id="nav-user-name">Utilisateur</span>
+      </span>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </nav>
 
     <main class="container">
         <h1>📅 Mes Réservations</h1>
@@ -65,16 +79,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             const user = api.getCurrentUser();
             if (!user) {
-                window.location.href = 'connexion.html';
+                window.location.href = 'index.html';
                 return;
             }
-            document.getElementById('user-name').textContent = user.name || user.email;
+            const displayName = user.name || user.forename || user.email;
+            document.getElementById('user-name').textContent = displayName;
+            const navName = document.getElementById('nav-user-name');
+            if (navName) navName.textContent = displayName;
             loadReservations();
         });
 
         function logout() {
             api.logout();
-            window.location.href = 'connexion.html';
+            window.location.href = 'index.html';
         }
 
         async function loadReservations() {

@@ -43,6 +43,7 @@ class DTOSecurityAnalyzer {
         'SubscribeToSubscriptionDTO' => 'backend/Infrastructure/Controller/SubscriptionController.php',
         'GetParkingSubscriptionsDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
         'AddSubscriptionTypeDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
+        'GetUserSubscriptionsDTO' => 'backend/Infrastructure/Controller/UserDataController.php',
         
         // Owner Analytics
         'GetParkingRevenueDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',

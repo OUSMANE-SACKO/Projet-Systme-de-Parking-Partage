@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../../Application/DTO/GetUserReservationsDTO.php';
 require_once __DIR__ . '/../../Application/DTO/GetUserSessionsDTO.php';
 require_once __DIR__ . '/../../Application/DTO/GetReservationInvoiceDTO.php';
+require_once __DIR__ . '/../../Application/DTO/GetUserSubscriptionsDTO.php';
 
 class UserDataController {
     private PDO $pdo;
@@ -157,5 +158,42 @@ class UserDataController {
             <hr>
             <h2 style='text-align: right;'>Total: {$invoice['amount']} {$invoice['currency']}</h2>
         </div>";
+    }
+
+    public function getUserSubscriptions(GetUserSubscriptionsDTO $dto): array {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT us.*, st.name as type_name, st.description, st.monthly_price,
+                       st.duration_months, p.name as parking_name, p.address as parking_address
+                FROM user_subscriptions us
+                JOIN subscription_types st ON us.subscription_type_id = st.id
+                JOIN parkings p ON st.parking_id = p.id
+                WHERE us.user_id = ?
+                ORDER BY us.start_date DESC
+            ");
+            $stmt->execute([$dto->userId]);
+            $subscriptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return [
+                'success' => true,
+                'subscriptions' => array_map(function($s) {
+                    return [
+                        'id' => $s['id'],
+                        'typeName' => $s['type_name'],
+                        'description' => $s['description'],
+                        'monthlyPrice' => $s['monthly_price'],
+                        'durationMonths' => $s['duration_months'],
+                        'parkingName' => $s['parking_name'],
+                        'parkingAddress' => $s['parking_address'],
+                        'startDate' => $s['start_date'],
+                        'endDate' => $s['end_date'],
+                        'status' => $s['status']
+                    ];
+                }, $subscriptions),
+                'count' => count($subscriptions)
+            ];
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
     }
 }

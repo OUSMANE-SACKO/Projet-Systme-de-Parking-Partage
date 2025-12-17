@@ -15,7 +15,7 @@ RewriteRule ^ - [L]
 
 # Rediriger les fichiers statiques du frontend
 RewriteRule ^(styles\.css|app\.js|api\.js)$ frontend/$1 [L]
-RewriteRule ^(connexion|register|tarifs|dashboard|reserver|abonnement)\.html$ frontend/$1.html [L]
+RewriteRule ^(connexion|register|tarifs|dashboard|reserver|abonnement|mes-reservations|mes-stationnements)\.html$ frontend/$1.html [L]
 
 # Routes API vers le backend
 RewriteRule ^api/(.*)$ backend/Infrastructure/Controller/$1 [L,QSA]

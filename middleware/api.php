@@ -39,6 +39,7 @@ require_once __DIR__ . '/../backend/Application/DTO/UpdateParkingPricingDTO.php'
 require_once __DIR__ . '/../backend/Application/DTO/SearchParkingsDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/GetUserReservationsDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/GetUserSessionsDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetUserSubscriptionsDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/GetReservationInvoiceDTO.php';
 
 // Charger les DTOs de réponse
@@ -192,6 +193,9 @@ class ApiHandler {
             // Abonnements
             case 'SubscribeToSubscriptionDTO':
                 return SubscribeToSubscriptionDTO::fromArray($data);
+
+            case 'GetUserSubscriptionsDTO':
+                return GetUserSubscriptionsDTO::fromArray($data);
 
             // Analytics propriétaire
             case 'GetParkingAvailabilityDTO':

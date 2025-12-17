@@ -1,120 +1,66 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaxawCar - Inscription Propriétaire</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaxawCar - Inscription Propriétaire</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <header>
-        <nav>
-            <div class="logo">🅿️ TaxawCar</div>
-            <ul>
-                <li><a href="index.html">Accueil</a></li>
-                <li><a href="connexion.html">Connexion</a></li>
-                <li><a href="register.html">Inscription Client</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main class="auth-container">
-        <div class="auth-box">
-            <h1>🏢 Inscription Propriétaire</h1>
-            <p>Créez un compte pour gérer vos parkings</p>
-
-            <form id="owner-register-form" onsubmit="handleOwnerRegister(event)">
-                <div class="form-group">
-                    <label for="name">Nom</label>
-                    <input type="text" id="name" name="name" required placeholder="Votre nom">
-                </div>
-                
-                <div class="form-group">
-                    <label for="forename">Prénom</label>
-                    <input type="text" id="forename" name="forename" required placeholder="Votre prénom">
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required placeholder="votre@email.com">
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Mot de passe</label>
-                    <input type="password" id="password" name="password" required minlength="6" placeholder="Au moins 6 caractères">
-                </div>
-                
-                <div class="form-group">
-                    <label for="password-confirm">Confirmer le mot de passe</label>
-                    <input type="password" id="password-confirm" required minlength="6" placeholder="Confirmez le mot de passe">
-                </div>
-
-                <div id="error-message" class="error-message" style="display:none;"></div>
-                <div id="success-message" class="success-message" style="display:none;"></div>
-
-                <button type="submit" class="btn-primary btn-full">Créer mon compte propriétaire</button>
-            </form>
-
-            <div class="auth-links">
-                <p>Déjà inscrit ? <a href="connexion.html">Se connecter</a></p>
-                <p>Vous êtes un client ? <a href="register.html">Inscription client</a></p>
-            </div>
+<body class="auth-body">
+  <div class="auth-container">
+    <div class="auth-left">
+      <div class="auth-brand">
+        <span class="logo-icon">
+          <svg width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="20,5 35,13 35,27 20,35 5,27 5,13" fill="#8e24aa"/>
+            <circle cx="20" cy="20" r="7" fill="#fff" fill-opacity="0.92"/>
+            <circle cx="20" cy="20" r="3.5" fill="#8e24aa"/>
+          </svg>
+        </span>
+        <span class="auth-brand-name">TaxawCar</span>
+      </div>
+      <h1 class="auth-title">Inscription Propriétaire</h1>
+      <p class="auth-subtitle">Créez un compte pour gérer vos parkings</p>
+      
+      <form class="auth-form" id="owner-register-form" method="POST" autocomplete="on">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nom">Nom</label>
+            <input type="text" id="nom" name="nom" placeholder="Votre nom" required>
+          </div>
+          <div class="form-group">
+            <label for="prenom">Prénom</label>
+            <input type="text" id="prenom" name="prenom" placeholder="Votre prénom" required>
+          </div>
         </div>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 TaxawCar - Système de parking partagé</p>
-    </footer>
-
-    <script src="api.js"></script>
-    <script>
-        async function handleOwnerRegister(event) {
-            event.preventDefault();
-            
-            const name = document.getElementById('name').value.trim();
-            const forename = document.getElementById('forename').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const passwordConfirm = document.getElementById('password-confirm').value;
-            
-            const errorDiv = document.getElementById('error-message');
-            const successDiv = document.getElementById('success-message');
-            
-            errorDiv.style.display = 'none';
-            successDiv.style.display = 'none';
-            
-            // Validation
-            if (password !== passwordConfirm) {
-                errorDiv.textContent = 'Les mots de passe ne correspondent pas.';
-                errorDiv.style.display = 'block';
-                return;
-            }
-            
-            if (password.length < 6) {
-                errorDiv.textContent = 'Le mot de passe doit contenir au moins 6 caractères.';
-                errorDiv.style.display = 'block';
-                return;
-            }
-            
-            try {
-                const result = await api.registerOwner(name, forename, email, password);
-                
-                if (result.success) {
-                    successDiv.textContent = 'Compte propriétaire créé avec succès ! Redirection vers la connexion...';
-                    successDiv.style.display = 'block';
-                    
-                    setTimeout(() => {
-                        window.location.href = 'connexion.html';
-                    }, 2000);
-                } else {
-                    errorDiv.textContent = result.error || result.message || 'Erreur lors de l\'inscription.';
-                    errorDiv.style.display = 'block';
-                }
-            } catch (error) {
-                errorDiv.textContent = 'Erreur de connexion au serveur.';
-                errorDiv.style.display = 'block';
-            }
-        }
-    </script>
+        <div class="form-group">
+          <label for="email">Adresse e-mail</label>
+          <input type="email" id="email" name="email" placeholder="votre@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label for="password2">Confirmer le mot de passe</label>
+          <input type="password" id="password2" name="password2" placeholder="••••••••" required minlength="6">
+        </div>
+        <div id="form-errors" class="form-errors"></div>
+        <button type="submit" class="auth-btn">Créer mon compte propriétaire</button>
+        <p class="auth-link">Déjà inscrit ? <a href="index.html">Se connecter</a></p>
+        <p class="auth-link">Vous êtes un client ? <a href="register.html">Inscription client</a></p>
+      </form>
+    </div>
+    <div class="auth-right">
+      <div class="auth-visual">
+        <div class="auth-visual-content">
+          <h2>Gérez vos parkings</h2>
+          <p>Ajoutez vos places de parking, gérez les réservations et suivez vos revenus en temps réel.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

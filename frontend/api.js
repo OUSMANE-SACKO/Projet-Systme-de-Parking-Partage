@@ -148,6 +148,11 @@ const api = {
     return await this.send('GetParkingSubscriptionsDTO', { parkingId });
   },
 
+  async getUserSubscriptions() {
+    const user = this.getCurrentUser();
+    return await this.send('GetUserSubscriptionsDTO', { userId: user?.id });
+  },
+
   async subscribe(subscriptionTypeId) {
     const user = this.getCurrentUser();
     return await this.send('SubscribeToSubscriptionDTO', { 

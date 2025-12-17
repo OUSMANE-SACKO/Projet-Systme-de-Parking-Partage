@@ -7,16 +7,28 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="logo">🅿️ TaxawCar</div>
-            <ul>
-                <li><a href="index.html">Accueil</a></li>
-                <li><a href="owner-dashboard.html" class="active">Mon Espace</a></li>
-                <li><a href="#" onclick="logout()">Déconnexion</a></li>
-            </ul>
-        </nav>
-    </header>
+  <nav class="navbar-rounded">
+    <div class="nav-left">
+      <span class="logo-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="20,5 35,13 35,27 20,35 5,27 5,13" fill="#8e24aa"/>
+          <circle cx="20" cy="20" r="7" fill="#fff" fill-opacity="0.92"/>
+          <circle cx="20" cy="20" r="3.5" fill="#8e24aa"/>
+        </svg>
+      </span>
+      <span class="logo-text">TaxawCar</span>
+    </div>
+    <ul class="nav-center">
+      <li><a href="owner-dashboard.html" class="active">Mon Espace</a></li>
+    </ul>
+    <div class="nav-right">
+      <span class="user-info">
+        <span class="user-avatar">👤</span>
+        <span class="user-name" id="owner-nav-name">Propriétaire</span>
+      </span>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </nav>
 
     <main class="dashboard-container">
         <h1>🏢 Tableau de bord propriétaire</h1>
@@ -208,10 +220,13 @@
         document.addEventListener('DOMContentLoaded', () => {
             const user = api.getCurrentUser();
             if (!user) {
-                window.location.href = 'connexion.html';
+                window.location.href = 'index.html';
                 return;
             }
-            document.getElementById('owner-name').textContent = user.name || user.email;
+            const displayName = user.name || user.forename || user.email;
+            document.getElementById('owner-name').textContent = displayName;
+            const navName = document.getElementById('owner-nav-name');
+            if (navName) navName.textContent = displayName;
             loadMyParkings();
             
             // Définir le mois courant
@@ -220,7 +235,7 @@
 
         function logout() {
             api.logout();
-            window.location.href = 'connexion.html';
+            window.location.href = 'index.html';
         }
 
         // ====== GESTION DES PARKINGS ======
