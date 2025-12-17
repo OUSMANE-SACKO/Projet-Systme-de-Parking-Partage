@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxawCar - Mes Stationnements</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🅿️ TaxawCar</div>
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="mes-reservations.html">Mes Réservations</a></li>
+                <li><a href="mes-stationnements.html" class="active">Mes Stationnements</a></li>
+                <li><a href="#" onclick="logout()">Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1>🚗 Mes Stationnements</h1>
+        
+        <div id="user-info" class="info-card">
+            <p>Bienvenue, <span id="user-name">Utilisateur</span></p>
+        </div>
+
+        <!-- Section Stationnement en cours -->
+        <section id="active-session" class="active-session-section" style="display:none;">
+            <h2>🟢 Stationnement en cours</h2>
+            <div id="active-session-card" class="session-active-card"></div>
+        </section>
+
+        <!-- Section Entrer/Sortir d'un parking -->
+        <section class="parking-action-section">
+            <h2>📍 Entrer ou Sortir d'un parking</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Parking</label>
+                    <select id="parking-select">
+                        <option value="">Sélectionner un parking</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Plaque d'immatriculation</label>
+                    <input type="text" id="vehicle-plate" placeholder="AA-123-BB">
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn-success" onclick="enterParking()">🚗 Entrer</button>
+                <button class="btn-danger" onclick="exitParking()">🚪 Sortir</button>
+            </div>
+            <div id="action-message" class="message" style="display:none;"></div>
+        </section>
+
+        <!-- Historique des stationnements -->
+        <section class="sessions-section">
+            <h2>📜 Historique des stationnements</h2>
+            
+            <div class="filters">
+                <label>
+                    <input type="checkbox" id="show-active-only" onchange="filterSessions()">
+                    Afficher uniquement les stationnements actifs
+                </label>
+            </div>
+
+            <div id="sessions-list" class="sessions-grid">
+                <p>Chargement...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 TaxawCar - Système de parking partagé</p>
+    </footer>
+
+    <script src="api.js"></script>
+    <script>
+        let allSessions = [];
+        let parkings = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = api.getCurrentUser();
+            if (!user) {
+                window.location.href = 'connexion.html';
+                return;
+            }
+            document.getElementById('user-name').textContent = user.name || user.email;
+            loadParkings();
+            loadSessions();
+        });
+
+        function logout() {
+            api.logout();
+            window.location.href = 'connexion.html';
+        }
+
+        async function loadParkings() {
+            const result = await api.getParkings();
+            if (result.success && result.parkings) {
+                parkings = result.parkings;
+                const select = document.getElementById('parking-select');
+                parkings.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = p.id;
+                    option.textContent = `${p.name} - ${p.city}`;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        async function loadSessions() {
+            const container = document.getElementById('sessions-list');
+            
+            try {
+                const result = await api.getUserSessions();
+                
+                if (!result.success) {
+                    container.innerHTML = `<p class="error">Erreur: ${result.error || result.message}</p>`;
+                    return;
+                }
+                
+                allSessions = result.sessions || [];
+                displaySessions(allSessions);
+                
+                // Afficher le stationnement actif s'il existe
+                const activeSession = allSessions.find(s => s.isActive);
+                if (activeSession) {
+                    showActiveSession(activeSession);
+                }
+                
+            } catch (error) {
+                container.innerHTML = '<p class="error">Erreur de connexion au serveur.</p>';
+            }
+        }
+
+        function filterSessions() {
+            const showActiveOnly = document.getElementById('show-active-only').checked;
+            
+            if (showActiveOnly) {
+                const filtered = allSessions.filter(s => s.isActive);
+                displaySessions(filtered);
+            } else {
+                displaySessions(allSessions);
+            }
+        }
+
+        function displaySessions(sessions) {
+            const container = document.getElementById('sessions-list');
+            
+            if (!sessions.length) {
+                container.innerHTML = '<p>Aucun stationnement trouvé.</p>';
+                return;
+            }
+            
+            container.innerHTML = sessions.map(s => `
+                <div class="session-card ${s.isActive ? 'active' : ''}">
+                    <div class="session-header">
+                        <h3>${s.parkingName || 'Parking'}</h3>
+                        <span class="status-badge ${s.isActive ? 'active' : 'completed'}">
+                            ${s.isActive ? '🟢 En cours' : '✅ Terminé'}
+                        </span>
+                    </div>
+                    <p class="session-address">📍 ${s.parkingAddress || 'Adresse non disponible'}</p>
+                    <div class="session-times">
+                        <p><strong>Entrée:</strong> ${formatDate(s.entryTime)}</p>
+                        <p><strong>Sortie:</strong> ${s.exitTime ? formatDate(s.exitTime) : '-'}</p>
+                    </div>
+                    ${s.isActive ? `
+                        <div class="session-duration">
+                            <p>Durée: <span class="duration">${calculateDuration(s.entryTime)}</span></p>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function showActiveSession(session) {
+            const section = document.getElementById('active-session');
+            const card = document.getElementById('active-session-card');
+            
+            section.style.display = 'block';
+            card.innerHTML = `
+                <h3>🅿️ ${session.parkingName || 'Parking'}</h3>
+                <p>📍 ${session.parkingAddress || ''}</p>
+                <p><strong>Entrée:</strong> ${formatDate(session.entryTime)}</p>
+                <p class="duration-live">Durée: <span id="live-duration">${calculateDuration(session.entryTime)}</span></p>
+                <button class="btn-danger" onclick="exitFromActive('${session.parkingId}')">🚪 Sortir maintenant</button>
+            `;
+            
+            // Mettre à jour la durée toutes les secondes
+            setInterval(() => {
+                const durationEl = document.getElementById('live-duration');
+                if (durationEl) {
+                    durationEl.textContent = calculateDuration(session.entryTime);
+                }
+            }, 1000);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            return new Date(dateStr).toLocaleString('fr-FR', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function calculateDuration(startTime) {
+            const start = new Date(startTime);
+            const now = new Date();
+            const diffMs = now - start;
+            
+            const hours = Math.floor(diffMs / (1000 * 60 * 60));
+            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}min`;
+            } else if (minutes > 0) {
+                return `${minutes}min ${seconds}s`;
+            } else {
+                return `${seconds}s`;
+            }
+        }
+
+        async function enterParking() {
+            const parkingId = document.getElementById('parking-select').value;
+            const vehiclePlate = document.getElementById('vehicle-plate').value.trim();
+            const messageDiv = document.getElementById('action-message');
+            
+            if (!parkingId) {
+                showMessage('Veuillez sélectionner un parking.', 'error');
+                return;
+            }
+            if (!vehiclePlate) {
+                showMessage('Veuillez entrer votre plaque d\'immatriculation.', 'error');
+                return;
+            }
+            
+            try {
+                const result = await api.enterParking(parkingId, vehiclePlate);
+                
+                if (result.success) {
+                    showMessage('✅ Vous êtes entré dans le parking !', 'success');
+                    loadSessions();
+                } else {
+                    showMessage(`❌ Erreur: ${result.error || result.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Erreur de connexion.', 'error');
+            }
+        }
+
+        async function exitParking() {
+            const parkingId = document.getElementById('parking-select').value;
+            const vehiclePlate = document.getElementById('vehicle-plate').value.trim();
+            
+            if (!parkingId) {
+                showMessage('Veuillez sélectionner un parking.', 'error');
+                return;
+            }
+            if (!vehiclePlate) {
+                showMessage('Veuillez entrer votre plaque d\'immatriculation.', 'error');
+                return;
+            }
+            
+            try {
+                const result = await api.exitParking(parkingId, vehiclePlate);
+                
+                if (result.success) {
+                    showMessage('✅ Vous êtes sorti du parking !', 'success');
+                    document.getElementById('active-session').style.display = 'none';
+                    loadSessions();
+                } else {
+                    showMessage(`❌ Erreur: ${result.error || result.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage('❌ Erreur de connexion.', 'error');
+            }
+        }
+
+        async function exitFromActive(parkingId) {
+            // Récupérer la plaque depuis la session active
+            const activeSession = allSessions.find(s => s.isActive && s.parkingId == parkingId);
+            const vehiclePlate = document.getElementById('vehicle-plate').value.trim() || 'AUTO';
+            
+            document.getElementById('parking-select').value = parkingId;
+            await exitParking();
+        }
+
+        function showMessage(message, type) {
+            const div = document.getElementById('action-message');
+            div.textContent = message;
+            div.className = `message ${type}`;
+            div.style.display = 'block';
+            
+            setTimeout(() => {
+                div.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

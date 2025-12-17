@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxawCar - Mes Réservations</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🅿️ TaxawCar</div>
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="mes-reservations.html" class="active">Mes Réservations</a></li>
+                <li><a href="mes-stationnements.html">Mes Stationnements</a></li>
+                <li><a href="#" onclick="logout()">Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1>📅 Mes Réservations</h1>
+        
+        <div id="user-info" class="info-card">
+            <p>Bienvenue, <span id="user-name">Utilisateur</span></p>
+        </div>
+
+        <section class="reservations-section">
+            <div class="filters">
+                <select id="status-filter" onchange="filterReservations()">
+                    <option value="all">Toutes les réservations</option>
+                    <option value="active">En cours</option>
+                    <option value="pending">À venir</option>
+                    <option value="completed">Terminées</option>
+                    <option value="cancelled">Annulées</option>
+                </select>
+            </div>
+
+            <div id="reservations-list" class="reservations-grid">
+                <p>Chargement...</p>
+            </div>
+        </section>
+
+        <!-- Modal Facture -->
+        <div id="invoice-modal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeInvoiceModal()">&times;</span>
+                <h2>📄 Facture</h2>
+                <div id="invoice-content"></div>
+                <button class="btn-primary" onclick="printInvoice()">🖨️ Imprimer</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 TaxawCar - Système de parking partagé</p>
+    </footer>
+
+    <script src="api.js"></script>
+    <script>
+        let allReservations = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = api.getCurrentUser();
+            if (!user) {
+                window.location.href = 'connexion.html';
+                return;
+            }
+            document.getElementById('user-name').textContent = user.name || user.email;
+            loadReservations();
+        });
+
+        function logout() {
+            api.logout();
+            window.location.href = 'connexion.html';
+        }
+
+        async function loadReservations() {
+            const container = document.getElementById('reservations-list');
+            
+            try {
+                const result = await api.getUserReservations();
+                
+                if (!result.success) {
+                    container.innerHTML = `<p class="error">Erreur: ${result.error || result.message}</p>`;
+                    return;
+                }
+                
+                allReservations = result.reservations || [];
+                displayReservations(allReservations);
+                
+            } catch (error) {
+                container.innerHTML = '<p class="error">Erreur de connexion au serveur.</p>';
+            }
+        }
+
+        function filterReservations() {
+            const filter = document.getElementById('status-filter').value;
+            
+            if (filter === 'all') {
+                displayReservations(allReservations);
+            } else {
+                const filtered = allReservations.filter(r => r.status === filter);
+                displayReservations(filtered);
+            }
+        }
+
+        function displayReservations(reservations) {
+            const container = document.getElementById('reservations-list');
+            
+            if (!reservations.length) {
+                container.innerHTML = '<p>Aucune réservation trouvée.</p>';
+                return;
+            }
+            
+            container.innerHTML = reservations.map(r => `
+                <div class="reservation-card status-${r.status}">
+                    <div class="reservation-header">
+                        <h3>${r.parkingName || 'Parking'}</h3>
+                        <span class="status-badge ${r.status}">${getStatusLabel(r.status)}</span>
+                    </div>
+                    <p class="reservation-address">📍 ${r.parkingAddress || 'Adresse non disponible'}</p>
+                    <div class="reservation-times">
+                        <p><strong>Début:</strong> ${formatDate(r.startTime)}</p>
+                        <p><strong>Fin:</strong> ${formatDate(r.endTime)}</p>
+                    </div>
+                    <div class="reservation-price">
+                        <span class="price">${r.totalPrice || '0.00'}€</span>
+                    </div>
+                    <div class="reservation-actions">
+                        <button class="btn-secondary" onclick="showInvoice('${r.id}')">📄 Facture</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'pending': '⏳ À venir',
+                'active': '🟢 En cours',
+                'completed': '✅ Terminée',
+                'cancelled': '❌ Annulée',
+                'past': '📜 Passée'
+            };
+            return labels[status] || status;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            return new Date(dateStr).toLocaleString('fr-FR', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        async function showInvoice(reservationId) {
+            const modal = document.getElementById('invoice-modal');
+            const content = document.getElementById('invoice-content');
+            
+            content.innerHTML = '<p>Chargement de la facture...</p>';
+            modal.style.display = 'flex';
+            
+            try {
+                const result = await api.getReservationInvoice(reservationId, 'html');
+                
+                if (result.success) {
+                    content.innerHTML = result.html || generateInvoiceHtml(result.invoice);
+                } else {
+                    content.innerHTML = `<p class="error">Erreur: ${result.error || result.message}</p>`;
+                }
+            } catch (error) {
+                content.innerHTML = '<p class="error">Erreur lors du chargement de la facture.</p>';
+            }
+        }
+
+        function generateInvoiceHtml(invoice) {
+            if (!invoice) return '<p>Facture non disponible</p>';
+            
+            return `
+                <div class="invoice">
+                    <h3>Facture ${invoice.invoiceNumber}</h3>
+                    <p>Date: ${invoice.date}</p>
+                    <hr>
+                    <h4>Client</h4>
+                    <p>${invoice.customer?.name}<br>${invoice.customer?.email}</p>
+                    <h4>Parking</h4>
+                    <p>${invoice.parking?.name}<br>${invoice.parking?.address}</p>
+                    <h4>Détails</h4>
+                    <p>Du: ${invoice.reservation?.startTime}<br>
+                       Au: ${invoice.reservation?.endTime}<br>
+                       Durée: ${invoice.reservation?.duration}</p>
+                    <hr>
+                    <h3 class="total">Total: ${invoice.amount} ${invoice.currency}</h3>
+                </div>
+            `;
+        }
+
+        function closeInvoiceModal() {
+            document.getElementById('invoice-modal').style.display = 'none';
+        }
+
+        function printInvoice() {
+            const content = document.getElementById('invoice-content').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head><title>Facture TaxawCar</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    h1, h2, h3 { color: #8e24aa; }
+                    hr { border: 1px solid #ddd; margin: 15px 0; }
+                    .total { text-align: right; font-size: 1.5em; }
+                </style>
+                </head>
+                <body>${content}</body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Fermer le modal en cliquant en dehors
+        window.onclick = function(event) {
+            const modal = document.getElementById('invoice-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1299,3 +1299,442 @@ footer {
   .map-container { height: 260px; }
   .gmap-search-bar { width: 98vw; max-width: 98vw; }
 }
+
+/* ========== DASHBOARD OWNER ========== */
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.dashboard-section {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.parkings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.parking-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+  border: 2px solid #e3e3e3;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.parking-card:hover {
+  border-color: #8e24aa;
+  box-shadow: 0 8px 30px rgba(142, 36, 170, 0.15);
+  transform: translateY(-4px);
+}
+
+.parking-card h3 {
+  color: #8e24aa;
+  margin: 0 0 0.5rem 0;
+}
+
+/* ========== TABS ========== */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e3e3e3;
+  padding-bottom: 0.5rem;
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  color: #666;
+}
+
+.tab:hover {
+  background: #f0f0f0;
+}
+
+.tab.active {
+  background: #8e24aa;
+  color: #fff;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* ========== TABLES ========== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+table th, table td {
+  padding: 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid #e3e3e3;
+}
+
+table th {
+  background: #f8f9fa;
+  color: #8e24aa;
+  font-weight: 600;
+}
+
+table tr:hover {
+  background: #fafbfc;
+}
+
+/* ========== STATUS BADGES ========== */
+.status-badge {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-badge.pending, .status-pending {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.status-badge.active, .status-active {
+  background: #e8f5e9;
+  color: #43a047;
+}
+
+.status-badge.completed, .status-completed {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.status-badge.cancelled, .status-cancelled {
+  background: #ffebee;
+  color: #e53935;
+}
+
+/* ========== RESERVATIONS & SESSIONS GRID ========== */
+.reservations-grid, .sessions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.reservation-card, .session-card {
+  background: #fff;
+  border: 2px solid #e3e3e3;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s;
+}
+
+.reservation-card:hover, .session-card:hover {
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.reservation-header, .session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.reservation-header h3, .session-header h3 {
+  margin: 0;
+  color: #181828;
+}
+
+.reservation-address, .session-address {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.reservation-times, .session-times {
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.reservation-price {
+  margin-top: 1rem;
+  text-align: right;
+}
+
+.reservation-price .price {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #8e24aa;
+}
+
+.reservation-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.session-card.active {
+  border-color: #43a047;
+  background: linear-gradient(135deg, #e8f5e9 0%, #fff 100%);
+}
+
+/* ========== ACTIVE SESSION ========== */
+.active-session-section {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.session-active-card {
+  background: #fff;
+  border-radius: 0.8rem;
+  padding: 1.5rem;
+}
+
+.duration-live {
+  font-size: 1.2rem;
+  color: #43a047;
+  font-weight: 600;
+}
+
+/* ========== AVAILABILITY ========== */
+.availability-card {
+  background: #f8f9fa;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.availability-bar {
+  height: 20px;
+  background: #e3e3e3;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.availability-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #43a047, #66bb6a);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+/* ========== REVENUE ========== */
+.revenue-card {
+  background: linear-gradient(135deg, #8e24aa 0%, #ab47bc 100%);
+  color: #fff;
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.revenue-amount {
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 1rem 0;
+}
+
+/* ========== SUBSCRIPTION TYPES ========== */
+.subscription-type-card {
+  background: #fff;
+  border: 2px solid #e3e3e3;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.subscription-type-card h4 {
+  color: #8e24aa;
+  margin: 0 0 0.5rem 0;
+}
+
+/* ========== PRICING TIERS ========== */
+.pricing-tier {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.pricing-tier input {
+  width: 80px;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 0.3rem;
+}
+
+/* ========== WARNING ROWS ========== */
+.warning-row {
+  background: #fff3e0 !important;
+}
+
+/* ========== MODAL ========== */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.close-btn:hover {
+  color: #8e24aa;
+}
+
+/* ========== BUTTONS ========== */
+.btn-success {
+  background: linear-gradient(135deg, #43a047, #66bb6a);
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(67, 160, 71, 0.3);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #e53935, #ef5350);
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* ========== MESSAGES ========== */
+.message {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.message.success {
+  background: #e8f5e9;
+  color: #43a047;
+  border: 1px solid #a5d6a7;
+}
+
+.message.error {
+  background: #ffebee;
+  color: #e53935;
+  border: 1px solid #ef9a9a;
+}
+
+/* ========== FILTERS ========== */
+.filters {
+  margin-bottom: 1rem;
+}
+
+.filters select {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e3e3e3;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+/* ========== INFO CARD ========== */
+.info-card {
+  background: linear-gradient(135deg, #8e24aa 0%, #ab47bc 100%);
+  color: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.info-card h3 {
+  margin: 0;
+}
+
+/* ========== INVOICE ========== */
+.invoice {
+  font-family: Arial, sans-serif;
+}
+
+.invoice h3, .invoice h4 {
+  color: #8e24aa;
+}
+
+.invoice hr {
+  border: 1px solid #ddd;
+  margin: 15px 0;
+}
+
+.invoice .total {
+  text-align: right;
+  font-size: 1.5em;
+}
+
+/* ========== CONTAINER ========== */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
