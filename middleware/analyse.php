@@ -19,6 +19,7 @@ class DTOSecurityAnalyzer {
         'RegisterOwnerDTO' => 'backend/Infrastructure/Controller/OwnerController.php',
         'AuthenticateUserDTO' => 'backend/Infrastructure/Controller/AuthController.php',
         'AddParkingDTO' => 'backend/Infrastructure/Controller/ParkingController.php',
+        'GetParkingsDTO' => 'backend/Infrastructure/Controller/ParkingListController.php',
         'ReserveParkingDTO' => 'backend/Infrastructure/Controller/ReservationController.php',
         'EnterExitParkingDTO' => 'backend/Infrastructure/Controller/ParkingSpaceController.php',
         'SubscribeToSubscriptionDTO' => 'backend/Infrastructure/Controller/SubscriptionController.php',

@@ -6,9 +6,6 @@ const Auth = {
   async login(email, password) {
     if (!email || !password) return { success: false, error: 'Email et mot de passe requis' };
     const result = await api.login(email, password);
-    if (result.success && !result.data?.token) {
-      localStorage.setItem('user', JSON.stringify(result.data?.user || { email }));
-    }
     return result;
   },
 
@@ -16,9 +13,6 @@ const Auth = {
     const { nom, prenom, email, password } = data;
     if (!nom || !prenom || !email || !password) return { success: false, error: 'Tous les champs sont requis' };
     const result = await api.register(nom, prenom, email, password);
-    if (result.success && !result.data?.token) {
-      localStorage.setItem('user', JSON.stringify(result.data?.user || { email, name: nom, forename: prenom }));
-    }
     return result;
   },
 
@@ -140,20 +134,22 @@ if (protectedPages.includes(currentPage)) {
 }
 
 // ========== PARKINGS ==========
-const parkings = [
-  { id: 1, name: 'Parking Indigo - Place Vendôme', lat: 48.867, lng: 2.329, address: '18 Place Vendôme, 75001 Paris', price: 3.50 },
-  { id: 2, name: 'Parking Saemes - Notre-Dame', lat: 48.852, lng: 2.349, address: 'Parvis Notre-Dame, 75004 Paris', price: 2.80 },
-  { id: 3, name: 'Parking Indigo - Bercy', lat: 48.838, lng: 2.384, address: '20 Rue de Bercy, 75012 Paris', price: 2.50 },
-  { id: 4, name: 'Parking Vinci - Gare de Lyon', lat: 48.844, lng: 2.373, address: 'Place Louis-Armand, 75012 Paris', price: 3.20 },
-  { id: 5, name: 'Parking Indigo - Champs-Élysées', lat: 48.870, lng: 2.307, address: '18 Avenue des Champs-Élysées, 75008 Paris', price: 4.00 }
-];
+let parkings = []; // Sera chargé depuis l'API
+
+async function loadParkings() {
+  const result = await api.getParkings();
+  if (result.success && result.parkings) {
+    parkings = result.parkings;
+  }
+  return parkings;
+}
 
 // ========== GOOGLE MAPS ==========
 if (document.getElementById('gmap')) {
-  window.initMap = function() {
+  window.initMap = async function() {
     const map = new google.maps.Map(document.getElementById('gmap'), {
       center: { lat: 48.8566, lng: 2.3522 },
-      zoom: 13,
+      zoom: 6, // Zoom plus large pour voir toute la France
       styles: [
         { elementType: 'geometry', stylers: [{ color: '#181828' }] },
         { elementType: 'labels.text.fill', stylers: [{ color: '#ffffff' }] },
@@ -162,6 +158,9 @@ if (document.getElementById('gmap')) {
         { featureType: 'poi', stylers: [{ visibility: 'off' }] }
       ]
     });
+
+    // Charger les parkings depuis l'API
+    await loadParkings();
 
     parkings.forEach(p => {
       const marker = new google.maps.Marker({

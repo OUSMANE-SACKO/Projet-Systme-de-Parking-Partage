@@ -79,11 +79,27 @@
         }
 
         private function hydrate(array $row): User {
-            if ($row['user_type'] === 'customer') {
-                return new Customer($row['name'], $row['forename'], $row['email'], $row['password_hash']);
+            // Mapper les colonnes de la BDD vers les propriétés de l'entité
+            $name = $row['last_name'] ?? '';
+            $forename = $row['first_name'] ?? '';
+            $email = $row['email'] ?? '';
+            $passwordHash = $row['password'] ?? '';
+            $id = $row['id'] ?? null;
+            
+            // Déterminer le type d'utilisateur (par défaut Customer)
+            $userType = $row['user_type'] ?? 'customer';
+            
+            if ($userType === 'owner') {
+                $user = new Owner($name, $forename, $email, $passwordHash);
             } else {
-                return new Owner($row['name'], $row['forename'], $row['email'], $row['password_hash']);
+                $user = new Customer($name, $forename, $email, $passwordHash);
             }
+            
+            if ($id !== null) {
+                $user->setId((int)$id);
+            }
+            
+            return $user;
         }
     }
 ?>

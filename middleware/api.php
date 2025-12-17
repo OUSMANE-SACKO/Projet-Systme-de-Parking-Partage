@@ -25,6 +25,7 @@ require_once __DIR__ . '/../backend/Application/DTO/ReserveParkingDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/EnterExitParkingDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/SubscribeToSubscriptionDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/AddParkingDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetParkingsDTO.php';
 
 // Charger les DTOs de réponse
 require_once __DIR__ . '/../backend/Application/DTO/Response/AuthResponseDTO.php';
@@ -136,6 +137,9 @@ class ApiHandler {
 
             case 'AddParkingDTO':
                 return AddParkingDTO::fromArray($data);
+
+            case 'GetParkingsDTO':
+                return GetParkingsDTO::fromArray($data);
 
             default:
                 return null;

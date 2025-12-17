@@ -18,7 +18,11 @@ const api = {
       });
 
       const result = await response.json();
-      return response.ok ? { success: true, data: result } : { success: false, error: result.message || 'Erreur serveur' };
+      // Le serveur renvoie { success, data: { ... } } - on aplatit la réponse
+      if (response.ok && result.success) {
+        return { success: true, ...result.data };
+      }
+      return { success: false, error: result.message || result.data?.message || 'Erreur serveur' };
     } catch (error) {
       return { success: false, error: 'Erreur de connexion' };
     }
@@ -26,19 +30,15 @@ const api = {
 
   async login(email, password) {
     const result = await this.send('AuthenticateUserDTO', { email, password });
-    if (result.success && result.data?.token) {
-      localStorage.setItem('authToken', result.data.token);
-      localStorage.setItem('user', JSON.stringify(result.data.user));
+    if (result.success && result.authenticated && result.token) {
+      localStorage.setItem('authToken', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
     }
     return result;
   },
 
   async register(name, forename, email, password) {
     const result = await this.send('RegisterCustomerDTO', { name, forename, email, password });
-    if (result.success && result.data?.token) {
-      localStorage.setItem('authToken', result.data.token);
-      localStorage.setItem('user', JSON.stringify(result.data.user));
-    }
     return result;
   },
 
@@ -58,6 +58,11 @@ const api = {
 
   async exitParking(parkingId, vehiclePlate) {
     return this.send('EnterExitParkingDTO', { parkingId, vehiclePlate, action: 'exit' });
+  },
+
+  async getParkings(city = null) {
+    const result = await this.send('GetParkingsDTO', { city });
+    return result;
   },
 
   logout() {
