@@ -4,6 +4,7 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 require_once __DIR__ . '/../../../vendor/autoload.php';
+require_once __DIR__ . '/../../../backend/Infrastructure/Database/SetupDatabase.php';
 
 class SetupDatabaseTest extends TestCase
 {
@@ -12,16 +13,11 @@ class SetupDatabaseTest extends TestCase
     protected function setUp(): void
     {
         $this->pdo = $this->createMock(PDO::class);
-        
-        // Inject mock PDO into MySQLFactory
-        $reflection = new ReflectionClass(MySQLFactory::class);
-        $property = $reflection->getProperty('instance');
-        $property->setAccessible(true);
-        $property->setValue(null, $this->pdo);
     }
 
     protected function tearDown(): void
     {
+        // Reset MySQLFactory singleton to avoid affecting other tests
         $reflection = new ReflectionClass(MySQLFactory::class);
         $property = $reflection->getProperty('instance');
         $property->setAccessible(true);
@@ -35,7 +31,7 @@ class SetupDatabaseTest extends TestCase
             ->method('exec')
             ->with($this->stringContains('CREATE TABLE'));
 
-        $setup = new SetupDatabase();
+        $setup = new SetupDatabase($this->pdo);
         
         // Capture output to avoid cluttering test output
         ob_start();
@@ -50,9 +46,10 @@ class SetupDatabaseTest extends TestCase
     {
         $this->pdo->method('exec')->willThrowException(new PDOException('Connection failed'));
 
-        $setup = new SetupDatabase();
+        $setup = new SetupDatabase($this->pdo);
         
         $this->expectException(PDOException::class);
+        $this->expectExceptionMessage('Connection failed');
         
         ob_start();
         try {

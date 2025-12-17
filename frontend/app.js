@@ -1,226 +1,274 @@
-// Animation de switch entre login et register
-const loginForm = document.getElementById('auth-form');
+// ========== AUTH ==========
+const Auth = {
+  isLoggedIn: () => localStorage.getItem('user') !== null,
+  getUser: () => JSON.parse(localStorage.getItem('user') || 'null'),
+  
+  async login(email, password) {
+    if (!email || !password) return { success: false, error: 'Email et mot de passe requis' };
+    const result = await api.login(email, password);
+    if (result.success && !result.data?.token) {
+      localStorage.setItem('user', JSON.stringify(result.data?.user || { email }));
+    }
+    return result;
+  },
+
+  async register(data) {
+    const { nom, prenom, email, password } = data;
+    if (!nom || !prenom || !email || !password) return { success: false, error: 'Tous les champs sont requis' };
+    const result = await api.register(nom, prenom, email, password);
+    if (result.success && !result.data?.token) {
+      localStorage.setItem('user', JSON.stringify(result.data?.user || { email, name: nom, forename: prenom }));
+    }
+    return result;
+  },
+
+  logout() {
+    api.logout();
+    window.location.href = 'index.html';
+  },
+
+  requireAuth() {
+    if (!this.isLoggedIn()) { window.location.href = 'index.html'; return false; }
+    return true;
+  },
+
+  redirectIfLoggedIn() {
+    if (this.isLoggedIn()) { window.location.href = 'dashboard.html'; return true; }
+    return false;
+  }
+};
+
+// ========== PAGE PROTECTION ==========
+const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+const protectedPages = ['dashboard.html', 'reserver.html', 'tarifs.html', 'abonnement.html'];
+
+if (protectedPages.includes(currentPage)) Auth.requireAuth();
+if (['index.html', 'register.html'].includes(currentPage)) Auth.redirectIfLoggedIn();
+
+// ========== FORMS ==========
+function showErrors(form, errors) {
+  let container = form.querySelector('.form-errors');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'form-errors';
+    form.insertBefore(container, form.firstChild);
+  }
+  container.innerHTML = (Array.isArray(errors) ? errors : [errors]).map(e => `<p class="error-message">${e}</p>`).join('');
+}
+
+function clearErrors(form) {
+  const container = form.querySelector('.form-errors');
+  if (container) container.innerHTML = '';
+}
+
+// Login
+const loginForm = document.getElementById('login-form');
+if (loginForm) {
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = loginForm.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Connexion...';
+    clearErrors(loginForm);
+
+    const result = await Auth.login(
+      document.getElementById('email').value,
+      document.getElementById('password').value
+    );
+
+    if (result.success) {
+      window.location.href = 'dashboard.html';
+    } else {
+      showErrors(loginForm, result.error || 'Erreur de connexion');
+      btn.disabled = false;
+      btn.textContent = 'Se connecter';
+    }
+  });
+}
+
+// Register
 const registerForm = document.getElementById('register-form');
-if (loginForm && registerForm && document.getElementById('show-register') && document.getElementById('show-login')) {
-  document.getElementById('show-register').onclick = e => {
+if (registerForm) {
+  registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    loginForm.style.display = 'none';
-    registerForm.style.display = 'block';
-    registerForm.classList.add('fade-in');
-  };
-  document.getElementById('show-login').onclick = e => {
-    e.preventDefault();
-    registerForm.style.display = 'none';
-    loginForm.style.display = 'block';
-    loginForm.classList.add('fade-in');
-  };
-  ['auth-form','register-form'].forEach(id => {
-    const el = document.getElementById(id);
-    el.addEventListener('animationend', () => el.classList.remove('fade-in'));
-  });
-  // Placeholder pour la connexion/inscription (à brancher sur l'API)
-  loginForm.onsubmit = e => {
-    e.preventDefault();
-    loginForm.querySelector('button').textContent = 'Connexion...';
-    setTimeout(() => {
-      loginForm.querySelector('button').textContent = 'Se connecter';
-      alert('Connexion simulée !');
-    }, 1200);
-  };
-  registerForm.onsubmit = e => {
-    e.preventDefault();
-    registerForm.querySelector('button').textContent = 'Inscription...';
-    setTimeout(() => {
-      registerForm.querySelector('button').textContent = 'S\'inscrire';
-      alert('Inscription simulée !');
-    }, 1200);
-  };
-}
-// Animation d'activation de lien navbar
-const navLinks = document.querySelectorAll('.nav-links a');
-if (navLinks.length) {
-  navLinks.forEach(link => {
-    link.addEventListener('click', function() {
-      navLinks.forEach(l => l.classList.remove('active'));
-      this.classList.add('active');
+    const btn = registerForm.querySelector('button[type="submit"]');
+    clearErrors(registerForm);
+
+    const password = document.getElementById('password').value;
+    if (password !== document.getElementById('password2').value) {
+      showErrors(registerForm, 'Les mots de passe ne correspondent pas');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Création...';
+
+    const result = await Auth.register({
+      nom: document.getElementById('nom').value,
+      prenom: document.getElementById('prenom').value,
+      email: document.getElementById('email').value,
+      password
     });
+
+    if (result.success) {
+      // Déconnecter pour forcer la connexion manuelle
+      localStorage.removeItem('user');
+      localStorage.removeItem('authToken');
+      alert('Compte créé avec succès ! Connectez-vous.');
+      window.location.href = 'index.html';
+    } else {
+      showErrors(registerForm, result.error || 'Erreur lors de l\'inscription');
+      btn.disabled = false;
+      btn.textContent = 'Créer mon compte';
+    }
   });
 }
-// Animation bouton CTA
-const ctaBtn = document.querySelector('.cta-btn');
-if (ctaBtn) {
-  ctaBtn.addEventListener('mouseenter', () => {
-    ctaBtn.style.boxShadow = '0 0 48px 12px #00ffe7';
-  });
-  ctaBtn.addEventListener('mouseleave', () => {
-    ctaBtn.style.boxShadow = '0 0 24px 4px #00ffe7';
-  });
+
+// Logout
+document.getElementById('logout-btn')?.addEventListener('click', () => Auth.logout());
+
+// User display
+if (protectedPages.includes(currentPage)) {
+  const user = Auth.getUser();
+  if (user) {
+    const name = user.forename || user.prenom || user.email;
+    const nameSpan = document.querySelector('#user-display .user-name');
+    if (nameSpan) nameSpan.textContent = name;
+    const welcomeName = document.getElementById('welcome-name');
+    if (welcomeName) welcomeName.textContent = name;
+  }
 }
-// (Suppression de la logique qui écrasait le HTML statique de #account-area)
-// --- Carte Google Maps centrée sur Paris ---
+
+// ========== PARKINGS ==========
 const parkings = [
-  { name: 'Parking Indigo - Place Vendôme', lat: 48.867, lng: 2.329 },
-  { name: 'Parking Saemes - Notre-Dame', lat: 48.852, lng: 2.349 },
-  { name: 'Parking Indigo - Bercy', lat: 48.838, lng: 2.384 },
-  { name: 'Parking Vinci - Gare de Lyon', lat: 48.844, lng: 2.373 },
-  { name: 'Parking Indigo - Champs-Élysées', lat: 48.870, lng: 2.307 }
+  { id: 1, name: 'Parking Indigo - Place Vendôme', lat: 48.867, lng: 2.329, address: '18 Place Vendôme, 75001 Paris', price: 3.50 },
+  { id: 2, name: 'Parking Saemes - Notre-Dame', lat: 48.852, lng: 2.349, address: 'Parvis Notre-Dame, 75004 Paris', price: 2.80 },
+  { id: 3, name: 'Parking Indigo - Bercy', lat: 48.838, lng: 2.384, address: '20 Rue de Bercy, 75012 Paris', price: 2.50 },
+  { id: 4, name: 'Parking Vinci - Gare de Lyon', lat: 48.844, lng: 2.373, address: 'Place Louis-Armand, 75012 Paris', price: 3.20 },
+  { id: 5, name: 'Parking Indigo - Champs-Élysées', lat: 48.870, lng: 2.307, address: '18 Avenue des Champs-Élysées, 75008 Paris', price: 4.00 }
 ];
+
+// ========== GOOGLE MAPS ==========
 if (document.getElementById('gmap')) {
-  function initGMap() {
-    const paris = { lat: 48.8566, lng: 2.3522 };
+  window.initMap = function() {
     const map = new google.maps.Map(document.getElementById('gmap'), {
-      center: paris,
+      center: { lat: 48.8566, lng: 2.3522 },
       zoom: 13,
-      disableDefaultUI: false,
-      mapTypeId: 'roadmap',
       styles: [
         { elementType: 'geometry', stylers: [{ color: '#181828' }] },
-        { elementType: 'labels.text.stroke', stylers: [{ color: '#181828' }] },
         { elementType: 'labels.text.fill', stylers: [{ color: '#ffffff' }] },
-        { featureType: 'poi', stylers: [{ visibility: 'off' }] },
         { featureType: 'road', stylers: [{ color: '#23233a' }] },
-        { featureType: 'water', stylers: [{ color: '#222b36' }] }
+        { featureType: 'water', stylers: [{ color: '#222b36' }] },
+        { featureType: 'poi', stylers: [{ visibility: 'off' }] }
       ]
     });
-    // Afficher les parkings
+
     parkings.forEach(p => {
-      new google.maps.Marker({
+      const marker = new google.maps.Marker({
         position: { lat: p.lat, lng: p.lng },
         map,
         title: p.name,
-        icon: {
-          url: 'https://maps.gstatic.com/mapfiles/ms2/micons/parkinglot.png',
-          scaledSize: new google.maps.Size(32, 32)
-        }
+        icon: { url: 'https://maps.gstatic.com/mapfiles/ms2/micons/parkinglot.png', scaledSize: new google.maps.Size(32, 32) }
       });
-    });
-  }
-  if (window.google && window.google.maps) {
-    initGMap();
-  } else {
-    window.initMap = initGMap;
-  }
-}
-// --- Recherche d'adresse sur Google Maps ---
-if (document.getElementById('gmap-search-btn') && document.getElementById('gmap-search-input') && document.getElementById('gmap')) {
-  const searchBtn = document.getElementById('gmap-search-btn');
-  const searchInput = document.getElementById('gmap-search-input');
-  let gmap = null;
-  function initGMap() {
-    const paris = { lat: 48.8566, lng: 2.3522 };
-    gmap = new google.maps.Map(document.getElementById('gmap'), {
-      center: paris,
-      zoom: 13,
-      disableDefaultUI: false,
-      mapTypeId: 'roadmap',
-      styles: [
-        { elementType: 'geometry', stylers: [{ color: '#181828' }] },
-        { elementType: 'labels.text.stroke', stylers: [{ color: '#181828' }] },
-        { elementType: 'labels.text.fill', stylers: [{ color: '#23233a' }] },
-        { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-        { featureType: 'road', stylers: [{ color: '#23233a' }] },
-        { featureType: 'water', stylers: [{ color: '#222b36' }] }
-      ]
-    });
-    new google.maps.Marker({ position: paris, map: gmap, title: 'Paris' });
-  }
-  if (window.google && window.google.maps) {
-    initGMap();
-  } else {
-    window.initMap = initGMap;
-  }
-  // Recherche géocodée
-  function searchLocation() {
-    const address = searchInput.value.trim();
-    if (!address) return;
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address }, (results, status) => {
-      if (status === 'OK' && results[0]) {
-        gmap.setCenter(results[0].geometry.location);
-        new google.maps.Marker({ position: results[0].geometry.location, map: gmap });
-      } else {
-        alert('Aucun résultat trouvé.');
-      }
-    });
-  }
-  searchBtn.addEventListener('click', searchLocation);
-  searchInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') searchLocation();
-  });
-}
-// --- Recherche parking sur liste ---
-if (document.getElementById('gmap-search-input') && document.getElementById('gmap-search-suggestions') && document.getElementById('gmap')) {
-  const searchInput = document.getElementById('gmap-search-input');
-  const suggestionsBox = document.getElementById('gmap-search-suggestions');
-  let gmap = null;
-  let markers = [];
-  function initGMap() {
-    const paris = { lat: 48.8566, lng: 2.3522 };
-    gmap = new google.maps.Map(document.getElementById('gmap'), {
-      center: paris,
-      zoom: 13,
-      disableDefaultUI: false,
-      mapTypeId: 'roadmap',
-      styles: [
-        { elementType: 'geometry', stylers: [{ color: '#181828' }] },
-        { elementType: 'labels.text.stroke', stylers: [{ color: '#181828' }] },
-        { elementType: 'labels.text.fill', stylers: [{ color: '#23233a' }] },
-        { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-        { featureType: 'road', stylers: [{ color: '#23233a' }] },
-        { featureType: 'water', stylers: [{ color: '#222b36' }] }
-      ]
-    });
-    // Afficher les parkings
-    markers = parkings.map(p => new google.maps.Marker({
-      position: { lat: p.lat, lng: p.lng },
-      map: gmap,
-      title: p.name,
-      icon: {
-        url: 'https://maps.gstatic.com/mapfiles/ms2/micons/parkinglot.png',
-        scaledSize: new google.maps.Size(32, 32)
-      }
-    }));
-  }
-  if (window.google && window.google.maps) {
-    initGMap();
-  } else {
-    window.initMap = initGMap;
-  }
-  // Suggestions dynamiques
-  searchInput.addEventListener('input', function() {
-    const val = this.value.trim().toLowerCase();
-    suggestionsBox.innerHTML = '';
-    if (!val) {
-      suggestionsBox.classList.remove('active');
-      return;
-    }
-    const filtered = parkings.filter(p => p.name.toLowerCase().includes(val));
-    if (filtered.length === 0) {
-      suggestionsBox.classList.remove('active');
-      return;
-    }
-    filtered.forEach((p, idx) => {
-      const div = document.createElement('div');
-      div.className = 'gmap-search-suggestion';
-      div.textContent = p.name;
-      div.tabIndex = 0;
-      div.addEventListener('mousedown', () => {
-        gmap.setCenter({ lat: p.lat, lng: p.lng });
-        gmap.setZoom(16);
-        markers.forEach(m => m.setAnimation(null));
-        const marker = markers[parkings.findIndex(pk => pk.name === p.name)];
-        if (marker) { marker.setAnimation(google.maps.Animation.BOUNCE); }
-        suggestionsBox.classList.remove('active');
-        searchInput.value = p.name;
+
+      const info = new google.maps.InfoWindow({
+        content: `<div style="padding:10px"><b>${p.name}</b><br>${p.address}<br><b style="color:#8e24aa">${p.price.toFixed(2)}€/h</b></div>`
       });
-      suggestionsBox.appendChild(div);
+
+      marker.addListener('click', () => info.open(map, marker));
     });
-    suggestionsBox.classList.add('active');
-  });
-  // Perte du focus sur la recherche
-  searchInput.addEventListener('blur', () => {
-    setTimeout(() => {
-      suggestionsBox.classList.remove('active');
-    }, 200);
-  });
+
+    // Parking list
+    const list = document.getElementById('parking-list');
+    if (list) {
+      parkings.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'parking-item';
+        div.innerHTML = `<div class="parking-item-name">${p.name}</div><div class="parking-item-address">${p.address}</div><div class="parking-item-price">${p.price.toFixed(2)}€/h</div>`;
+        div.onclick = () => { map.setCenter({ lat: p.lat, lng: p.lng }); map.setZoom(16); openReservationModal(p); };
+        list.appendChild(div);
+      });
+    }
+
+    // Search
+    const searchInput = document.getElementById('gmap-search-input');
+    const suggestions = document.getElementById('gmap-search-suggestions');
+    if (searchInput && suggestions) {
+      searchInput.oninput = function() {
+        const val = this.value.toLowerCase();
+        suggestions.innerHTML = '';
+        if (!val) { suggestions.classList.remove('active'); return; }
+        const filtered = parkings.filter(p => p.name.toLowerCase().includes(val) || p.address.toLowerCase().includes(val));
+        if (!filtered.length) { suggestions.classList.remove('active'); return; }
+        filtered.forEach(p => {
+          const div = document.createElement('div');
+          div.className = 'gmap-search-suggestion';
+          div.textContent = p.name;
+          div.onmousedown = () => { map.setCenter({ lat: p.lat, lng: p.lng }); map.setZoom(16); suggestions.classList.remove('active'); searchInput.value = p.name; };
+          suggestions.appendChild(div);
+        });
+        suggestions.classList.add('active');
+      };
+      searchInput.onblur = () => setTimeout(() => suggestions.classList.remove('active'), 200);
+    }
+  };
+
+  if (window.google?.maps) window.initMap();
 }
+
+// ========== RESERVATION MODAL ==========
+function openReservationModal(parking) {
+  const modal = document.getElementById('reservation-modal');
+  if (!modal) return;
+
+  document.getElementById('modal-parking-info').innerHTML = `<h3>${parking.name}</h3><p>${parking.address}</p><p><strong>${parking.price.toFixed(2)}€/h</strong></p>`;
+  modal.style.display = 'flex';
+
+  document.getElementById('modal-close').onclick = () => modal.style.display = 'none';
+  modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+
+  const dateDebut = document.getElementById('modal-date-debut');
+  const dateFin = document.getElementById('modal-date-fin');
+  const priceDisplay = document.getElementById('modal-price');
+
+  const calcPrice = () => {
+    if (dateDebut.value && dateFin.value) {
+      const hours = (new Date(dateFin.value) - new Date(dateDebut.value)) / 3600000;
+      if (hours > 0) priceDisplay.textContent = (10 + hours * parking.price).toFixed(2) + '€';
+    }
+  };
+  dateDebut.onchange = dateFin.onchange = calcPrice;
+
+  document.getElementById('confirm-reservation').onclick = async function() {
+    if (!dateDebut.value || !dateFin.value) { alert('Sélectionnez les dates'); return; }
+    this.disabled = true;
+    this.textContent = 'Réservation...';
+    
+    const result = await api.reserveParking(parking.id, dateDebut.value, dateFin.value);
+    alert(result.success ? 'Réservation confirmée !' : 'Erreur: ' + result.error);
+    if (result.success) modal.style.display = 'none';
+    
+    this.disabled = false;
+    this.textContent = 'Confirmer la réservation';
+  };
+}
+
+// ========== SUBSCRIPTIONS ==========
+document.querySelectorAll('.sub-btn').forEach(btn => {
+  btn.onclick = async function() {
+    const planMap = { 'essentiel-1': '1', 'premium': '2', 'annuel': '3' };
+    this.disabled = true;
+    this.textContent = 'Traitement...';
+    
+    const result = await api.subscribe(planMap[this.dataset.plan] || this.dataset.plan);
+    alert(result.success ? 'Abonnement souscrit !' : 'Erreur: ' + result.error);
+    
+    if (result.success) {
+      const current = document.getElementById('current-subscription');
+      if (current) current.style.display = 'block';
+    }
+    
+    this.disabled = false;
+    this.textContent = 'Choisir';
+  };
+});

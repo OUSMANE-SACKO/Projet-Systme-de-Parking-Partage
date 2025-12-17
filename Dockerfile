@@ -5,10 +5,10 @@ WORKDIR /var/www/html
 # Installe les extensions PHP nécessaires
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Active mod_rewrite pour les URLs propres
-RUN a2enmod rewrite
+# Active mod_rewrite pour les URLs propres et mod_headers pour les en-têtes HTTP
+RUN a2enmod rewrite headers
 
-                                            # Configure Apache pour autoriser .htaccess
+# Configure Apache pour autoriser .htaccess
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 # Installe les dépendances système et Composer

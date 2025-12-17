@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaxawCar - Tableau de bord</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAF6fhfRmmm8DMfJznhzdI4Xc-S51WoTnY"></script>
+</head>
+<body>
+  <nav class="navbar-rounded">
+    <div class="nav-left">
+      <span class="logo-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="20,5 35,13 35,27 20,35 5,27 5,13" fill="#8e24aa"/>
+          <circle cx="20" cy="20" r="7" fill="#fff" fill-opacity="0.92"/>
+          <circle cx="20" cy="20" r="3.5" fill="#8e24aa"/>
+        </svg>
+      </span>
+      <span class="logo-text">TaxawCar</span>
+    </div>
+    <ul class="nav-center">
+      <li><a href="dashboard.html" class="active">Accueil</a></li>
+      <li><a href="reserver.html">Réserver</a></li>
+      <li><a href="tarifs.html">Tarifs</a></li>
+      <li><a href="abonnement.html">Abonnement</a></li>
+    </ul>
+    <div class="nav-right" id="account-area">
+      <span class="user-info" id="user-display">
+        <span class="user-avatar">👤</span>
+        <span class="user-name">Utilisateur</span>
+      </span>
+      <button class="logout-btn" id="logout-btn">Déconnexion</button>
+    </div>
+  </nav>
+
+  <main class="dashboard-section">
+    <div class="dashboard-header">
+      <h1>Bienvenue, <span id="welcome-name">Utilisateur</span> 👋</h1>
+      <p>Gérez vos réservations et trouvez des places de parking</p>
+    </div>
+
+    <div class="dashboard-stats">
+      <div class="stat-card">
+        <div class="stat-icon">🚗</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-reservations">0</span>
+          <span class="stat-label">Réservations actives</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-abonnement">-</span>
+          <span class="stat-label">Abonnement</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💳</div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-depenses">0€</span>
+          <span class="stat-label">Dépenses ce mois</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="dashboard-card quick-actions">
+        <h2>Actions rapides</h2>
+        <div class="actions-grid">
+          <a href="reserver.html" class="action-btn">
+            <span class="action-icon">🅿️</span>
+            <span>Réserver une place</span>
+          </a>
+          <a href="abonnement.html" class="action-btn">
+            <span class="action-icon">📋</span>
+            <span>Gérer abonnement</span>
+          </a>
+          <a href="historique.html" class="action-btn">
+            <span class="action-icon">📜</span>
+            <span>Historique</span>
+          </a>
+          <a href="profil.html" class="action-btn">
+            <span class="action-icon">⚙️</span>
+            <span>Mon profil</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="dashboard-card reservations-list">
+        <h2>Mes réservations récentes</h2>
+        <div id="reservations-container">
+          <div class="empty-state">
+            <span>🚗</span>
+            <p>Aucune réservation pour le moment</p>
+            <a href="reserver.html" class="cta-btn-small">Réserver maintenant</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="map-section-dashboard">
+      <h2>Parkings à proximité</h2>
+      <div class="gmap-search-bar">
+        <input type="text" id="gmap-search-input" placeholder="Rechercher un parking..." autocomplete="off" />
+        <div id="gmap-search-suggestions" class="gmap-search-suggestions"></div>
+      </div>
+      <div id="gmap" class="map-container-dashboard"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span>© 2025 TaxawCar — Solution professionnelle</span>
+  </footer>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

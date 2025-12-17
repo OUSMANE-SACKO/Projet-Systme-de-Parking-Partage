@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaxawCar - Abonnement</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar-rounded">
+    <div class="nav-left">
+      <span class="logo-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="20,5 35,13 35,27 20,35 5,27 5,13" fill="#8e24aa"/>
+          <circle cx="20" cy="20" r="7" fill="#fff" fill-opacity="0.92"/>
+          <circle cx="20" cy="20" r="3.5" fill="#8e24aa"/>
+        </svg>
+      </span>
+      <span class="logo-text">TaxawCar</span>
+    </div>
+    <ul class="nav-center">
+      <li><a href="dashboard.html">Accueil</a></li>
+      <li><a href="reserver.html">Réserver</a></li>
+      <li><a href="tarifs.html">Tarifs</a></li>
+      <li><a href="abonnement.html" class="active">Abonnement</a></li>
+    </ul>
+    <div class="nav-right" id="account-area">
+      <span class="user-info" id="user-display">
+        <span class="user-avatar">👤</span>
+        <span class="user-name">Utilisateur</span>
+      </span>
+      <button class="logout-btn" id="logout-btn">Déconnexion</button>
+    </div>
+  </nav>
+
+  <main class="subscription-section">
+    <div class="subscription-header">
+      <h1>Choisissez votre abonnement</h1>
+      <p>Profitez d'avantages exclusifs avec nos formules d'abonnement</p>
+    </div>
+
+    <div class="subscription-cards">
+      <div class="subscription-card">
+        <div class="sub-badge">1 mois</div>
+        <h2>Essentiel</h2>
+        <div class="sub-price">29€<span>/mois</span></div>
+        <ul class="sub-features">
+          <li>✓ 1 place garantie</li>
+          <li>✓ Accès 7j/7</li>
+          <li>✓ Annulation flexible</li>
+          <li>✓ Support email</li>
+        </ul>
+        <button class="sub-btn" data-plan="essentiel-1">Choisir ce plan</button>
+      </div>
+
+      <div class="subscription-card featured">
+        <div class="sub-badge popular">Populaire</div>
+        <h2>Premium</h2>
+        <div class="sub-price">60€<span>/mois</span></div>
+        <ul class="sub-features">
+          <li>✓ 1 place garantie premium</li>
+          <li>✓ Accès 24h/24</li>
+          <li>✓ Entrées/sorties illimitées</li>
+          <li>✓ Support prioritaire</li>
+          <li>✓ Réservation anticipée</li>
+        </ul>
+        <button class="sub-btn featured-btn" data-plan="premium">Choisir ce plan</button>
+      </div>
+
+      <div class="subscription-card">
+        <div class="sub-badge">12 mois</div>
+        <h2>Annuel</h2>
+        <div class="sub-price">499€<span>/an</span></div>
+        <div class="sub-savings">Économisez 221€</div>
+        <ul class="sub-features">
+          <li>✓ Tous les avantages Premium</li>
+          <li>✓ 2 mois offerts</li>
+          <li>✓ Place VIP</li>
+          <li>✓ Conciergerie parking</li>
+        </ul>
+        <button class="sub-btn" data-plan="annuel">Choisir ce plan</button>
+      </div>
+    </div>
+
+    <div class="current-subscription" id="current-subscription" style="display: none;">
+      <h2>Mon abonnement actuel</h2>
+      <div class="current-sub-card">
+        <div class="current-sub-info">
+          <span class="current-sub-type" id="current-sub-type">Premium</span>
+          <span class="current-sub-status active">Actif</span>
+        </div>
+        <div class="current-sub-details">
+          <p><strong>Début:</strong> <span id="sub-start">--</span></p>
+          <p><strong>Fin:</strong> <span id="sub-end">--</span></p>
+          <p><strong>Parking:</strong> <span id="sub-parking">--</span></p>
+        </div>
+        <div class="current-sub-actions">
+          <button class="sub-action-btn">Modifier</button>
+          <button class="sub-action-btn cancel">Résilier</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <span>© 2025 TaxawCar — Solution professionnelle</span>
+  </footer>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

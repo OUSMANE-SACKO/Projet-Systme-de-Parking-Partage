@@ -4,6 +4,7 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 require_once __DIR__ . '/../../../vendor/autoload.php';
+require_once __DIR__ . '/../../../backend/Infrastructure/Database/TestConnexion.php';
 
 class TestConnexionTest extends TestCase
 {
@@ -12,16 +13,11 @@ class TestConnexionTest extends TestCase
     protected function setUp(): void
     {
         $this->pdo = $this->createMock(PDO::class);
-        
-        // Inject mock PDO into MySQLFactory
-        $reflection = new ReflectionClass(MySQLFactory::class);
-        $property = $reflection->getProperty('instance');
-        $property->setAccessible(true);
-        $property->setValue(null, $this->pdo);
     }
 
     protected function tearDown(): void
     {
+        // Reset MySQLFactory singleton to avoid affecting other tests
         $reflection = new ReflectionClass(MySQLFactory::class);
         $property = $reflection->getProperty('instance');
         $property->setAccessible(true);
@@ -43,7 +39,7 @@ class TestConnexionTest extends TestCase
                 ['SHOW TABLES', null, $stmtTables]
             ]);
 
-        $testConnexion = new TestConnexion();
+        $testConnexion = new TestConnexion($this->pdo);
         
         ob_start();
         $testConnexion->run();
@@ -70,7 +66,7 @@ class TestConnexionTest extends TestCase
                 ['SHOW TABLES', null, $stmtTables]
             ]);
 
-        $testConnexion = new TestConnexion();
+        $testConnexion = new TestConnexion($this->pdo);
         
         ob_start();
         $testConnexion->run();
@@ -83,12 +79,11 @@ class TestConnexionTest extends TestCase
     {
         $this->pdo->method('query')->willThrowException(new PDOException('Connection failed'));
 
-        $testConnexion = new TestConnexion();
+        $testConnexion = new TestConnexion($this->pdo);
         
-        ob_start();
+        $this->expectException(PDOException::class);
+        $this->expectExceptionMessage('Connection failed');
+        
         $testConnexion->run();
-        $output = ob_get_clean();
-
-        $this->assertStringContainsString('Connection failed:', $output);
     }
 }

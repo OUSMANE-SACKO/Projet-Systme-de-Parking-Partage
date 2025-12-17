@@ -1,23 +1,23 @@
 services:
   app:
     build: .
-    container_name: parking_app
     ports:
-      - "8080:80"       # http://localhost:8080
+      - "8080:80"
     volumes:
       - .:/var/www/html
     depends_on:
       - db
     environment:
-      DB_HOST: db
-      DB_NAME: parking
-      DB_USER: user
-      DB_PASSWORD: password
-    restart: unless-stopped
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_NAME=parking
+      - MYSQL_USER=user
+      - MYSQL_PASS=password
 
   db:
     image: mysql:8.0
     container_name: parking_db
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: parking
@@ -27,7 +27,20 @@ services:
       - "7070:3306"
     volumes:
       - db_data:/var/lib/mysql
-    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: parking_phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: user
+      PMA_PASSWORD: password
+    depends_on:
+      - db
 
 volumes:
   db_data:
