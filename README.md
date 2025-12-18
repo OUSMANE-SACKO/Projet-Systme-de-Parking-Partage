@@ -3,7 +3,11 @@
 Deux commandes simples (définies comme scripts composer) :
 
 ```bash
-composer coverage   # runs tests with coverage
+composer coverage   # Run les tests de couverture
+composer open-coverage # Run le résultat sur un fichier html
+```
+
+```bash
 composer mutation   # runs mutation testing (Infection)
 composer open-mutation # runs the html results
 ```
@@ -21,4 +25,11 @@ XDEBUG_MODE=coverage ./vendor/bin/infection --threads=4 --min-msi=80
 Sur PowerShell (Windows) :
 ```powershell
 $env:XDEBUG_MODE="coverage"; ./vendor/bin/infection --threads=4 --min-msi=80
+```
+
+Pour implémenter la BDD, il faut appeler les fichiers suivants:
+
+```bash
+php SetupDatabase.php # Initialise la base de données
+php SeedDatabase.php # Concoie les tables
 ```
