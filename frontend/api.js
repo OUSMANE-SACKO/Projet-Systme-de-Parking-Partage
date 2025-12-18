@@ -9,6 +9,7 @@ const API_URL = '/middleware/api.php';
 const api = {
   async send(dtoType, data = {}) {
     try {
+      console.log('[api.send] request', { dtoType, data });
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
@@ -18,13 +19,22 @@ const api = {
         body: JSON.stringify({ dtoType, ...data })
       });
 
-      const result = await response.json();
+      const text = await response.text();
+      let result;
+      try {
+        result = JSON.parse(text);
+      } catch (e) {
+        console.warn('[api.send] non-json response', text);
+        result = { success: false, message: 'Réponse non valide du serveur', raw: text };
+      }
+      console.log('[api.send] response', { status: response.status, body: result });
       // Le serveur renvoie { success, data: { ... } } - on aplatit la réponse
       if (response.ok && result.success) {
         return { success: true, ...result.data };
       }
-      return { success: false, error: result.message || result.data?.message || 'Erreur serveur' };
+      return { success: false, error: result.message || result.data?.message || 'Erreur serveur', raw: result };
     } catch (error) {
+      console.error('[api.send] network error', error);
       return { success: false, error: 'Erreur de connexion' };
     }
   },
@@ -99,14 +109,13 @@ const api = {
 
   // ========== RÉSERVATIONS ==========
 
-  async reserveParking(parkingId, from, to, vehiclePlate = null) {
+  async reserveParking(parkingId, from, to) {
     const user = this.getCurrentUser();
     return await this.send('ReserveParkingDTO', { 
       customerId: user?.id, 
       parkingId, 
       from, 
-      to, 
-      vehiclePlate 
+      to
     });
   },
 
@@ -123,14 +132,21 @@ const api = {
     return await this.send('GetReservationInvoiceDTO', { reservationId, format });
   },
 
-  // ========== STATIONNEMENTS (SESSIONS) ==========
-
-  async enterParking(parkingId, vehiclePlate) {
-    return await this.send('EnterExitParkingDTO', { parkingId, vehiclePlate, action: 'enter' });
+  async cancelReservation(reservationId) {
+    const user = this.getCurrentUser();
+    return await this.send('CancelReservationDTO', { reservationId, userId: user?.id });
   },
 
-  async exitParking(parkingId, vehiclePlate) {
-    return await this.send('EnterExitParkingDTO', { parkingId, vehiclePlate, action: 'exit' });
+  // ========== STATIONNEMENTS (SESSIONS) ==========
+
+  async enterParking(parkingId) {
+    const user = this.getCurrentUser();
+    return await this.send('EnterExitParkingDTO', { parkingId, action: 'enter', userId: user?.id });
+  },
+
+  async exitParking(parkingId) {
+    const user = this.getCurrentUser();
+    return await this.send('EnterExitParkingDTO', { parkingId, action: 'exit', userId: user?.id });
   },
 
   async getParkingSessions(parkingId, activeOnly = false) {

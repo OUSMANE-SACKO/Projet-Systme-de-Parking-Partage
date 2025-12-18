@@ -639,6 +639,30 @@ table tr:hover { background: rgba(255,255,255,0.05); }
 
 .warning-row { background: rgba(245, 124, 0, 0.1); }
 
+/* ========== PRICING NOTE ========== */
+.pricing-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+/* ========== SESSION ACTIONS ========== */
+.session-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.session-plate {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.session-card.active {
+  border-left: 4px solid var(--primary);
+  background: rgba(142, 36, 170, 0.1);
+}
+
 /* ========== FOOTER ========== */
 footer {
   text-align: center;

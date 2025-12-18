@@ -1,12 +1,18 @@
 <?php
 
 require_once __DIR__ . '/../../Application/DTO/GetParkingsDTO.php';
+require_once __DIR__ . '/../../Infrastructure/Repositories/ParkingRepository.php';
+require_once __DIR__ . '/../../Infrastructure/Repositories/SessionRepository.php';
 
 class ParkingListController {
     private PDO $pdo;
+    private ParkingRepository $parkingRepo;
+    private SessionRepository $sessionRepo;
 
     public function __construct(PDO $pdo) {
         $this->pdo = $pdo;
+        $this->parkingRepo = new ParkingRepository($pdo);
+        $this->sessionRepo = new SessionRepository($pdo);
     }
 
     public function getParkings(GetParkingsDTO $dto): array {
@@ -30,8 +36,11 @@ class ParkingListController {
             $stmt->execute($params);
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $parkings = array_map(function($row) {
-                return [
+            $parkings = [];
+            foreach ($rows as $row) {
+                $occupied = $this->sessionRepo->countActiveSessions((int)$row['id']);
+                $available = max(0, (int)$row['total_spaces'] - $occupied);
+                $parkings[] = [
                     'id' => (int)$row['id'],
                     'name' => $row['name'],
                     'address' => $row['address'],
@@ -39,9 +48,10 @@ class ParkingListController {
                     'lat' => (float)$row['latitude'],
                     'lng' => (float)$row['longitude'],
                     'totalSpaces' => (int)$row['total_spaces'],
+                    'availableSpaces' => $available,
                     'price' => (float)$row['hourly_rate']
                 ];
-            }, $rows);
+            }
 
             return [
                 'success' => true,

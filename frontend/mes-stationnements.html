@@ -57,14 +57,11 @@
                         <option value="">Sélectionner un parking</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Plaque d'immatriculation</label>
-                    <input type="text" id="vehicle-plate" placeholder="AA-123-BB">
-                </div>
+                <!-- Plaque d'immatriculation removed: not required anymore -->
             </div>
             <div class="action-buttons">
-                <button class="btn-success" onclick="enterParking()">🚗 Entrer</button>
-                <button class="btn-danger" onclick="exitParking()">🚪 Sortir</button>
+                <button id="enter-btn" class="btn-success" onclick="enterParking()">🚗 Entrer</button>
+                <button id="exit-btn" class="btn-danger" onclick="exitParking()">🚪 Sortir</button>
             </div>
             <div id="action-message" class="message" style="display:none;"></div>
         </section>
@@ -105,7 +102,6 @@
             document.getElementById('user-name').textContent = displayName;
             const navName = document.getElementById('nav-user-name');
             if (navName) navName.textContent = displayName;
-            loadParkings();
             loadSessions();
         });
 
@@ -141,6 +137,66 @@
                 
                 allSessions = result.sessions || [];
                 displaySessions(allSessions);
+                
+                // Remplir la liste des parkings uniquement à partir des réservations de l'utilisateur (à venir / en cours)
+                const select = document.getElementById('parking-select');
+                const enterBtn = document.getElementById('enter-btn');
+                const exitBtn = document.getElementById('exit-btn');
+                if (select) {
+                    select.innerHTML = '<option value="">Sélectionner un parking</option>';
+                    // récupérer les réservations
+                    const resResult = await api.getUserReservations();
+                    let reserved = [];
+                    if (resResult.success && Array.isArray(resResult.reservations)) {
+                        // Use server-provided status and inParking flag when available
+                        reserved = resResult.reservations.map(r => {
+                            const start = r.startTime || r.from || r.begin || r.fromTime;
+                            const end = r.endTime || r.to || r.finish || r.toTime;
+                            const status = r.status || 'pending';
+                            const inParking = !!r.inParking;
+                            return { ...r, startTime: start, endTime: end, status, inParking };
+                        });
+                    }
+
+                    // garder uniquement les parkings pour réservations 'pending' ou 'active'
+                    const seen = new Set();
+                    reserved.forEach(r => {
+                        if (r.status === 'pending' || r.status === 'active' || r.inParking) {
+                            const pid = r.parkingId || r.parking?.id || r.parkingId;
+                            const pname = r.parkingName || r.parking?.name || r.parking?.title || 'Parking';
+                            const pcity = r.parkingCity || r.parking?.city || '';
+                            if (pid && !seen.has(pid)) {
+                                seen.add(pid);
+                                const option = document.createElement('option');
+                                option.value = pid;
+                                let label = pcity ? `${pname} - ${pcity}` : pname;
+                                const dispLabel = r.displayLabel || (r.inParking ? 'Dans le parking' : getStatusLabel(r.status));
+                                if (dispLabel) label += ' — ' + dispLabel;
+                                option.textContent = label;
+                                select.appendChild(option);
+                            }
+                        }
+                    });
+
+                    if (seen.size === 0) {
+                        // aucun parking réservé à venir/en cours → désactiver actions
+                        if (enterBtn) enterBtn.disabled = true;
+                        if (exitBtn) exitBtn.disabled = true;
+                        // indiquer à l'utilisateur
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.textContent = 'Aucune réservation active / à venir';
+                        select.appendChild(opt);
+                    } else {
+                        if (enterBtn) enterBtn.disabled = false;
+                        if (exitBtn) exitBtn.disabled = false;
+                        // If user has exactly one reservation parking, pre-select it to avoid wrong choice
+                        if (seen.size === 1) {
+                            const only = Array.from(seen)[0];
+                            select.value = only;
+                        }
+                    }
+                }
                 
                 // Afficher le stationnement actif s'il existe
                 const activeSession = allSessions.find(s => s.isActive);
@@ -181,6 +237,7 @@
                         </span>
                     </div>
                     <p class="session-address">📍 ${s.parkingAddress || 'Adresse non disponible'}</p>
+                    <p class="session-plate">🚗 Plaque: <strong>${s.vehiclePlate || 'N/A'}</strong></p>
                     <div class="session-times">
                         <p><strong>Entrée:</strong> ${formatDate(s.entryTime)}</p>
                         <p><strong>Sortie:</strong> ${s.exitTime ? formatDate(s.exitTime) : '-'}</p>
@@ -188,6 +245,9 @@
                     ${s.isActive ? `
                         <div class="session-duration">
                             <p>Durée: <span class="duration">${calculateDuration(s.entryTime)}</span></p>
+                        </div>
+                        <div class="session-actions">
+                            <button class="btn-danger" onclick="exitFromActive('${s.parkingId}', '${s.vehiclePlate || ''}')">🚪 Sortir</button>
                         </div>
                     ` : ''}
                 </div>
@@ -199,9 +259,19 @@
             const card = document.getElementById('active-session-card');
             
             section.style.display = 'block';
+            
+            // Pré-remplir le formulaire avec le parking actif
+            const parkingSelect = document.getElementById('parking-select');
+            if (parkingSelect && session.parkingId) {
+                parkingSelect.value = session.parkingId;
+            }
+            
+            // vehicle plate removed
+            
             card.innerHTML = `
                 <h3>🅿️ ${session.parkingName || 'Parking'}</h3>
                 <p>📍 ${session.parkingAddress || ''}</p>
+                <!-- vehicle plate removed from active session card -->
                 <p><strong>Entrée:</strong> ${formatDate(session.entryTime)}</p>
                 <p class="duration-live">Durée: <span id="live-duration">${calculateDuration(session.entryTime)}</span></p>
                 <button class="btn-danger" onclick="exitFromActive('${session.parkingId}')">🚪 Sortir maintenant</button>
@@ -248,48 +318,48 @@
 
         async function enterParking() {
             const parkingId = document.getElementById('parking-select').value;
-            const vehiclePlate = document.getElementById('vehicle-plate').value.trim();
             const messageDiv = document.getElementById('action-message');
             
             if (!parkingId) {
                 showMessage('Veuillez sélectionner un parking.', 'error');
                 return;
             }
-            if (!vehiclePlate) {
-                showMessage('Veuillez entrer votre plaque d\'immatriculation.', 'error');
-                return;
-            }
-            
             try {
-                const result = await api.enterParking(parkingId, vehiclePlate);
-                
+                console.log('[enterParking] parkingId', parkingId);
+                const result = await api.enterParking(parkingId);
+                console.log('[enterParking] result', result);
                 if (result.success) {
                     showMessage('✅ Vous êtes entré dans le parking !', 'success');
                     loadSessions();
                 } else {
                     showMessage(`❌ Erreur: ${result.error || result.message}`, 'error');
+                    // If no reservation found, show the user's reservations to help select the right parking
+                    if (result.message && result.message.includes('Aucune réservation en cours')) {
+                        const res = await api.getUserReservations();
+                        console.log('[enterParking] user reservations', res);
+                        if (res.success && Array.isArray(res.reservations) && res.reservations.length) {
+                            const list = res.reservations.map(r => `#${r.id} - ${r.parkingName || 'Parking'} (${r.startTime} → ${r.endTime})`).join('\n');
+                            alert('Réservations de l\'utilisateur:\n' + list);
+                        }
+                    }
                 }
             } catch (error) {
+                console.error('[enterParking] error', error);
                 showMessage('❌ Erreur de connexion.', 'error');
             }
         }
 
         async function exitParking() {
             const parkingId = document.getElementById('parking-select').value;
-            const vehiclePlate = document.getElementById('vehicle-plate').value.trim();
             
             if (!parkingId) {
                 showMessage('Veuillez sélectionner un parking.', 'error');
                 return;
             }
-            if (!vehiclePlate) {
-                showMessage('Veuillez entrer votre plaque d\'immatriculation.', 'error');
-                return;
-            }
-            
             try {
-                const result = await api.exitParking(parkingId, vehiclePlate);
-                
+                console.log('[exitParking] parkingId', parkingId);
+                const result = await api.exitParking(parkingId);
+                console.log('[exitParking] result', result);
                 if (result.success) {
                     showMessage('✅ Vous êtes sorti du parking !', 'success');
                     document.getElementById('active-session').style.display = 'none';
@@ -298,15 +368,13 @@
                     showMessage(`❌ Erreur: ${result.error || result.message}`, 'error');
                 }
             } catch (error) {
+                console.error('[exitParking] error', error);
                 showMessage('❌ Erreur de connexion.', 'error');
             }
         }
 
         async function exitFromActive(parkingId) {
-            // Récupérer la plaque depuis la session active
-            const activeSession = allSessions.find(s => s.isActive && s.parkingId == parkingId);
-            const vehiclePlate = document.getElementById('vehicle-plate').value.trim() || 'AUTO';
-            
+            // Pré-remplir le formulaire
             document.getElementById('parking-select').value = parkingId;
             await exitParking();
         }

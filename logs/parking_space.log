@@ -1,0 +1,188 @@
+2025-12-18T15:46:22+00:00 - ENTER attempt user=23 parking=14
+2025-12-18T15:46:22+00:00 - SERVER NOW=2025-12-18 15:46:22
+2025-12-18T15:46:22+00:00 - QUERY reservations params parking=14 user=23 returned=
+2025-12-18T15:46:22+00:00 - No reservation found for user=23 parking=14
+2025-12-18T15:46:27+00:00 - ENTER attempt user=23 parking=14
+2025-12-18T15:46:27+00:00 - SERVER NOW=2025-12-18 15:46:27
+2025-12-18T15:46:27+00:00 - QUERY reservations params parking=14 user=23 returned=
+2025-12-18T15:46:27+00:00 - No reservation found for user=23 parking=14
+2025-12-18T15:46:32+00:00 - ENTER attempt user=23 parking=14
+2025-12-18T15:46:32+00:00 - SERVER NOW=2025-12-18 15:46:32
+2025-12-18T15:46:32+00:00 - QUERY reservations params parking=14 user=23 returned=
+2025-12-18T15:46:32+00:00 - No reservation found for user=23 parking=14
+2025-12-18T15:48:51+00:00 - ENTER attempt user=23 parking=14
+2025-12-18T15:48:51+00:00 - SERVER NOW=2025-12-18 15:48:51
+2025-12-18T15:48:51+00:00 - Using graceMinutes=15
+2025-12-18T15:48:51+00:00 - QUERY reservations params parking=14 user=23 returned=
+2025-12-18T15:48:51+00:00 - No reservation found for user=23 parking=14
+2025-12-18T15:55:11+00:00 - ENTER attempt user=23 parking=14
+2025-12-18T15:55:11+00:00 - SERVER NOW=2025-12-18 15:55:11
+2025-12-18T15:55:11+00:00 - Using graceMinutes=10
+2025-12-18T15:55:11+00:00 - QUERY reservations params parking=14 user=23 returned=
+2025-12-18T15:55:11+00:00 - No reservation found for user=23 parking=14
+2025-12-18T15:55:28+00:00 - ENTER attempt user=23 parking=14
+2025-12-18T15:55:28+00:00 - SERVER NOW=2025-12-18 15:55:28
+2025-12-18T15:55:28+00:00 - Using graceMinutes=10
+2025-12-18T15:55:28+00:00 - QUERY reservations params parking=14 user=23 returned=
+2025-12-18T15:55:28+00:00 - No reservation found for user=23 parking=14
+2025-12-18T15:55:50+00:00 - ENTER attempt user=23 parking=34
+2025-12-18T15:55:50+00:00 - SERVER NOW=2025-12-18 15:55:50
+2025-12-18T15:55:50+00:00 - Using graceMinutes=10
+2025-12-18T15:55:50+00:00 - QUERY reservations params parking=34 user=23 returned=
+2025-12-18T15:55:50+00:00 - No reservation found for user=23 parking=34
+2025-12-18T15:56:03+00:00 - ENTER attempt user=23 parking=34
+2025-12-18T15:56:03+00:00 - SERVER NOW=2025-12-18 15:56:03
+2025-12-18T15:56:03+00:00 - Using graceMinutes=10
+2025-12-18T15:56:03+00:00 - QUERY reservations params parking=34 user=23 returned=
+2025-12-18T15:56:03+00:00 - No reservation found for user=23 parking=34
+2025-12-18T16:01:56+00:00 - ENTER attempt user=23 parking=34
+2025-12-18T16:01:56+00:00 - SERVER NOW=2025-12-18 16:01:56
+2025-12-18T16:01:56+00:00 - DB NOW=2025-12-18 16:01:56
+2025-12-18T16:01:56+00:00 - Using graceMinutes=10
+2025-12-18T16:01:56+00:00 - QUERY reservations params parking=34 user=23 returned=
+2025-12-18T16:01:56+00:00 - No reservation found for user=23 parking=34
+2025-12-18T16:08:43+00:00 - ENTER attempt user=23 parking=34
+2025-12-18T16:08:43+00:00 - DB NOW=2025-12-18 16:08:43
+2025-12-18T16:08:43+00:00 - Using graceMinutes=10
+2025-12-18T16:08:43+00:00 - QUERY reservations params parking=34 user=23 returned=
+2025-12-18T16:08:43+00:00 - No reservation found for user=23 parking=34
+2025-12-18T16:08:57+00:00 - ENTER attempt user=23 parking=34
+2025-12-18T16:08:57+00:00 - DB NOW=2025-12-18 16:08:57
+2025-12-18T16:08:57+00:00 - Using graceMinutes=10
+2025-12-18T16:08:57+00:00 - QUERY reservations params parking=34 user=23 returned=
+2025-12-18T16:08:57+00:00 - No reservation found for user=23 parking=34
+2025-12-18T16:11:13+00:00 - ENTER attempt user=23 parking=34
+2025-12-18T16:11:13+00:00 - DB NOW=2025-12-18 16:11:13
+2025-12-18T16:11:13+00:00 - Using graceMinutes=10
+2025-12-18T16:11:13+00:00 - DB NOW=2025-12-18 16:11:13 PHP NOW=2025-12-18 16:11:13
+2025-12-18T16:11:13+00:00 - QUERY reservations candidates count=1
+Array
+(
+    [0] => Array
+        (
+            [id] => 34
+            [user_id] => 23
+            [parking_id] => 34
+            [start_time] => 2025-12-18 17:08:00
+            [end_time] => 2025-12-18 18:08:00
+            [total_price] => 
+            [penalty_amount] => 0.00
+            [status] => pending
+            [created_at] => 2025-12-18 16:08:35
+        )
+
+)
+
+2025-12-18T16:11:13+00:00 - No reservation matched for user=23 parking=34 (checked candidates)
+2025-12-18T16:12:08+00:00 - ENTER attempt user=23 parking=34
+2025-12-18T16:12:08+00:00 - DB NOW=2025-12-18 16:12:08
+2025-12-18T16:12:08+00:00 - Using graceMinutes=10
+2025-12-18T16:12:08+00:00 - DB NOW=2025-12-18 16:12:08 PHP NOW=2025-12-18 16:12:08
+2025-12-18T16:12:08+00:00 - QUERY reservations candidates count=1
+Array
+(
+    [0] => Array
+        (
+            [id] => 34
+            [user_id] => 23
+            [parking_id] => 34
+            [start_time] => 2025-12-18 17:08:00
+            [end_time] => 2025-12-18 18:08:00
+            [total_price] => 
+            [penalty_amount] => 0.00
+            [status] => pending
+            [created_at] => 2025-12-18 16:08:35
+        )
+
+)
+
+2025-12-18T16:12:08+00:00 - No reservation matched for user=23 parking=34 (checked candidates)
+2025-12-18T16:15:25+00:00 - ENTER attempt user=23 parking=34
+2025-12-18T16:15:25+00:00 - DB NOW=2025-12-18 16:15:25
+2025-12-18T16:15:25+00:00 - Using graceMinutes=10
+2025-12-18T16:15:25+00:00 - DB NOW=2025-12-18 16:15:25 PHP NOW=2025-12-18 16:15:25
+2025-12-18T16:15:25+00:00 - QUERY reservations candidates count=1
+Array
+(
+    [0] => Array
+        (
+            [id] => 34
+            [user_id] => 23
+            [parking_id] => 34
+            [start_time] => 2025-12-18 17:08:00
+            [end_time] => 2025-12-18 18:08:00
+            [total_price] => 
+            [penalty_amount] => 0.00
+            [status] => pending
+            [created_at] => 2025-12-18 16:08:35
+        )
+
+)
+
+2025-12-18T16:15:25+00:00 - No reservation matched for user=23 parking=34 (checked candidates)
+2025-12-18T16:16:06+00:00 - ENTER attempt user=23 parking=34
+2025-12-18T16:16:06+00:00 - DB NOW=2025-12-18 16:16:06
+2025-12-18T16:16:06+00:00 - Using graceMinutes=10
+2025-12-18T16:16:06+00:00 - DB NOW=2025-12-18 16:16:06 PHP NOW=2025-12-18 16:16:06
+2025-12-18T16:16:06+00:00 - QUERY reservations candidates count=1
+Array
+(
+    [0] => Array
+        (
+            [id] => 34
+            [user_id] => 23
+            [parking_id] => 34
+            [start_time] => 2025-12-18 17:08:00
+            [end_time] => 2025-12-18 18:08:00
+            [total_price] => 
+            [penalty_amount] => 0.00
+            [status] => pending
+            [created_at] => 2025-12-18 16:08:35
+            [start_ts] => 1766077680
+            [end_ts] => 1766081280
+        )
+
+)
+
+2025-12-18T16:16:06+00:00 - DB now_ts=1766074566
+2025-12-18T16:16:06+00:00 - candidate id=34 start_ts=1766077680 end_ts=1766081280 startGraceTs=1766077080 nowTs=1766074566
+2025-12-18T16:16:06+00:00 - No reservation matched for user=23 parking=34 (checked candidates)
+2025-12-18T16:16:17+00:00 - ENTER attempt user=23 parking=34
+2025-12-18T16:16:17+00:00 - DB NOW=2025-12-18 16:16:17
+2025-12-18T16:16:17+00:00 - Using graceMinutes=10
+2025-12-18T16:16:17+00:00 - DB NOW=2025-12-18 16:16:17 PHP NOW=2025-12-18 16:16:17
+2025-12-18T16:16:17+00:00 - QUERY reservations candidates count=1
+Array
+(
+    [0] => Array
+        (
+            [id] => 34
+            [user_id] => 23
+            [parking_id] => 34
+            [start_time] => 2025-12-18 17:08:00
+            [end_time] => 2025-12-18 18:08:00
+            [total_price] => 
+            [penalty_amount] => 0.00
+            [status] => pending
+            [created_at] => 2025-12-18 16:08:35
+            [start_ts] => 1766077680
+            [end_ts] => 1766081280
+        )
+
+)
+
+2025-12-18T16:16:17+00:00 - DB now_ts=1766074577
+2025-12-18T16:16:17+00:00 - candidate id=34 start_ts=1766077680 end_ts=1766081280 startGraceTs=1766077080 nowTs=1766074577
+2025-12-18T16:16:17+00:00 - No reservation matched for user=23 parking=34 (checked candidates)
+2025-12-18T16:38:34+00:00 - ENTER attempt user=23 parking=34
+2025-12-18T16:38:34+00:00 - DB NOW=2025-12-18 16:38:34
+2025-12-18T16:38:34+00:00 - Using graceMinutes=10
+2025-12-18T16:38:34+00:00 - DB NOW=2025-12-18 16:38:34 PHP NOW=2025-12-18 16:38:34
+2025-12-18T16:38:34+00:00 - QUERY reservations active check parking=34 user=23 returned=
+2025-12-18T16:38:34+00:00 - No active reservation for user=23 parking=34
+2025-12-18T16:38:48+00:00 - ENTER attempt user=23 parking=34
+2025-12-18T16:38:48+00:00 - DB NOW=2025-12-18 16:38:48
+2025-12-18T16:38:48+00:00 - Using graceMinutes=10
+2025-12-18T16:38:48+00:00 - DB NOW=2025-12-18 16:38:48 PHP NOW=2025-12-18 16:38:48
+2025-12-18T16:38:48+00:00 - QUERY reservations active check parking=34 user=23 returned=
+2025-12-18T16:38:48+00:00 - No active reservation for user=23 parking=34

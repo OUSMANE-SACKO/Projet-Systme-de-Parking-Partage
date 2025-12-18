@@ -10,34 +10,29 @@ require_once __DIR__ . '/../../Application/DTO/UpdateParkingPricingDTO.php';
 require_once __DIR__ . '/../../Application/DTO/GetParkingInfoDTO.php';
 require_once __DIR__ . '/../../Application/DTO/GetParkingSubscriptionsDTO.php';
 require_once __DIR__ . '/../../Application/DTO/SearchParkingsDTO.php';
+require_once __DIR__ . '/../../Infrastructure/Repositories/ReservationRepository.php';
+require_once __DIR__ . '/../../Infrastructure/Repositories/SessionRepository.php';
+require_once __DIR__ . '/../../Infrastructure/Repositories/ParkingRepository.php';
+require_once __DIR__ . '/../../Infrastructure/Repositories/SubscriptionRepository.php';
 
 class ParkingDataController {
     private PDO $pdo;
+    private ReservationRepository $reservationRepo;
+    private SessionRepository $sessionRepo;
+    private ParkingRepository $parkingRepo;
+    private SubscriptionRepository $subscriptionRepo;
 
     public function __construct(PDO $pdo) {
         $this->pdo = $pdo;
+        $this->reservationRepo = new ReservationRepository($pdo);
+        $this->sessionRepo = new SessionRepository($pdo);
+        $this->parkingRepo = new ParkingRepository($pdo);
+        $this->subscriptionRepo = new SubscriptionRepository($pdo);
     }
 
     public function getParkingReservations(GetParkingReservationsDTO $dto): array {
         try {
-            $sql = "
-                SELECT r.*, u.first_name, u.last_name, u.email
-                FROM reservations r
-                JOIN users u ON r.user_id = u.id
-                WHERE r.parking_id = ?
-            ";
-            $params = [$dto->parkingId];
-
-            if ($dto->status) {
-                $sql .= " AND r.status = ?";
-                $params[] = $dto->status;
-            }
-
-            $sql .= " ORDER BY r.start_time DESC";
-
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute($params);
-            $reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $reservations = $this->reservationRepo->findByParking($dto->parkingId, $dto->status ?? null);
 
             return [
                 'success' => true,
@@ -64,23 +59,7 @@ class ParkingDataController {
 
     public function getParkingSessions(GetParkingSessionsDTO $dto): array {
         try {
-            $sql = "
-                SELECT ps.*, u.first_name, u.last_name, u.email
-                FROM parkings_sessions ps
-                LEFT JOIN users u ON ps.user_id = u.id
-                WHERE ps.parking_id = ?
-            ";
-            $params = [$dto->parkingId];
-
-            if ($dto->activeOnly === 'true') {
-                $sql .= " AND ps.exit_time IS NULL";
-            }
-
-            $sql .= " ORDER BY ps.entry_time DESC";
-
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute($params);
-            $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $sessions = $this->sessionRepo->findByParking($dto->parkingId, $dto->activeOnly === 'true');
 
             return [
                 'success' => true,
@@ -156,29 +135,11 @@ class ParkingDataController {
         try {
             $monthStart = sprintf('%04d-%02d-01', $dto->year, $dto->month);
             $monthEnd = date('Y-m-t', strtotime($monthStart));
-
             // Revenus des réservations terminées
-            $stmt = $this->pdo->prepare("
-                SELECT COALESCE(SUM(total_price), 0) as revenue
-                FROM reservations 
-                WHERE parking_id = ? 
-                AND status = 'completed'
-                AND end_time >= ? AND end_time <= ?
-            ");
-            $stmt->execute([$dto->parkingId, $monthStart . ' 00:00:00', $monthEnd . ' 23:59:59']);
-            $reservationsRevenue = (float)$stmt->fetchColumn();
+            $reservationsRevenue = $this->reservationRepo->sumCompletedRevenueForPeriod($dto->parkingId, $monthStart . ' 00:00:00', $monthEnd . ' 23:59:59');
 
             // Revenus des abonnements actifs
-            $stmt = $this->pdo->prepare("
-                SELECT COALESCE(SUM(st.monthly_price), 0) as revenue
-                FROM user_subscriptions us
-                JOIN subscription_types st ON us.subscription_type_id = st.id
-                WHERE st.parking_id = ?
-                AND us.status = 'active'
-                AND us.start_date <= ? AND us.end_date >= ?
-            ");
-            $stmt->execute([$dto->parkingId, $monthEnd, $monthStart]);
-            $subscriptionsRevenue = (float)$stmt->fetchColumn();
+            $subscriptionsRevenue = $this->subscriptionRepo->sumActiveMonthlyRevenueForParking($dto->parkingId, $monthEnd, $monthStart);
 
             return [
                 'success' => true,
@@ -196,29 +157,18 @@ class ParkingDataController {
         try {
             $checkTime = $dto->timestamp ? new DateTime($dto->timestamp) : new DateTime();
             $timeStr = $checkTime->format('Y-m-d H:i:s');
-
-            // Trouver les sessions actives sans réservation ni abonnement valide
-            $stmt = $this->pdo->prepare("
-                SELECT ps.*, u.first_name, u.last_name, u.email
-                FROM parkings_sessions ps
-                JOIN users u ON ps.user_id = u.id
-                WHERE ps.parking_id = ? 
-                AND ps.exit_time IS NULL
-                AND ps.user_id NOT IN (
-                    SELECT DISTINCT r.user_id FROM reservations r
-                    WHERE r.parking_id = ps.parking_id
-                    AND r.start_time <= ? AND r.end_time >= ?
-                )
-                AND ps.user_id NOT IN (
-                    SELECT DISTINCT us.user_id FROM user_subscriptions us
-                    JOIN subscription_types st ON us.subscription_type_id = st.id
-                    WHERE st.parking_id = ps.parking_id
-                    AND us.status = 'active'
-                    AND us.start_date <= ? AND us.end_date >= ?
-                )
-            ");
-            $stmt->execute([$dto->parkingId, $timeStr, $timeStr, $timeStr, $timeStr]);
-            $unauthorized = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // Récupérer les sessions actives et filtrer en PHP en s'appuyant sur les repositories
+            $sessions = $this->sessionRepo->findByParking($dto->parkingId, true);
+            $unauthorized = [];
+            foreach ($sessions as $s) {
+                $userId = $s['user_id'];
+                // Si pas de réservation active et pas d'abonnement actif -> non autorisé
+                $hasReservation = $this->reservationRepo->userHasActiveReservationAt((int)$userId, (int)$dto->parkingId, $timeStr);
+                $hasSubscription = $this->subscriptionRepo->userHasActiveSubscriptionAt((int)$userId, (int)$dto->parkingId, $timeStr);
+                if (!$hasReservation && !$hasSubscription) {
+                    $unauthorized[] = $s;
+                }
+            }
 
             return [
                 'success' => true,
@@ -243,23 +193,13 @@ class ParkingDataController {
 
     public function addSubscriptionType(AddSubscriptionTypeDTO $dto): array {
         try {
-            $stmt = $this->pdo->prepare("
-                INSERT INTO subscription_types (parking_id, name, description, monthly_price, duration_months)
-                VALUES (?, ?, ?, ?, ?)
-            ");
-            $stmt->execute([
-                $dto->parkingId,
-                $dto->name,
-                $dto->description,
-                $dto->monthlyPrice,
-                $dto->durationMonths
-            ]);
+            $id = $this->subscriptionRepo->createSubscriptionType($dto->parkingId, $dto->name, $dto->description, $dto->monthlyPrice, $dto->durationMonths);
 
             return [
                 'success' => true,
                 'message' => 'Type d\'abonnement ajouté.',
                 'subscriptionType' => [
-                    'id' => $this->pdo->lastInsertId(),
+                    'id' => $id,
                     'name' => $dto->name,
                     'monthlyPrice' => $dto->monthlyPrice,
                     'durationMonths' => $dto->durationMonths
@@ -344,11 +284,7 @@ class ParkingDataController {
 
     public function getParkingSubscriptions(GetParkingSubscriptionsDTO $dto): array {
         try {
-            $stmt = $this->pdo->prepare("
-                SELECT * FROM subscription_types WHERE parking_id = ? ORDER BY monthly_price
-            ");
-            $stmt->execute([$dto->parkingId]);
-            $subscriptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $subscriptions = $this->subscriptionRepo->findByParking($dto->parkingId);
 
             return [
                 'success' => true,
@@ -390,15 +326,11 @@ class ParkingDataController {
 
             $results = [];
             foreach ($parkings as $parking) {
-                // Calculer les places disponibles
-                $stmtOccupied = $this->pdo->prepare("
-                    SELECT COUNT(*) FROM parkings_sessions 
-                    WHERE parking_id = ? AND exit_time IS NULL
-                ");
-                $stmtOccupied->execute([$parking['id']]);
-                $occupied = (int)$stmtOccupied->fetchColumn();
+                // Calculer les places disponibles via les repositories
+                $occupied = $this->sessionRepo->countActiveSessions($parking['id']);
+                $reserved = $this->reservationRepo->countActiveReservationsAt($parking['id'], $checkTime->format('Y-m-d H:i:s'));
 
-                $available = max(0, (int)$parking['total_spaces'] - $occupied);
+                $available = max(0, (int)$parking['total_spaces'] - max($occupied, $reserved));
 
                 if ($available > 0) {
                     $results[] = [

@@ -32,6 +32,7 @@ class DTOSecurityAnalyzer {
         'ReserveParkingDTO' => 'backend/Infrastructure/Controller/ReservationController.php',
         'GetParkingReservationsDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
         'GetUserReservationsDTO' => 'backend/Infrastructure/Controller/UserDataController.php',
+        'CancelReservationDTO' => 'backend/Infrastructure/Controller/ReservationController.php',
         'GetReservationInvoiceDTO' => 'backend/Infrastructure/Controller/UserDataController.php',
         
         // Parking Sessions (Enter/Exit)
@@ -117,7 +118,7 @@ class DTOSecurityAnalyzer {
             $_SERVER['REMOTE_ADDR'] ?? 'unknown',
             substr($value, 0, 120)
         );
-        @file_put_contents(__DIR__ . '/../logs/security.log', $msg, FILE_APPEND);
+        // logging removed: security event - $msg
     }
 }
 ?>

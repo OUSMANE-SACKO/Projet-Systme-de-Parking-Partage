@@ -4,9 +4,16 @@ require_once __DIR__ . '/../../Application/DTO/GetUserReservationsDTO.php';
 require_once __DIR__ . '/../../Application/DTO/GetUserSessionsDTO.php';
 require_once __DIR__ . '/../../Application/DTO/GetReservationInvoiceDTO.php';
 require_once __DIR__ . '/../../Application/DTO/GetUserSubscriptionsDTO.php';
+require_once __DIR__ . '/../Repositories/ReservationRepository.php';
+require_once __DIR__ . '/../Repositories/SessionRepository.php';
+require_once __DIR__ . '/../Repositories/SubscriptionRepository.php';
 
 class UserDataController {
     private PDO $pdo;
+
+    private ReservationRepository $reservationRepo;
+    private SessionRepository $sessionRepo;
+    private SubscriptionRepository $subscriptionRepo;
 
     public function __construct(PDO $pdo) {
         $this->pdo = $pdo;
@@ -14,26 +21,77 @@ class UserDataController {
 
     public function getUserReservations(GetUserReservationsDTO $dto): array {
         try {
-            $stmt = $this->pdo->prepare("
-                SELECT r.*, p.name as parking_name, p.address as parking_address
-                FROM reservations r
-                JOIN parkings p ON r.parking_id = p.id
-                WHERE r.user_id = ?
-                ORDER BY r.start_time DESC
-            ");
-            $stmt->execute([$dto->userId]);
-            $reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $this->reservationRepo = new ReservationRepository($this->pdo);
+            $this->sessionRepo = new SessionRepository($this->pdo);
+            $this->subscriptionRepo = new SubscriptionRepository($this->pdo);
+            $reservations = $this->reservationRepo->findByUserWithParking($dto->userId);
+            // compute DB now timestamp and a grace window for lateness detection
+            $graceMinutes = 10;
+            $dbNowRow = $this->pdo->query("SELECT UNIX_TIMESTAMP(NOW()) AS now_ts")->fetch(PDO::FETCH_ASSOC);
+            $dbNowTs = isset($dbNowRow['now_ts']) ? (int)$dbNowRow['now_ts'] : time();
 
             return [
                 'success' => true,
-                'reservations' => array_map(function($r) {
-                    $now = new DateTime();
-                    $start = new DateTime($r['start_time']);
-                    $end = new DateTime($r['end_time']);
+                'reservations' => array_map(function($r) use ($dbNowTs, $graceMinutes) {
                     $status = $r['status'];
-                    if ($status === 'pending' && $start <= $now && $end >= $now) $status = 'active';
-                    elseif ($status === 'pending' && $end < $now) $status = 'past';
-                    
+
+                    // Vérifier si l'utilisateur est actuellement dans le parking pour cette réservation
+                    $inParking = false;
+                    try {
+                        $s = $this->sessionRepo->getOpenSessionByReservation((int)$r['id']);
+                        $inParking = (bool)$s;
+                    } catch (Exception $e) {
+                        $inParking = false;
+                    }
+
+                    // Determine timestamps
+                    $startTs = isset($r['start_time']) ? (int)strtotime($r['start_time']) : null;
+                    $endTs = isset($r['end_time']) ? (int)strtotime($r['end_time']) : null;
+
+                    // Determine if reservation is late: pending and now > start_time + grace
+                    $isLate = false;
+                    if ($status === 'pending' && $startTs !== null) {
+                        if ($dbNowTs > ($startTs + ($graceMinutes * 60))) {
+                            $isLate = true;
+                        }
+                    }
+
+                    // Compute displayStatus and displayLabel with precedence:
+                    // inParking -> 'Dans le parking'
+                    // completed/status='completed' -> 'Terminé'
+                    // pending & now < start -> 'A venir'
+                    // pending & now between start and end -> 'En cours' (unless isLate -> 'En retard')
+                    // active & now between start and end -> 'En cours'
+                    // otherwise -> 'Terminé'
+                    $displayStatus = $status;
+                    $displayLabel = ucfirst($status);
+
+                    if ($inParking) {
+                        $displayStatus = 'in_parking';
+                        $displayLabel = 'Dans le parking';
+                    } elseif (($r['status'] ?? '') === 'completed') {
+                        $displayStatus = 'completed';
+                        $displayLabel = 'Terminé';
+                    } else {
+                        if ($startTs !== null && $endTs !== null) {
+                            if ($dbNowTs < $startTs) {
+                                $displayStatus = 'pending';
+                                $displayLabel = 'À venir';
+                            } elseif ($dbNowTs >= $startTs && $dbNowTs <= $endTs) {
+                                if ($isLate) {
+                                    $displayStatus = 'late';
+                                    $displayLabel = 'En retard';
+                                } else {
+                                    $displayStatus = 'active';
+                                    $displayLabel = 'En cours';
+                                }
+                            } else {
+                                $displayStatus = 'completed';
+                                $displayLabel = 'Terminé';
+                            }
+                        }
+                    }
+
                     return [
                         'id' => $r['id'],
                         'parkingId' => $r['parking_id'],
@@ -42,7 +100,11 @@ class UserDataController {
                         'startTime' => $r['start_time'],
                         'endTime' => $r['end_time'],
                         'totalPrice' => $r['total_price'],
-                        'status' => $status
+                        'status' => $status,
+                        'inParking' => $inParking,
+                        'isLate' => $isLate,
+                        'displayStatus' => $displayStatus,
+                        'displayLabel' => $displayLabel
                     ];
                 }, $reservations),
                 'count' => count($reservations)
@@ -54,15 +116,8 @@ class UserDataController {
 
     public function getUserSessions(GetUserSessionsDTO $dto): array {
         try {
-            $stmt = $this->pdo->prepare("
-                SELECT ps.*, p.name as parking_name, p.address as parking_address
-                FROM parkings_sessions ps
-                JOIN parkings p ON ps.parking_id = p.id
-                WHERE ps.user_id = ?
-                ORDER BY ps.entry_time DESC
-            ");
-            $stmt->execute([$dto->userId]);
-            $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $this->sessionRepo = new SessionRepository($this->pdo);
+            $sessions = $this->sessionRepo->findByUser($dto->userId);
 
             return [
                 'success' => true,
@@ -87,19 +142,15 @@ class UserDataController {
     public function getReservationInvoice(GetReservationInvoiceDTO $dto): array {
         try {
             // Récupérer la réservation
-            $stmt = $this->pdo->prepare("
-                SELECT r.*, p.name as parking_name, p.address as parking_address, p.hourly_rate,
-                       u.first_name, u.last_name, u.email
-                FROM reservations r
-                JOIN parkings p ON r.parking_id = p.id
-                JOIN users u ON r.user_id = u.id
-                WHERE r.id = ?
-            ");
-            $stmt->execute([$dto->reservationId]);
-            $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
+            $reservation = $this->reservationRepo->findByIdWithDetails($dto->reservationId);
 
             if (!$reservation) {
                 return ['success' => false, 'message' => 'Réservation non trouvée.'];
+            }
+
+            // N'autoriser la facture que pour les réservations terminées
+            if (($reservation['status'] ?? '') !== 'completed') {
+                return ['success' => false, 'message' => 'Facture disponible uniquement pour les réservations terminées.'];
             }
 
             // Calculer le montant
@@ -162,17 +213,7 @@ class UserDataController {
 
     public function getUserSubscriptions(GetUserSubscriptionsDTO $dto): array {
         try {
-            $stmt = $this->pdo->prepare("
-                SELECT us.*, st.name as type_name, st.description, st.monthly_price,
-                       st.duration_months, p.name as parking_name, p.address as parking_address
-                FROM user_subscriptions us
-                JOIN subscription_types st ON us.subscription_type_id = st.id
-                JOIN parkings p ON st.parking_id = p.id
-                WHERE us.user_id = ?
-                ORDER BY us.start_date DESC
-            ");
-            $stmt->execute([$dto->userId]);
-            $subscriptions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $subscriptions = $this->subscriptionRepo->findUserSubscriptions($dto->userId);
 
             return [
                 'success' => true,

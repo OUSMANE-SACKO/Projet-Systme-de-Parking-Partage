@@ -10,7 +10,15 @@ const Auth = {
   
   async login(email, password) {
     if (!email || !password) return { success: false, error: 'Email et mot de passe requis' };
-    return await api.login(email, password);
+      const result = await api.login(email, password);
+      // Stocker le rôle dans le localStorage si présent
+      if (result.success && result.user && result.user.role) {
+        localStorage.setItem('userRole', result.user.role);
+      } else if (result.success && result.user && result.user.isOwner) {
+        // fallback pour compatibilité : si isOwner true, rôle = owner
+        localStorage.setItem('userRole', result.user.isOwner ? 'owner' : 'customer');
+      }
+      return result;
   },
 
   async register(data) {
@@ -89,12 +97,37 @@ if (loginForm) {
     );
 
     if (result.success) {
-      window.location.href = 'dashboard.html';
+      // Rediriger selon le rôle
+      const role = localStorage.getItem('userRole');
+      if (role === 'owner') {
+        window.location.href = 'owner-dashboard.html';
+      } else {
+        window.location.href = 'dashboard.html';
+      }
     } else {
       showErrors(loginForm, result.error || 'Erreur de connexion');
       btn.disabled = false;
       btn.textContent = originalText;
     }
+  // Affichage du menu selon le rôle
+  document.addEventListener('DOMContentLoaded', () => {
+    const role = localStorage.getItem('userRole');
+    // Si on est sur dashboard.html et c'est un owner, rediriger
+    if (currentPage === 'dashboard.html' && role === 'owner') {
+      window.location.href = 'owner-dashboard.html';
+    }
+    // Si on est sur owner-dashboard.html et pas owner, rediriger
+    if (currentPage === 'owner-dashboard.html' && role !== 'owner') {
+      window.location.href = 'dashboard.html';
+    }
+    // Adapter le menu si besoin (exemple : masquer les liens client pour owner)
+    if (role === 'owner') {
+      const nav = document.querySelector('.nav-center');
+      if (nav) nav.innerHTML = '<li><a href="owner-dashboard.html" class="active">Mon Espace</a></li>';
+      const navName = document.getElementById('nav-user-name');
+      if (navName) navName.textContent = 'Propriétaire';
+    }
+  });
   });
 }
 
@@ -203,6 +236,68 @@ async function loadParkings() {
   return parkings;
 }
 
+// ========== RÉSERVATIONS (Dashboard) ==========
+function computeReservationStatus(startIso, endIso) {
+  const now = new Date();
+  const start = startIso ? new Date(startIso) : null;
+  const end = endIso ? new Date(endIso) : null;
+  if (start && end) {
+    if (now >= start && now <= end) return 'active';
+    if (now < start) return 'pending';
+    return 'completed';
+  }
+  return 'pending';
+}
+
+async function loadDashboardReservations() {
+  if (currentPage !== 'dashboard.html') return;
+  const container = document.getElementById('reservations-container');
+  if (!container) return;
+  container.innerHTML = '<p>Chargement...</p>';
+  try {
+    const res = await api.getUserReservations();
+    if (!res.success) {
+      container.innerHTML = `<p class="error">Erreur: ${res.error || res.message}</p>`;
+      return;
+    }
+    const reservations = res.reservations || [];
+    if (!reservations.length) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <span>🚗</span>
+          <p>Aucune réservation pour le moment</p>
+          <a href="reserver.html" class="cta-btn-small">Réserver maintenant</a>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = reservations.map(r => {
+      const start = r.startTime || r.from || r.begin || r.fromTime;
+      const end = r.endTime || r.to || r.finish || r.toTime;
+      const status = computeReservationStatus(start, end);
+      const label = status === 'active' ? '🟢 En cours' : (status === 'pending' ? '⏳ À venir' : '✅ Terminée');
+      return `
+        <div class="reservation-summary">
+          <div class="res-left">
+            <strong>${r.parkingName || r.parking?.name || 'Parking'}</strong>
+            <div class="res-dates">${start ? new Date(start).toLocaleString() : '-'} → ${end ? new Date(end).toLocaleString() : '-'}</div>
+          </div>
+          <div class="res-right">
+            <span class="status-badge ${status}">${label}</span>
+            <div class="res-price">${(r.totalPrice || r.price || 0).toFixed ? (r.totalPrice || r.price || 0).toFixed(2) + '€' : (r.totalPrice || r.price || 0) + '€'}</div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    container.innerHTML = '<p class="error">Erreur de connexion au serveur.</p>';
+  }
+}
+
+// Charger les résa sur la page d'accueil si présent
+if (currentPage === 'dashboard.html') {
+  loadDashboardReservations();
+}
+
 // ========== GOOGLE MAPS ==========
 if (document.getElementById('gmap')) {
   window.initMap = async function() {
@@ -306,14 +401,27 @@ function setupMapSearch(map) {
 }
 
 // ========== MODAL DE RÉSERVATION ==========
-function openReservationModal(parking) {
+async function openReservationModal(parking) {
   const modal = document.getElementById('reservation-modal');
   if (!modal) return;
+
+  // Charger les infos détaillées du parking (avec les tranches tarifaires)
+  try {
+    const result = await api.getParkingInfo(parking.id);
+    if (result.success && result.parking) {
+      parking.pricingTiers = result.parking.pricingTiers || [];
+      // override base price if API provides a different one
+      if (typeof result.parking.price === 'number') parking.price = result.parking.price;
+    }
+  } catch (e) {
+    // ignore and use local parking data
+  }
 
   document.getElementById('modal-parking-info').innerHTML = `
     <h3>${parking.name}</h3>
     <p>${parking.address}, ${parking.city}</p>
-    <p><strong>${parking.price.toFixed(2)}€/h</strong></p>
+    <p><strong>${parking.price.toFixed(2)}€/h</strong> (tarif de base)</p>
+    <p class="pricing-note">💡 Le tarif peut varier selon l'heure de stationnement</p>
   `;
   modal.style.display = 'flex';
 
@@ -324,10 +432,54 @@ function openReservationModal(parking) {
   const dateFin = document.getElementById('modal-date-fin');
   const priceDisplay = document.getElementById('modal-price');
 
+  // Fonction pour obtenir le tarif applicable selon l'heure
+  const getPriceForHour = (hour) => {
+    if (!parking.pricingTiers || parking.pricingTiers.length === 0) {
+      return parking.price;
+    }
+    
+    // Trier les tranches par heure
+    const sortedTiers = [...parking.pricingTiers].sort((a, b) => {
+      const timeA = a.time.split(':').map(Number);
+      const timeB = b.time.split(':').map(Number);
+      return (timeA[0] * 60 + timeA[1]) - (timeB[0] * 60 + timeB[1]);
+    });
+    
+    // Trouver la tranche applicable
+    let applicableTier = sortedTiers[0];
+    for (const tier of sortedTiers) {
+      const tierHour = parseInt(tier.time.split(':')[0]);
+      if (tierHour <= hour) {
+        applicableTier = tier;
+      }
+    }
+    
+    return applicableTier ? applicableTier.price : parking.price;
+  };
+
+  // Calculer le prix en tenant compte des tranches horaires et des jours
   const calcPrice = () => {
     if (dateDebut.value && dateFin.value) {
-      const hours = (new Date(dateFin.value) - new Date(dateDebut.value)) / 3600000;
-      if (hours > 0) priceDisplay.textContent = (hours * parking.price).toFixed(2) + '€';
+      const start = new Date(dateDebut.value);
+      const end = new Date(dateFin.value);
+      if (isNaN(start) || isNaN(end) || end <= start) {
+        priceDisplay.textContent = '--€';
+        return;
+      }
+      let totalPrice = 0;
+      let current = new Date(start);
+      // Boucle heure par heure, même sur plusieurs jours
+      while (current < end) {
+        const hour = current.getHours();
+        const hourlyRate = getPriceForHour(hour);
+        // Calcul de la durée de ce segment (jusqu'à la prochaine heure ou la fin)
+        let nextHour = new Date(current);
+        nextHour.setHours(current.getHours() + 1, 0, 0, 0);
+        let delta = Math.min((end - current) / 3600000, 1);
+        if (delta > 0) totalPrice += hourlyRate * delta;
+        current = nextHour;
+      }
+      priceDisplay.textContent = totalPrice.toFixed(2) + '€';
     }
   };
   dateDebut.onchange = dateFin.onchange = calcPrice;
@@ -338,12 +490,42 @@ function openReservationModal(parking) {
     this.textContent = 'Réservation...';
     
     const result = await api.reserveParking(parking.id, dateDebut.value, dateFin.value);
-    alert(result.success ? 'Réservation confirmée !' : 'Erreur: ' + (result.error || result.message));
-    if (result.success) modal.style.display = 'none';
+    if (result.success) {
+      showGlobalMessage('✅ Réservation confirmée !', 'success');
+      modal.style.display = 'none';
+    } else {
+      showGlobalMessage('❌ Erreur: ' + (result.error || result.message), 'error');
+    }
     
     this.disabled = false;
     this.textContent = 'Confirmer la réservation';
   };
+}
+
+// Message global simple (bandeau en haut de page)
+function showGlobalMessage(message, type = 'info') {
+  let div = document.getElementById('global-message');
+  if (!div) {
+    div = document.createElement('div');
+    div.id = 'global-message';
+    div.style.position = 'fixed';
+    div.style.top = '16px';
+    div.style.left = '50%';
+    div.style.transform = 'translateX(-50%)';
+    div.style.zIndex = 9999;
+    div.style.padding = '10px 16px';
+    div.style.borderRadius = '6px';
+    div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+    div.style.fontSize = '14px';
+    document.body.appendChild(div);
+  }
+  div.textContent = message;
+  if (type === 'success') div.style.background = '#d4edda', div.style.color = '#155724';
+  else if (type === 'error') div.style.background = '#f8d7da', div.style.color = '#721c24';
+  else div.style.background = '#cce5ff', div.style.color = '#004085';
+  div.style.display = 'block';
+  clearTimeout(div._timeout);
+  div._timeout = setTimeout(() => { div.style.display = 'none'; }, 5000);
 }
 
 // ========== ABONNEMENTS ==========

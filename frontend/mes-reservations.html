@@ -106,6 +106,14 @@
                 }
                 
                 allReservations = result.reservations || [];
+                // Prefer server-provided status and isLate flag; normalize time fields
+                allReservations = allReservations.map(r => {
+                    const start = r.startTime || r.from || r.begin || r.fromTime;
+                    const end = r.endTime || r.to || r.finish || r.toTime;
+                    const status = r.status || 'pending';
+                    const isLate = !!r.isLate;
+                    return { ...r, startTime: start, endTime: end, status, isLate };
+                });
                 displayReservations(allReservations);
                 
             } catch (error) {
@@ -132,11 +140,11 @@
                 return;
             }
             
-            container.innerHTML = reservations.map(r => `
-                <div class="reservation-card status-${r.status}">
+                container.innerHTML = reservations.map(r => `
+                <div class="reservation-card status-${r.displayStatus || r.status}">
                     <div class="reservation-header">
                         <h3>${r.parkingName || 'Parking'}</h3>
-                        <span class="status-badge ${r.status}">${getStatusLabel(r.status)}</span>
+                        <span class="status-badge ${r.displayStatus || r.status}">${r.inParking ? '🏷️ Dans le parking' : (r.displayLabel || getStatusLabel(r.status))}</span>
                     </div>
                     <p class="reservation-address">📍 ${r.parkingAddress || 'Adresse non disponible'}</p>
                     <div class="reservation-times">
@@ -147,10 +155,29 @@
                         <span class="price">${r.totalPrice || '0.00'}€</span>
                     </div>
                     <div class="reservation-actions">
-                        <button class="btn-secondary" onclick="showInvoice('${r.id}')">📄 Facture</button>
+                        ${r.status === 'completed' ? `<button class="btn-secondary" onclick="showInvoice('${r.id}')">📄 Facture</button>` : ''}
+                        ${r.status === 'pending' ? `<button class="btn-danger" onclick="cancelReservation('${r.id}')">❌ Annuler</button>` : ''}
                     </div>
                 </div>
             `).join('');
+        }
+
+        async function cancelReservation(reservationId) {
+            if (!confirm('Confirmer l\'annulation de la réservation ?')) return;
+            try {
+                console.log('[cancelReservation] sending', reservationId);
+                const result = await api.cancelReservation(reservationId);
+                console.log('[cancelReservation] result', result);
+                if (result.success) {
+                    alert('Réservation annulée.');
+                    await loadReservations();
+                } else {
+                    alert('Erreur: ' + (result.error || 'Impossible d\'annuler la réservation.'));
+                }
+            } catch (err) {
+                console.error('[cancelReservation] error', err);
+                alert('Erreur de communication avec le serveur.');
+            }
         }
 
         function getStatusLabel(status) {

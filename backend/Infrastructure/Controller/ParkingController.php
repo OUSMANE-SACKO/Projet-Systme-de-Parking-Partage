@@ -1,31 +1,27 @@
 <?php
 
 require_once __DIR__ . '/../../Application/DTO/AddParkingDTO.php';
+require_once __DIR__ . '/../../Infrastructure/Repositories/ParkingRepository.php';
 
 class ParkingController {
     private PDO $pdo;
+    private ParkingRepository $parkingRepo;
 
     public function __construct(PDO $pdo) {
         $this->pdo = $pdo;
+        $this->parkingRepo = new ParkingRepository($pdo);
     }
 
     public function addParking(AddParkingDTO $dto): array {
         try {
             // Vérifier que le propriétaire existe
-            $stmt = $this->pdo->prepare("SELECT * FROM parking_owners WHERE id = ?");
-            $stmt->execute([$dto->ownerId]);
-            $owner = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+            $owner = $this->parkingRepo->findOwnerById($dto->ownerId);
             if (!$owner) {
                 return ['success' => false, 'message' => 'Propriétaire non trouvé.'];
             }
 
-            // Créer le parking
-            $stmt = $this->pdo->prepare(
-                "INSERT INTO parkings (owner_id, name, address, city, latitude, longitude, total_spaces) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?)"
-            );
-            $stmt->execute([
+            // Créer le parking via le repository
+            $parkingId = $this->parkingRepo->createParking(
                 $dto->ownerId,
                 $dto->name,
                 $dto->address,
@@ -33,9 +29,7 @@ class ParkingController {
                 $dto->latitude,
                 $dto->longitude,
                 $dto->totalSpaces
-            ]);
-
-            $parkingId = $this->pdo->lastInsertId();
+            );
 
             return [
                 'success' => true,

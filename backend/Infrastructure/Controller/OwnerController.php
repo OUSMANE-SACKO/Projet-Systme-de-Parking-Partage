@@ -21,7 +21,7 @@ class OwnerController {
             // Hasher le mot de passe
             $hashedPassword = password_hash($dto->password, PASSWORD_ARGON2ID);
 
-            // Insérer le propriétaire
+            // Insérer le propriétaire dans parking_owners
             $stmt = $this->pdo->prepare(
                 "INSERT INTO parking_owners (first_name, last_name, email, password) VALUES (?, ?, ?, ?)"
             );
@@ -29,11 +29,20 @@ class OwnerController {
 
             $ownerId = $this->pdo->lastInsertId();
 
+            // Insérer aussi dans users avec le rôle 'owner'
+            $stmt = $this->pdo->prepare(
+                "INSERT INTO users (first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, 'owner')"
+            );
+            $stmt->execute([$dto->forename, $dto->name, $dto->email, $hashedPassword]);
+
+            $userId = $this->pdo->lastInsertId();
+
             return [
                 'success' => true,
                 'message' => 'Compte propriétaire créé avec succès.',
                 'owner' => [
                     'id' => $ownerId,
+                    'user_id' => $userId,
                     'email' => $dto->email,
                     'name' => $dto->name,
                     'forename' => $dto->forename

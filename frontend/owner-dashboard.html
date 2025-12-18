@@ -499,12 +499,11 @@
             container.innerHTML = `
                 <table>
                     <thead>
-                        <tr><th>Plaque</th><th>Entrée</th><th>Durée</th></tr>
+                        <tr><th>Entrée</th><th>Durée</th></tr>
                     </thead>
                     <tbody>
                         ${result.drivers.map(d => `
                             <tr class="warning-row">
-                                <td>${d.vehiclePlate || 'N/A'}</td>
                                 <td>${new Date(d.entryTime).toLocaleString('fr-FR')}</td>
                                 <td>${d.duration || 'N/A'}</td>
                             </tr>

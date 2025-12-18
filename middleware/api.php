@@ -41,6 +41,7 @@ require_once __DIR__ . '/../backend/Application/DTO/GetUserReservationsDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/GetUserSessionsDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/GetUserSubscriptionsDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/GetReservationInvoiceDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/CancelReservationDTO.php';
 
 // Charger les DTOs de réponse
 require_once __DIR__ . '/../backend/Application/DTO/Response/AuthResponseDTO.php';
@@ -179,6 +180,9 @@ class ApiHandler {
 
             case 'GetReservationInvoiceDTO':
                 return GetReservationInvoiceDTO::fromArray($data);
+
+            case 'CancelReservationDTO':
+                return CancelReservationDTO::fromArray($data);
 
             // Stationnements (Sessions)
             case 'EnterExitParkingDTO':
