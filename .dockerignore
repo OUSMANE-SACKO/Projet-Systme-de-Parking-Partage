@@ -1,0 +1,24 @@
+﻿# Ignorer les dépendances - elles seront installées dans le conteneur
+vendor/
+node_modules/
+
+# Ignorer les fichiers de cache et logs
+*.log
+.cache/
+tests/cache/
+tests/build/
+tests/reports/
+
+# Ignorer les fichiers de configuration locale
+.env.local
+*.local
+
+# Ignorer les fichiers IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Ignorer les fichiers Git
+.git/
+.gitignore

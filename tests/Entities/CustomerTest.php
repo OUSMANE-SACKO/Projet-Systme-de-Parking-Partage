@@ -11,7 +11,7 @@ class CustomerTest extends TestCase {
     
     protected function setUp(): void {
         $this->customer = new Customer('Doe', 'John', 'john@test.com', 'hash123');
-        $this->parking = new Parking(['address' => '123 Test St', 'city' => 'TestCity'], 10);
+        $this->parking = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 10);
         
         // Create test entities
         $this->reservation = new Reservation($this->customer, $this->parking, new DateTime('2024-01-01 10:00'), new DateTime('2024-01-01 12:00'));
@@ -133,3 +133,4 @@ class CustomerTest extends TestCase {
         $this->assertContainsOnlyInstancesOf(Reservation::class, $this->customer->getReservations());
     }
 }
+

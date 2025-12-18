@@ -1,0 +1,80 @@
+<?php
+    class Reservation {
+        private ?int $id = null;
+        private Customer $customer;
+        private Parking $parking;
+        private DateTime $startTime;
+        private DateTime $endTime;
+
+        public function __construct(Customer $customer, Parking $parking, DateTime $startTime, DateTime $endTime) {
+            if ($endTime < $startTime) {
+                throw new InvalidArgumentException('endTime must be after startTime');
+            }
+            $this->customer = $customer;
+            $this->parking = $parking;
+            $this->startTime = $startTime;
+            $this->endTime = $endTime;
+        }
+        
+        //getters
+        public function getId() : ?int {
+            return $this->id;
+        }
+
+        public function getCustomer() : Customer {
+            return $this->customer;
+        }
+
+        public function getParking() : Parking {
+            return $this->parking;
+        }
+
+        public function getStartTime() : DateTime {
+            return $this->startTime;
+        }
+
+        public function getEndTime() : DateTime {
+            return $this->endTime;
+        }
+
+        // computed helpers
+        public function getDurationMinutes() : int {
+            $seconds = max(0, $this->endTime->getTimestamp() - $this->startTime->getTimestamp());
+            return (int) ceil($seconds / 60);
+        }
+
+        public function getAmount() : float {
+            // Montant simple basé sur la durée
+            $durationMinutes = $this->getDurationMinutes();
+            $durationHours = ceil($durationMinutes / 60.0);
+            return 10 + ($durationHours * 2); // 10 euros de base + 2 euros par heure
+        }
+
+        //setters
+        public function setId(int $id) : void {
+            $this->id = $id;
+        }
+
+        public function setCustomer(Customer $customer) : void {
+            $this->customer = $customer;
+        }
+
+        public function setParking(Parking $parking) : void {
+            $this->parking = $parking;
+        }
+
+        public function setStartTime(DateTime $startTime) : void {
+            if ($this->endTime < $startTime) {
+                throw new InvalidArgumentException('startTime must be before endTime');
+            }
+            $this->startTime = $startTime;
+        }
+
+        public function setEndTime(DateTime $endTime) : void {
+            if ($endTime < $this->startTime) {
+                throw new InvalidArgumentException('endTime must be after startTime');
+            }
+            $this->endTime = $endTime;
+        }
+    }
+?>

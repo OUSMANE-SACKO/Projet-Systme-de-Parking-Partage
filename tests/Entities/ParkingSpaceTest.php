@@ -10,7 +10,7 @@ class ParkingSpaceTest extends TestCase {
     
     protected function setUp(): void {
         $this->customer = new Customer('Doe', 'John', 'john@test.com', 'hash');
-        $this->parking = new Parking(['address' => '123 Test St'], 10);
+        $this->parking = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 10);
     }
     
     public function testParkingSpaceConstruction(): void {
@@ -18,7 +18,7 @@ class ParkingSpaceTest extends TestCase {
         
         $parkingSpace = new ParkingSpace($this->customer, $startTime, $this->parking);
         
-        $this->assertNotEmpty($parkingSpace->getId());
+        
         $this->assertSame($this->customer, $parkingSpace->getCustomer());
         $this->assertEquals($startTime, $parkingSpace->getStartTime());
         $this->assertNull($parkingSpace->getEndTime());
@@ -31,7 +31,7 @@ class ParkingSpaceTest extends TestCase {
         $newCustomer = new Customer('Smith', 'Jane', 'jane@test.com', 'hash2');
         $newStartTime = new DateTime('2024-01-02 09:00:00');
         $newEndTime = new DateTime('2024-01-02 10:00:00');
-        $newParking = new Parking(['address' => '456 Other St'], 20);
+        $newParking = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 20);
         
         $parkingSpace->setCustomer($newCustomer);
         $parkingSpace->setStartTime($newStartTime);
@@ -63,7 +63,11 @@ class ParkingSpaceTest extends TestCase {
         $space1 = new ParkingSpace($this->customer, new DateTime(), $this->parking);
         $space2 = new ParkingSpace($this->customer, new DateTime(), $this->parking);
         
-        $this->assertNotEquals($space1->getId(), $space2->getId());
+        // IDs are null until persisted to database
+        $this->assertNull($space1->getId());
+        $this->assertNull($space2->getId());
+        // But the objects are different instances
+        $this->assertNotSame($space1, $space2);
     }
     
     public function testIsOccupiedWhenEndTimeIsNull(): void {
@@ -98,3 +102,4 @@ class ParkingSpaceTest extends TestCase {
         }
     }
 }
+

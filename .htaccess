@@ -1,0 +1,31 @@
+# Page d'accueil par défaut
+DirectoryIndex frontend/index.html index.php
+
+# Activer la réécriture d'URL
+RewriteEngine On
+
+# Rediriger /index.html vers la racine
+RewriteRule ^index\.html$ / [R=301,L]
+RewriteRule ^frontend/index\.html$ / [R=301,L]
+
+# Si le fichier ou dossier existe, le servir directement
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Rediriger les fichiers statiques du frontend
+RewriteRule ^(styles\.css|app\.js|api\.js)$ frontend/$1 [L]
+RewriteRule ^(connexion|register|tarifs|dashboard|reserver|abonnement|mes-reservations|mes-stationnements)\.html$ frontend/$1.html [L]
+
+# Routes API vers le backend
+RewriteRule ^api/(.*)$ backend/Infrastructure/Controller/$1 [L,QSA]
+
+# Protection XSS - autoriser Google Maps API et Google Fonts
+Header set Content-Security-Policy "default-src 'self'; script-src 'self' https://maps.googleapis.com https://maps.gstatic.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://maps.googleapis.com https://maps.gstatic.com; connect-src 'self' https://maps.googleapis.com; frame-src 'self'"
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "DENY"
+Header set X-XSS-Protection "1; mode=block"
+Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Cookies sécurisés (PHP)
+Header always edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure;SameSite=Strict

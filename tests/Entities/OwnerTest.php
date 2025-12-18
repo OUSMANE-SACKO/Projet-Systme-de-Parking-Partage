@@ -13,7 +13,7 @@ class OwnerTest extends TestCase {
         
         $owner = new Owner($name, $forename, $email, $passwordHash);
         
-        $this->assertNotEmpty($owner->getId());
+        $this->assertNull($owner->getId());
         $this->assertEquals($name, $owner->getName());
         $this->assertEquals($forename, $owner->getForename());
         $this->assertEquals($email, $owner->getEmail());
@@ -31,7 +31,7 @@ class OwnerTest extends TestCase {
     
     public function testAddAndRemoveParking(): void {
         $owner = new Owner('Wilson', 'Alex', 'alex@test.com', 'hash');
-        $parking = new Parking(['address' => '789 Main St'], 30);
+        $parking = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 30);
         
         $owner->addParking($parking);
         $parkings = $owner->getParkings();
@@ -46,7 +46,7 @@ class OwnerTest extends TestCase {
     
     public function testRemoveNonExistentParkingReturnsFalse(): void {
         $owner = new Owner('Davis', 'Chris', 'chris@test.com', 'hash');
-        $parking = new Parking(['address' => '999 Test Ave'], 15);
+        $parking = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 15);
         
         $result = $owner->removeParking($parking);
         $this->assertFalse($result);
@@ -54,8 +54,8 @@ class OwnerTest extends TestCase {
     
     public function testSetParkingsWithValidArray(): void {
         $owner = new Owner('Johnson', 'Pat', 'pat@test.com', 'hash');
-        $parking1 = new Parking(['address' => '111 First St'], 20);
-        $parking2 = new Parking(['address' => '222 Second St'], 25);
+        $parking1 = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 20);
+        $parking2 = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 25);
         
         $parkings = [$parking1, $parking2];
         $owner->setParkings($parkings);
@@ -74,9 +74,9 @@ class OwnerTest extends TestCase {
     
     public function testMultipleParkings(): void {
         $owner = new Owner('Taylor', 'Jordan', 'jordan@test.com', 'hash');
-        $parking1 = new Parking(['address' => '333 Third St'], 40);
-        $parking2 = new Parking(['address' => '444 Fourth St'], 50);
-        $parking3 = new Parking(['address' => '555 Fifth St'], 60);
+        $parking1 = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 40);
+        $parking2 = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 50);
+        $parking3 = new Parking(['latitude' => 0.0, 'longitude' => 0.0], 60);
         
         $owner->addParking($parking1);
         $owner->addParking($parking2);
@@ -88,3 +88,4 @@ class OwnerTest extends TestCase {
         $this->assertContains($parking3, $owner->getParkings());
     }
 }
+

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxawCar - Mes Stationnements</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar-rounded">
+    <div class="nav-left">
+      <span class="logo-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="20,5 35,13 35,27 20,35 5,27 5,13" fill="#8e24aa"/>
+          <circle cx="20" cy="20" r="7" fill="#fff" fill-opacity="0.92"/>
+          <circle cx="20" cy="20" r="3.5" fill="#8e24aa"/>
+        </svg>
+      </span>
+      <span class="logo-text">TaxawCar</span>
+    </div>
+    <ul class="nav-center">
+      <li><a href="dashboard.html">Accueil</a></li>
+      <li><a href="reserver.html">Réserver</a></li>
+      <li><a href="mes-reservations.html">Mes Réservations</a></li>
+      <li><a href="mes-stationnements.html" class="active">Mes Stationnements</a></li>
+      <li><a href="abonnement.html">Abonnements</a></li>
+    </ul>
+    <div class="nav-right">
+      <span class="user-info">
+        <span class="user-avatar">👤</span>
+        <span class="user-name" id="nav-user-name">Utilisateur</span>
+      </span>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </nav>
+
+    <main class="container">
+        <h1>🚗 Mes Stationnements</h1>
+        
+        <div id="user-info" class="info-card">
+            <p>Bienvenue, <span id="user-name">Utilisateur</span></p>
+        </div>
+
+        <!-- Section Stationnement en cours -->
+        <section id="active-session" class="active-session-section" style="display:none;">
+            <h2>🟢 Stationnement en cours</h2>
+            <div id="active-session-card" class="session-active-card"></div>
+        </section>
+
+        <!-- Section Entrer/Sortir d'un parking -->
+        <section class="parking-action-section">
+            <h2>📍 Entrer ou Sortir d'un parking</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Parking</label>
+                    <select id="parking-select">
+                        <option value="">Sélectionner un parking</option>
+                    </select>
+                </div>
+                <!-- Plaque d'immatriculation removed: not required anymore -->
+            </div>
+            <div class="action-buttons">
+                <button id="enter-btn" class="btn-success" onclick="enterParking()">🚗 Entrer</button>
+                <button id="exit-btn" class="btn-danger" onclick="exitParking()">🚪 Sortir</button>
+            </div>
+            <div id="action-message" class="message" style="display:none;"></div>
+        </section>
+
+        <!-- Historique des stationnements -->
+        <section class="sessions-section">
+            <h2>📜 Historique des stationnements</h2>
+            
+            <div class="filters">
+                <label>
+                    <input type="checkbox" id="show-active-only" onchange="filterSessions()">
+                    Afficher uniquement les stationnements actifs
+                </label>
+            </div>
+
+            <div id="sessions-list" class="sessions-grid">
+                <p>Chargement...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 TaxawCar - Système de parking partagé</p>
+    </footer>
+
+    <script src="api.js"></script>
+    <script>
+        let allSessions = [];
+        let parkings = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = api.getCurrentUser();
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            const displayName = user.name || user.forename || user.email;
+            document.getElementById('user-name').textContent = displayName;
+            const navName = document.getElementById('nav-user-name');
+            if (navName) navName.textContent = displayName;
+            loadSessions();
+        });
+
+        function logout() {
+            api.logout();
+            window.location.href = 'index.html';
+        }
+
+        async function loadParkings() {
+            const result = await api.getParkings();
+            if (result.success && result.parkings) {
+                parkings = result.parkings;
+                const select = document.getElementById('parking-select');
+                parkings.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = p.id;
+                    option.textContent = `${p.name} - ${p.city}`;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        async function loadSessions() {
+            const container = document.getElementById('sessions-list');
+            
+            try {
+                const result = await api.getUserSessions();
+                
+                if (!result.success) {
+                    container.innerHTML = `<p class="error">Erreur: ${result.error || result.message}</p>`;
+                    return;
+                }
+                
+                allSessions = result.sessions || [];
+                displaySessions(allSessions);
+                
+                // Remplir la liste des parkings uniquement à partir des réservations de l'utilisateur (à venir / en cours)
+                const select = document.getElementById('parking-select');
+                const enterBtn = document.getElementById('enter-btn');
+                const exitBtn = document.getElementById('exit-btn');
+                if (select) {
+                    select.innerHTML = '<option value="">Sélectionner un parking</option>';
+                    // récupérer les réservations
+                    const resResult = await api.getUserReservations();
+                    let reserved = [];
+                    if (resResult.success && Array.isArray(resResult.reservations)) {
+                        // Use server-provided status and inParking flag when available
+                        reserved = resResult.reservations.map(r => {
+                            const start = r.startTime || r.from || r.begin || r.fromTime;
+                            const end = r.endTime || r.to || r.finish || r.toTime;
+                            const status = r.status || 'pending';
+                            const inParking = !!r.inParking;
+                            return { ...r, startTime: start, endTime: end, status, inParking };
+                        });
+                    }
+
+                    // garder uniquement les parkings pour réservations 'pending' ou 'active'
+                    const seen = new Set();
+                    reserved.forEach(r => {
+                        if (r.status === 'pending' || r.status === 'active' || r.inParking) {
+                            const pid = r.parkingId || r.parking?.id || r.parkingId;
+                            const pname = r.parkingName || r.parking?.name || r.parking?.title || 'Parking';
+                            const pcity = r.parkingCity || r.parking?.city || '';
+                            if (pid && !seen.has(pid)) {
+                                seen.add(pid);
+                                const option = document.createElement('option');
+                                option.value = pid;
+                                let label = pcity ? `${pname} - ${pcity}` : pname;
+                                const dispLabel = r.displayLabel || (r.inParking ? 'Dans le parking' : getStatusLabel(r.status));
+                                if (dispLabel) label += ' — ' + dispLabel;
+                                option.textContent = label;
+                                select.appendChild(option);
+                            }
+                        }
+                    });
+
+                    if (seen.size === 0) {
+                        // aucun parking réservé à venir/en cours → désactiver actions
+                        if (enterBtn) enterBtn.disabled = true;
+                        if (exitBtn) exitBtn.disabled = true;
+                        // indiquer à l'utilisateur
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.textContent = 'Aucune réservation active / à venir';
+                        select.appendChild(opt);
+                    } else {
+                        if (enterBtn) enterBtn.disabled = false;
+                        if (exitBtn) exitBtn.disabled = false;
+                        // If user has exactly one reservation parking, pre-select it to avoid wrong choice
+                        if (seen.size === 1) {
+                            const only = Array.from(seen)[0];
+                            select.value = only;
+                        }
+                    }
+                }
+                
+                // Afficher le stationnement actif s'il existe
+                const activeSession = allSessions.find(s => s.isActive);
+                if (activeSession) {
+                    showActiveSession(activeSession);
+                }
+                
+            } catch (error) {
+                container.innerHTML = '<p class="error">Erreur de connexion au serveur.</p>';
+            }
+        }
+
+        function filterSessions() {
+            const showActiveOnly = document.getElementById('show-active-only').checked;
+            
+            if (showActiveOnly) {
+                const filtered = allSessions.filter(s => s.isActive);
+                displaySessions(filtered);
+            } else {
+                displaySessions(allSessions);
+            }
+        }
+
+        function displaySessions(sessions) {
+            const container = document.getElementById('sessions-list');
+            
+            if (!sessions.length) {
+                container.innerHTML = '<p>Aucun stationnement trouvé.</p>';
+                return;
+            }
+            
+            container.innerHTML = sessions.map(s => `
+                <div class="session-card ${s.isActive ? 'active' : ''}">
+                    <div class="session-header">
+                        <h3>${s.parkingName || 'Parking'}</h3>
+                        <span class="status-badge ${s.isActive ? 'active' : 'completed'}">
+                            ${s.isActive ? '🟢 En cours' : '✅ Terminé'}
+                        </span>
+                    </div>
+                    <p class="session-address">📍 ${s.parkingAddress || 'Adresse non disponible'}</p>
+                    <p class="session-plate">🚗 Plaque: <strong>${s.vehiclePlate || 'N/A'}</strong></p>
+                    <div class="session-times">
+                        <p><strong>Entrée:</strong> ${formatDate(s.entryTime)}</p>
+                        <p><strong>Sortie:</strong> ${s.exitTime ? formatDate(s.exitTime) : '-'}</p>
+                    </div>
+                    ${s.isActive ? `
+                        <div class="session-duration">
+                            <p>Durée: <span class="duration">${calculateDuration(s.entryTime)}</span></p>
+                        </div>
+                        <div class="session-actions">
+                            <button class="btn-danger" onclick="exitFromActive('${s.parkingId}', '${s.vehiclePlate || ''}')">🚪 Sortir</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function showActiveSession(session) {
+            const section = document.getElementById('active-session');
+            const card = document.getElementById('active-session-card');
+            
+            section.style.display = 'block';
+            
+            // Pré-remplir le formulaire avec le parking actif
+            const parkingSelect = document.getElementById('parking-select');
+            if (parkingSelect && session.parkingId) {
+                parkingSelect.value = session.parkingId;
+            }
+            
+            // vehicle plate removed
+            
+            card.innerHTML = `
+                <h3>🅿️ ${session.parkingName || 'Parking'}</h3>
+                <p>📍 ${session.parkingAddress || ''}</p>
+                <!-- vehicle plate removed from active session card -->
+                <p><strong>Entrée:</strong> ${formatDate(session.entryTime)}</p>
+                <p class="duration-live">Durée: <span id="live-duration">${calculateDuration(session.entryTime)}</span></p>
+                <button class="btn-danger" onclick="exitFromActive('${session.parkingId}')">🚪 Sortir maintenant</button>
+            `;
+            
+            // Mettre à jour la durée toutes les secondes
+            setInterval(() => {
+                const durationEl = document.getElementById('live-duration');
+                if (durationEl) {
+                    durationEl.textContent = calculateDuration(session.entryTime);
+                }
+            }, 1000);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            return new Date(dateStr).toLocaleString('fr-FR', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function calculateDuration(startTime) {
+            const start = new Date(startTime);
+            const now = new Date();
+            const diffMs = now - start;
+            
+            const hours = Math.floor(diffMs / (1000 * 60 * 60));
+            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}min`;
+            } else if (minutes > 0) {
+                return `${minutes}min ${seconds}s`;
+            } else {
+                return `${seconds}s`;
+            }
+        }
+
+        async function enterParking() {
+            const parkingId = document.getElementById('parking-select').value;
+            const messageDiv = document.getElementById('action-message');
+            
+            if (!parkingId) {
+                showMessage('Veuillez sélectionner un parking.', 'error');
+                return;
+            }
+            try {
+                console.log('[enterParking] parkingId', parkingId);
+                const result = await api.enterParking(parkingId);
+                console.log('[enterParking] result', result);
+                if (result.success) {
+                    showMessage('✅ Vous êtes entré dans le parking !', 'success');
+                    loadSessions();
+                } else {
+                    showMessage(`❌ Erreur: ${result.error || result.message}`, 'error');
+                    // If no reservation found, show the user's reservations to help select the right parking
+                    if (result.message && result.message.includes('Aucune réservation en cours')) {
+                        const res = await api.getUserReservations();
+                        console.log('[enterParking] user reservations', res);
+                        if (res.success && Array.isArray(res.reservations) && res.reservations.length) {
+                            const list = res.reservations.map(r => `#${r.id} - ${r.parkingName || 'Parking'} (${r.startTime} → ${r.endTime})`).join('\n');
+                            alert('Réservations de l\'utilisateur:\n' + list);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('[enterParking] error', error);
+                showMessage('❌ Erreur de connexion.', 'error');
+            }
+        }
+
+        async function exitParking() {
+            const parkingId = document.getElementById('parking-select').value;
+            
+            if (!parkingId) {
+                showMessage('Veuillez sélectionner un parking.', 'error');
+                return;
+            }
+            try {
+                console.log('[exitParking] parkingId', parkingId);
+                const result = await api.exitParking(parkingId);
+                console.log('[exitParking] result', result);
+                if (result.success) {
+                    showMessage('✅ Vous êtes sorti du parking !', 'success');
+                    document.getElementById('active-session').style.display = 'none';
+                    loadSessions();
+                } else {
+                    showMessage(`❌ Erreur: ${result.error || result.message}`, 'error');
+                }
+            } catch (error) {
+                console.error('[exitParking] error', error);
+                showMessage('❌ Erreur de connexion.', 'error');
+            }
+        }
+
+        async function exitFromActive(parkingId) {
+            // Pré-remplir le formulaire
+            document.getElementById('parking-select').value = parkingId;
+            await exitParking();
+        }
+
+        function showMessage(message, type) {
+            const div = document.getElementById('action-message');
+            div.textContent = message;
+            div.className = `message ${type}`;
+            div.style.display = 'block';
+            
+            setTimeout(() => {
+                div.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

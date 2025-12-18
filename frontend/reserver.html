@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaxawCar - Réserver une place</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAF6fhfRmmm8DMfJznhzdI4Xc-S51WoTnY"></script>
+</head>
+<body>
+  <nav class="navbar-rounded">
+    <div class="nav-left">
+      <span class="logo-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="20,5 35,13 35,27 20,35 5,27 5,13" fill="#8e24aa"/>
+          <circle cx="20" cy="20" r="7" fill="#fff" fill-opacity="0.92"/>
+          <circle cx="20" cy="20" r="3.5" fill="#8e24aa"/>
+        </svg>
+      </span>
+      <span class="logo-text">TaxawCar</span>
+    </div>
+    <ul class="nav-center">
+      <li><a href="dashboard.html">Accueil</a></li>
+      <li><a href="reserver.html" class="active">Réserver</a></li>
+      <li><a href="mes-reservations.html">Mes Réservations</a></li>
+      <li><a href="mes-stationnements.html">Mes Stationnements</a></li>
+      <li><a href="abonnement.html">Abonnements</a></li>
+    </ul>
+    <div class="nav-right">
+      <span class="user-info">
+        <span class="user-avatar">👤</span>
+        <span class="user-name" id="nav-user-name">Utilisateur</span>
+      </span>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </nav>
+
+  <main class="reserve-section">
+    <div class="reserve-header">
+      <h1>Réserver une place</h1>
+      <p>Trouvez et réservez votre place de parking en quelques clics</p>
+    </div>
+
+    <div class="reserve-content">
+      <div class="reserve-sidebar">
+        <div class="search-filters">
+          <h3>Rechercher</h3>
+          <div class="form-group">
+            <label for="location">Lieu</label>
+            <input type="text" id="location" placeholder="Ville, adresse..." />
+          </div>
+          <div class="form-group">
+            <label for="date-debut">Date d'arrivée</label>
+            <input type="datetime-local" id="date-debut" />
+          </div>
+          <div class="form-group">
+            <label for="date-fin">Date de départ</label>
+            <input type="datetime-local" id="date-fin" />
+          </div>
+          <button class="auth-btn" id="search-btn">Rechercher</button>
+        </div>
+
+        <div class="parking-results" id="parking-results">
+          <h3>Parkings disponibles</h3>
+          <div class="parking-list" id="parking-list">
+            <!-- Les parkings seront chargés ici -->
+          </div>
+        </div>
+      </div>
+
+      <div class="reserve-map">
+        <div id="gmap" class="map-container-reserve"></div>
+      </div>
+    </div>
+
+    <div class="reservation-modal" id="reservation-modal" style="display: none;">
+      <div class="modal-content">
+        <button class="modal-close" id="modal-close">&times;</button>
+        <h2>Confirmer la réservation</h2>
+        <div class="modal-parking-info" id="modal-parking-info">
+          <!-- Infos parking -->
+        </div>
+        <div class="modal-form">
+          <div class="form-group">
+            <label>Date d'arrivée</label>
+            <input type="datetime-local" id="modal-date-debut" />
+          </div>
+          <div class="form-group">
+            <label>Date de départ</label>
+            <input type="datetime-local" id="modal-date-fin" />
+          </div>
+          <div class="modal-price">
+            <span>Total estimé:</span>
+            <span class="price-value" id="modal-price">--€</span>
+          </div>
+          <button class="auth-btn" id="confirm-reservation">Confirmer la réservation</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <span>© 2025 TaxawCar — Solution professionnelle</span>
+  </footer>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

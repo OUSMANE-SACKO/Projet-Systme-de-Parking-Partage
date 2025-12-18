@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaxawCar - Abonnements</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar-rounded">
+    <div class="nav-left">
+      <span class="logo-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="20,5 35,13 35,27 20,35 5,27 5,13" fill="#8e24aa"/>
+          <circle cx="20" cy="20" r="7" fill="#fff" fill-opacity="0.92"/>
+          <circle cx="20" cy="20" r="3.5" fill="#8e24aa"/>
+        </svg>
+      </span>
+      <span class="logo-text">TaxawCar</span>
+    </div>
+    <ul class="nav-center">
+      <li><a href="dashboard.html">Accueil</a></li>
+      <li><a href="reserver.html">Réserver</a></li>
+      <li><a href="mes-reservations.html">Mes Réservations</a></li>
+      <li><a href="mes-stationnements.html">Mes Stationnements</a></li>
+      <li><a href="abonnement.html" class="active">Abonnements</a></li>
+    </ul>
+    <div class="nav-right">
+      <span class="user-info">
+        <span class="user-avatar">👤</span>
+        <span class="user-name" id="nav-user-name">Utilisateur</span>
+      </span>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="subscription-header">
+      <h1>📋 Abonnements par Parking</h1>
+      <p>Chaque parking propose ses propres formules d'abonnement définies par le propriétaire</p>
+    </div>
+
+    <!-- Mes abonnements actifs -->
+    <section id="my-subscriptions" class="dashboard-section" style="margin-bottom: 2rem;">
+      <h2>🎫 Mes abonnements actifs</h2>
+      <div id="active-subscriptions-list" class="subscriptions-grid">
+        <p>Chargement...</p>
+      </div>
+    </section>
+
+    <!-- Sélection du parking -->
+    <section class="dashboard-section">
+      <h2>🅿️ Choisir un parking</h2>
+      <div class="form-group">
+        <select id="parking-select" onchange="loadParkingSubscriptions()">
+          <option value="">Sélectionnez un parking</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Abonnements disponibles pour le parking sélectionné -->
+    <section id="parking-subscriptions" class="dashboard-section" style="display: none;">
+      <h2 id="parking-name-title">Abonnements disponibles</h2>
+      <div id="subscription-cards" class="subscription-cards"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span>© 2025 TaxawCar — Solution professionnelle</span>
+  </footer>
+
+  <script src="api.js"></script>
+  <script>
+    let parkings = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = api.getCurrentUser();
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      const displayName = user.name || user.forename || user.email;
+      document.getElementById('nav-user-name').textContent = displayName;
+      
+      loadParkings();
+      loadMySubscriptions();
+    });
+
+    function logout() {
+      api.logout();
+      window.location.href = 'index.html';
+    }
+
+    async function loadParkings() {
+      const result = await api.getParkings();
+      if (result.success && result.parkings) {
+        parkings = result.parkings;
+        const select = document.getElementById('parking-select');
+        parkings.forEach(p => {
+          const option = document.createElement('option');
+          option.value = p.id;
+          option.textContent = `${p.name} - ${p.city}`;
+          select.appendChild(option);
+        });
+      }
+    }
+
+    async function loadMySubscriptions() {
+      const container = document.getElementById('active-subscriptions-list');
+      
+      try {
+        const result = await api.getUserSubscriptions();
+        
+        if (!result.success || !result.subscriptions?.length) {
+          container.innerHTML = '<p class="empty-message">Vous n\'avez pas d\'abonnement actif.</p>';
+          return;
+        }
+
+        container.innerHTML = result.subscriptions.map(sub => `
+          <div class="subscription-active-card">
+            <div class="sub-header">
+              <h3>${sub.typeName || sub.name}</h3>
+              <span class="status-badge ${sub.status}">${sub.status === 'active' ? '✅ Actif' : sub.status}</span>
+            </div>
+            <p><strong>Parking:</strong> ${sub.parkingName || 'N/A'}</p>
+            <p><strong>Du:</strong> ${formatDate(sub.startDate)} <strong>au:</strong> ${formatDate(sub.endDate)}</p>
+            <p><strong>Prix:</strong> ${sub.monthlyPrice || sub.price}€/mois</p>
+          </div>
+        `).join('');
+      } catch (error) {
+        container.innerHTML = '<p class="error">Erreur lors du chargement.</p>';
+      }
+    }
+
+    async function loadParkingSubscriptions() {
+      const parkingId = document.getElementById('parking-select').value;
+      const section = document.getElementById('parking-subscriptions');
+      const container = document.getElementById('subscription-cards');
+      
+      if (!parkingId) {
+        section.style.display = 'none';
+        return;
+      }
+
+      const parking = parkings.find(p => p.id == parkingId);
+      document.getElementById('parking-name-title').textContent = 
+        `Abonnements - ${parking?.name || 'Parking'}`;
+
+      try {
+        const result = await api.getParkingSubscriptions(parkingId);
+        
+        if (!result.success || !result.subscriptionTypes?.length) {
+          container.innerHTML = '<p class="empty-message">Aucun abonnement disponible pour ce parking.</p>';
+          section.style.display = 'block';
+          return;
+        }
+
+        container.innerHTML = result.subscriptionTypes.map((sub, idx) => `
+          <div class="subscription-card ${idx === 0 ? 'featured' : ''}">
+            <div class="sub-badge">${sub.durationMonths || 1} mois</div>
+            <h2>${sub.name}</h2>
+            <div class="sub-price">${sub.monthlyPrice}€<span>/mois</span></div>
+            ${sub.description ? `<p class="sub-description">${sub.description}</p>` : ''}
+            <ul class="sub-features">
+              <li>✓ Accès au parking ${parking?.name}</li>
+              <li>✓ Durée: ${sub.durationMonths || 1} mois</li>
+              <li>✓ ${parking?.address}, ${parking?.city}</li>
+            </ul>
+            <button class="sub-btn ${idx === 0 ? 'featured-btn' : ''}" 
+                    onclick="subscribeToType(${sub.id}, '${sub.name}')">
+              Souscrire
+            </button>
+          </div>
+        `).join('');
+
+        section.style.display = 'block';
+      } catch (error) {
+        container.innerHTML = '<p class="error">Erreur lors du chargement des abonnements.</p>';
+        section.style.display = 'block';
+      }
+    }
+
+    async function subscribeToType(subscriptionTypeId, typeName) {
+      if (!confirm(`Souscrire à l'abonnement "${typeName}" ?`)) return;
+
+      const result = await api.subscribe(subscriptionTypeId);
+      
+      if (result.success) {
+        alert('Abonnement souscrit avec succès !');
+        loadMySubscriptions();
+      } else {
+        alert('Erreur: ' + (result.error || result.message));
+      }
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return 'N/A';
+      return new Date(dateStr).toLocaleDateString('fr-FR');
+    }
+  </script>
+</body>
+</html>
