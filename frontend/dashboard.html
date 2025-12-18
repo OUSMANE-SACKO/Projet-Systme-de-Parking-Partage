@@ -22,15 +22,16 @@
     <ul class="nav-center">
       <li><a href="dashboard.html" class="active">Accueil</a></li>
       <li><a href="reserver.html">Réserver</a></li>
-      <li><a href="tarifs.html">Tarifs</a></li>
-      <li><a href="abonnement.html">Abonnement</a></li>
+      <li><a href="mes-reservations.html">Mes Réservations</a></li>
+      <li><a href="mes-stationnements.html">Mes Stationnements</a></li>
+      <li><a href="abonnement.html">Abonnements</a></li>
     </ul>
-    <div class="nav-right" id="account-area">
-      <span class="user-info" id="user-display">
+    <div class="nav-right">
+      <span class="user-info">
         <span class="user-avatar">👤</span>
-        <span class="user-name">Utilisateur</span>
+        <span class="user-name" id="nav-user-name">Utilisateur</span>
       </span>
-      <button class="logout-btn" id="logout-btn">Déconnexion</button>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
     </div>
   </nav>
 
@@ -76,13 +77,13 @@
             <span class="action-icon">📋</span>
             <span>Gérer abonnement</span>
           </a>
-          <a href="historique.html" class="action-btn">
-            <span class="action-icon">📜</span>
-            <span>Historique</span>
+          <a href="mes-reservations.html" class="action-btn">
+            <span class="action-icon">📅</span>
+            <span>Mes Réservations</span>
           </a>
-          <a href="profil.html" class="action-btn">
-            <span class="action-icon">⚙️</span>
-            <span>Mon profil</span>
+          <a href="mes-stationnements.html" class="action-btn">
+            <span class="action-icon">🚗</span>
+            <span>Mes Stationnements</span>
           </a>
         </div>
       </div>

@@ -21,11 +21,27 @@ require_once __DIR__ . '/../backend/Functions/autoloader.php';
 // Charger les DTOs de requête du backend
 require_once __DIR__ . '/../backend/Application/DTO/AuthenticateUserDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/RegisterCustomerDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/RegisterOwnerDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/ReserveParkingDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/EnterExitParkingDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/SubscribeToSubscriptionDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/AddParkingDTO.php';
 require_once __DIR__ . '/../backend/Application/DTO/GetParkingsDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetParkingInfoDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetParkingReservationsDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetParkingSessionsDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetParkingAvailabilityDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetParkingRevenueDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetParkingSubscriptionsDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetUnauthorizedDriversDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/AddSubscriptionTypeDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/UpdateParkingPricingDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/SearchParkingsDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetUserReservationsDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetUserSessionsDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetUserSubscriptionsDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/GetReservationInvoiceDTO.php';
+require_once __DIR__ . '/../backend/Application/DTO/CancelReservationDTO.php';
 
 // Charger les DTOs de réponse
 require_once __DIR__ . '/../backend/Application/DTO/Response/AuthResponseDTO.php';
@@ -120,26 +136,80 @@ class ApiHandler {
      */
     private function createDTO(string $type, array $data): ?object {
         switch ($type) {
+            // Authentification & Inscription
             case 'AuthenticateUserDTO':
                 return AuthenticateUserDTO::fromArray($data);
 
             case 'RegisterCustomerDTO':
                 return RegisterCustomerDTO::fromArray($data);
 
-            case 'ReserveParkingDTO':
-                return ReserveParkingDTO::fromArray($data);
+            case 'RegisterOwnerDTO':
+                return RegisterOwnerDTO::fromArray($data);
 
-            case 'EnterExitParkingDTO':
-                return EnterExitParkingDTO::fromArray($data);
-
-            case 'SubscribeToSubscriptionDTO':
-                return SubscribeToSubscriptionDTO::fromArray($data);
-
+            // Gestion des parkings
             case 'AddParkingDTO':
                 return AddParkingDTO::fromArray($data);
 
             case 'GetParkingsDTO':
                 return GetParkingsDTO::fromArray($data);
+
+            case 'GetParkingInfoDTO':
+                return GetParkingInfoDTO::fromArray($data);
+
+            case 'SearchParkingsDTO':
+                return SearchParkingsDTO::fromArray($data);
+
+            case 'UpdateParkingPricingDTO':
+                return UpdateParkingPricingDTO::fromArray($data);
+
+            case 'GetParkingSubscriptionsDTO':
+                return GetParkingSubscriptionsDTO::fromArray($data);
+
+            case 'AddSubscriptionTypeDTO':
+                return AddSubscriptionTypeDTO::fromArray($data);
+
+            // Réservations
+            case 'ReserveParkingDTO':
+                return ReserveParkingDTO::fromArray($data);
+
+            case 'GetParkingReservationsDTO':
+                return GetParkingReservationsDTO::fromArray($data);
+
+            case 'GetUserReservationsDTO':
+                return GetUserReservationsDTO::fromArray($data);
+
+            case 'GetReservationInvoiceDTO':
+                return GetReservationInvoiceDTO::fromArray($data);
+
+            case 'CancelReservationDTO':
+                return CancelReservationDTO::fromArray($data);
+
+            // Stationnements (Sessions)
+            case 'EnterExitParkingDTO':
+                return EnterExitParkingDTO::fromArray($data);
+
+            case 'GetParkingSessionsDTO':
+                return GetParkingSessionsDTO::fromArray($data);
+
+            case 'GetUserSessionsDTO':
+                return GetUserSessionsDTO::fromArray($data);
+
+            // Abonnements
+            case 'SubscribeToSubscriptionDTO':
+                return SubscribeToSubscriptionDTO::fromArray($data);
+
+            case 'GetUserSubscriptionsDTO':
+                return GetUserSubscriptionsDTO::fromArray($data);
+
+            // Analytics propriétaire
+            case 'GetParkingAvailabilityDTO':
+                return GetParkingAvailabilityDTO::fromArray($data);
+
+            case 'GetParkingRevenueDTO':
+                return GetParkingRevenueDTO::fromArray($data);
+
+            case 'GetUnauthorizedDriversDTO':
+                return GetUnauthorizedDriversDTO::fromArray($data);
 
             default:
                 return null;

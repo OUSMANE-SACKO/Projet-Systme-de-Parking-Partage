@@ -15,14 +15,40 @@ class DTOSecurityAnalyzer {
 
     // DTO → Controller file path
     private const DTO_ROUTES = [
+        // Auth & Registration
         'RegisterCustomerDTO' => 'backend/Infrastructure/Controller/CustomerController.php',
         'RegisterOwnerDTO' => 'backend/Infrastructure/Controller/OwnerController.php',
         'AuthenticateUserDTO' => 'backend/Infrastructure/Controller/AuthController.php',
+        
+        // Parking Management
         'AddParkingDTO' => 'backend/Infrastructure/Controller/ParkingController.php',
         'GetParkingsDTO' => 'backend/Infrastructure/Controller/ParkingListController.php',
+        'GetParkingInfoDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
+        'SearchParkingsDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
+        'GetParkingAvailabilityDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
+        'UpdateParkingPricingDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
+        
+        // Reservations
         'ReserveParkingDTO' => 'backend/Infrastructure/Controller/ReservationController.php',
+        'GetParkingReservationsDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
+        'GetUserReservationsDTO' => 'backend/Infrastructure/Controller/UserDataController.php',
+        'CancelReservationDTO' => 'backend/Infrastructure/Controller/ReservationController.php',
+        'GetReservationInvoiceDTO' => 'backend/Infrastructure/Controller/UserDataController.php',
+        
+        // Parking Sessions (Enter/Exit)
         'EnterExitParkingDTO' => 'backend/Infrastructure/Controller/ParkingSpaceController.php',
+        'GetParkingSessionsDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
+        'GetUserSessionsDTO' => 'backend/Infrastructure/Controller/UserDataController.php',
+        
+        // Subscriptions
         'SubscribeToSubscriptionDTO' => 'backend/Infrastructure/Controller/SubscriptionController.php',
+        'GetParkingSubscriptionsDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
+        'AddSubscriptionTypeDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
+        'GetUserSubscriptionsDTO' => 'backend/Infrastructure/Controller/UserDataController.php',
+        
+        // Owner Analytics
+        'GetParkingRevenueDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
+        'GetUnauthorizedDriversDTO' => 'backend/Infrastructure/Controller/ParkingDataController.php',
     ];
 
     private PDO $pdo;
@@ -92,7 +118,7 @@ class DTOSecurityAnalyzer {
             $_SERVER['REMOTE_ADDR'] ?? 'unknown',
             substr($value, 0, 120)
         );
-        @file_put_contents(__DIR__ . '/../logs/security.log', $msg, FILE_APPEND);
+        // logging removed: security event - $msg
     }
 }
 ?>

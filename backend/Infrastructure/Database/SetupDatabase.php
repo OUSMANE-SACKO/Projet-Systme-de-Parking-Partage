@@ -14,6 +14,19 @@ class SetupDatabase {
         
         echo "Creating tables...\n";
         
+        $pdo->exec("DROP TABLE IF EXISTS invoices;");
+        $pdo->exec("DROP TABLE IF EXISTS parkings_sessions;");
+        $pdo->exec("DROP TABLE IF EXISTS reservations;");
+        $pdo->exec("DROP TABLE IF EXISTS user_subscriptions;");
+        $pdo->exec("DROP TABLE IF EXISTS subscription_time_slots;");
+        $pdo->exec("DROP TABLE IF EXISTS subscription_types;");
+        $pdo->exec("DROP TABLE IF EXISTS pricing_tiers;");
+        $pdo->exec("DROP TABLE IF EXISTS parking_tiers;");
+        $pdo->exec("DROP TABLE IF EXISTS parkings;");
+        $pdo->exec("DROP TABLE IF EXISTS users;");
+        $pdo->exec("DROP TABLE IF EXISTS parking_owners;");
+        echo "✓ All tables dropped (if existed)\n";
+        
         // Table des propriétaires de parking
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS parking_owners (
@@ -35,6 +48,7 @@ class SetupDatabase {
                 password VARCHAR(255) NOT NULL,
                 first_name VARCHAR(100) NOT NULL,
                 last_name VARCHAR(100) NOT NULL,
+                role ENUM('admin','user','owner') NOT NULL DEFAULT 'user',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ");
@@ -45,6 +59,9 @@ class SetupDatabase {
             CREATE TABLE IF NOT EXISTS parkings (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 owner_id INT NOT NULL,
+                name VARCHAR(255) NOT NULL,
+                address VARCHAR(255) NOT NULL,
+                city VARCHAR(100) NOT NULL,
                 latitude DECIMAL(10, 8) NOT NULL,
                 longitude DECIMAL(11, 8) NOT NULL,
                 total_spaces INT NOT NULL,
@@ -101,6 +118,7 @@ class SetupDatabase {
         echo "✓ Table reservations created\n";
         
         // Table des stationnements (entrée/sortie réelles)
+
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS parkings_sessions (
                 id INT AUTO_INCREMENT PRIMARY KEY,

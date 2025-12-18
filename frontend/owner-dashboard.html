@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxawCar - Espace Propriétaire</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar-rounded">
+    <div class="nav-left">
+      <span class="logo-icon">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="20,5 35,13 35,27 20,35 5,27 5,13" fill="#8e24aa"/>
+          <circle cx="20" cy="20" r="7" fill="#fff" fill-opacity="0.92"/>
+          <circle cx="20" cy="20" r="3.5" fill="#8e24aa"/>
+        </svg>
+      </span>
+      <span class="logo-text">TaxawCar</span>
+    </div>
+    <ul class="nav-center">
+      <li><a href="owner-dashboard.html" class="active">Mon Espace</a></li>
+    </ul>
+    <div class="nav-right">
+      <span class="user-info">
+        <span class="user-avatar">👤</span>
+        <span class="user-name" id="owner-nav-name">Propriétaire</span>
+      </span>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </nav>
+
+    <main class="dashboard-container">
+        <h1>🏢 Tableau de bord propriétaire</h1>
+        
+        <div id="owner-info" class="info-card">
+            <h3>Bienvenue, <span id="owner-name">Propriétaire</span></h3>
+        </div>
+
+        <!-- Section Mes Parkings -->
+        <section id="my-parkings" class="dashboard-section">
+            <h2>📍 Mes Parkings</h2>
+            <button class="btn-primary" onclick="showAddParkingForm()">+ Ajouter un parking</button>
+            <div id="parkings-list" class="parkings-grid"></div>
+        </section>
+
+        <!-- Formulaire Ajout Parking (caché par défaut) -->
+        <section id="add-parking-form" class="dashboard-section" style="display:none;">
+            <h2>➕ Ajouter un nouveau parking</h2>
+            <form onsubmit="addParking(event)">
+                <div class="form-group">
+                    <label>Nom du parking</label>
+                    <input type="text" id="parking-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Adresse</label>
+                    <input type="text" id="parking-address" required>
+                </div>
+                <div class="form-group">
+                    <label>Ville</label>
+                    <input type="text" id="parking-city" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Latitude</label>
+                        <input type="number" step="0.0000001" id="parking-lat" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Longitude</label>
+                        <input type="number" step="0.0000001" id="parking-lng" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre de places</label>
+                        <input type="number" id="parking-spaces" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tarif horaire (€)</label>
+                        <input type="number" step="0.01" id="parking-rate" min="0" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Créer le parking</button>
+                    <button type="button" class="btn-secondary" onclick="hideAddParkingForm()">Annuler</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Section détail parking sélectionné -->
+        <section id="parking-detail" class="dashboard-section" style="display:none;">
+            <h2 id="detail-parking-name">Détails du parking</h2>
+            
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('reservations')">📅 Réservations</button>
+                <button class="tab" onclick="showTab('sessions')">🚗 Stationnements</button>
+                <button class="tab" onclick="showTab('availability')">📊 Disponibilité</button>
+                <button class="tab" onclick="showTab('revenue')">💰 Revenus</button>
+                <button class="tab" onclick="showTab('subscriptions')">🎫 Abonnements</button>
+                <button class="tab" onclick="showTab('unauthorized')">⚠️ Non autorisés</button>
+                <button class="tab" onclick="showTab('pricing')">💲 Tarifs</button>
+            </div>
+
+            <!-- Contenu des tabs -->
+            <div id="tab-reservations" class="tab-content active">
+                <h3>Liste des réservations</h3>
+                <select id="reservation-status-filter" onchange="loadParkingReservations()">
+                    <option value="">Toutes</option>
+                    <option value="pending">En attente</option>
+                    <option value="active">Actives</option>
+                    <option value="completed">Terminées</option>
+                    <option value="cancelled">Annulées</option>
+                </select>
+                <div id="reservations-table"></div>
+            </div>
+
+            <div id="tab-sessions" class="tab-content">
+                <h3>Stationnements</h3>
+                <label><input type="checkbox" id="active-only" onchange="loadParkingSessions()"> Actifs uniquement</label>
+                <div id="sessions-table"></div>
+            </div>
+
+            <div id="tab-availability" class="tab-content">
+                <h3>Disponibilité à une date</h3>
+                <div class="form-group">
+                    <label>Date et heure</label>
+                    <input type="datetime-local" id="availability-datetime" onchange="checkAvailability()">
+                </div>
+                <div id="availability-result"></div>
+            </div>
+
+            <div id="tab-revenue" class="tab-content">
+                <h3>Chiffre d'affaires mensuel</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Mois</label>
+                        <select id="revenue-month">
+                            <option value="1">Janvier</option>
+                            <option value="2">Février</option>
+                            <option value="3">Mars</option>
+                            <option value="4">Avril</option>
+                            <option value="5">Mai</option>
+                            <option value="6">Juin</option>
+                            <option value="7">Juillet</option>
+                            <option value="8">Août</option>
+                            <option value="9">Septembre</option>
+                            <option value="10">Octobre</option>
+                            <option value="11">Novembre</option>
+                            <option value="12">Décembre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Année</label>
+                        <input type="number" id="revenue-year" value="2025" min="2020" max="2030">
+                    </div>
+                    <button class="btn-primary" onclick="loadRevenue()">Calculer</button>
+                </div>
+                <div id="revenue-result"></div>
+            </div>
+
+            <div id="tab-subscriptions" class="tab-content">
+                <h3>Types d'abonnements</h3>
+                <button class="btn-primary" onclick="showAddSubscriptionForm()">+ Ajouter un type</button>
+                <div id="subscription-types-list"></div>
+                <div id="add-subscription-form" style="display:none; margin-top:20px;">
+                    <h4>Nouveau type d'abonnement</h4>
+                    <div class="form-group">
+                        <label>Nom</label>
+                        <input type="text" id="sub-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="sub-description"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Prix mensuel (€)</label>
+                            <input type="number" step="0.01" id="sub-price" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Durée (mois)</label>
+                            <input type="number" id="sub-duration" value="1" min="1">
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="addSubscriptionType()">Créer</button>
+                    <button class="btn-secondary" onclick="hideAddSubscriptionForm()">Annuler</button>
+                </div>
+            </div>
+
+            <div id="tab-unauthorized" class="tab-content">
+                <h3>Conducteurs non autorisés</h3>
+                <p>Liste des véhicules stationnés sans réservation ou abonnement valide.</p>
+                <button class="btn-primary" onclick="loadUnauthorizedDrivers()">Actualiser</button>
+                <div id="unauthorized-list"></div>
+            </div>
+
+            <div id="tab-pricing" class="tab-content">
+                <h3>Modifier les tarifs</h3>
+                <div class="form-group">
+                    <label>Tarif horaire de base (€)</label>
+                    <input type="number" step="0.01" id="new-hourly-rate" min="0">
+                </div>
+                <h4>Grilles tarifaires (par tranche horaire)</h4>
+                <div id="pricing-tiers"></div>
+                <button class="btn-primary" onclick="updatePricing()">Enregistrer les tarifs</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 TaxawCar - Système de parking partagé</p>
+    </footer>
+
+    <script src="api.js"></script>
+    <script>
+        let currentParkingId = null;
+        
+        // Vérifier l'authentification au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = api.getCurrentUser();
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            const displayName = user.name || user.forename || user.email;
+            document.getElementById('owner-name').textContent = displayName;
+            const navName = document.getElementById('owner-nav-name');
+            if (navName) navName.textContent = displayName;
+            loadMyParkings();
+            
+            // Définir le mois courant
+            document.getElementById('revenue-month').value = new Date().getMonth() + 1;
+        });
+
+        function logout() {
+            api.logout();
+            window.location.href = 'index.html';
+        }
+
+        // ====== GESTION DES PARKINGS ======
+        async function loadMyParkings() {
+            const result = await api.getParkings();
+            const container = document.getElementById('parkings-list');
+            
+            if (!result.success || !result.parkings?.length) {
+                container.innerHTML = '<p>Vous n\'avez pas encore de parking.</p>';
+                return;
+            }
+            
+            container.innerHTML = result.parkings.map(p => `
+                <div class="parking-card" onclick="selectParking(${p.id})">
+                    <h3>${p.name}</h3>
+                    <p>📍 ${p.address}, ${p.city}</p>
+                    <p>🚗 ${p.totalSpaces} places</p>
+                    <p>💰 ${p.price}€/h</p>
+                </div>
+            `).join('');
+        }
+
+        function showAddParkingForm() {
+            document.getElementById('add-parking-form').style.display = 'block';
+        }
+
+        function hideAddParkingForm() {
+            document.getElementById('add-parking-form').style.display = 'none';
+        }
+
+        async function addParking(event) {
+            event.preventDefault();
+            const parkingData = {
+                name: document.getElementById('parking-name').value,
+                address: document.getElementById('parking-address').value,
+                city: document.getElementById('parking-city').value,
+                latitude: parseFloat(document.getElementById('parking-lat').value),
+                longitude: parseFloat(document.getElementById('parking-lng').value),
+                totalSpaces: parseInt(document.getElementById('parking-spaces').value),
+                hourlyRate: parseFloat(document.getElementById('parking-rate').value)
+            };
+            
+            const result = await api.addParking(parkingData);
+            if (result.success) {
+                alert('Parking ajouté avec succès !');
+                hideAddParkingForm();
+                loadMyParkings();
+            } else {
+                alert('Erreur: ' + (result.error || result.message));
+            }
+        }
+
+        // ====== SÉLECTION D'UN PARKING ======
+        function selectParking(parkingId) {
+            currentParkingId = parkingId;
+            document.getElementById('parking-detail').style.display = 'block';
+            loadParkingDetail(parkingId);
+            showTab('reservations');
+        }
+
+        async function loadParkingDetail(parkingId) {
+            const result = await api.getParkingInfo(parkingId);
+            if (result.success && result.parking) {
+                document.getElementById('detail-parking-name').textContent = result.parking.name;
+                document.getElementById('new-hourly-rate').value = result.parking.hourlyRate;
+                loadPricingTiers(result.parking.pricingTiers || []);
+            }
+        }
+
+        // ====== NAVIGATION TABS ======
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            // Charger les données
+            switch(tabName) {
+                case 'reservations': loadParkingReservations(); break;
+                case 'sessions': loadParkingSessions(); break;
+                case 'subscriptions': loadParkingSubscriptions(); break;
+            }
+        }
+
+        // ====== RÉSERVATIONS ======
+        async function loadParkingReservations() {
+            if (!currentParkingId) return;
+            const status = document.getElementById('reservation-status-filter').value || null;
+            const result = await api.getParkingReservations(currentParkingId, status);
+            
+            const container = document.getElementById('reservations-table');
+            if (!result.success || !result.reservations?.length) {
+                container.innerHTML = '<p>Aucune réservation.</p>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr><th>Client</th><th>Début</th><th>Fin</th><th>Status</th><th>Prix</th></tr>
+                    </thead>
+                    <tbody>
+                        ${result.reservations.map(r => `
+                            <tr>
+                                <td>${r.customer?.name || 'N/A'}</td>
+                                <td>${new Date(r.startTime).toLocaleString('fr-FR')}</td>
+                                <td>${new Date(r.endTime).toLocaleString('fr-FR')}</td>
+                                <td><span class="status-${r.status}">${r.status}</span></td>
+                                <td>${r.totalPrice}€</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // ====== STATIONNEMENTS ======
+        async function loadParkingSessions() {
+            if (!currentParkingId) return;
+            const activeOnly = document.getElementById('active-only').checked;
+            const result = await api.getParkingSessions(currentParkingId, activeOnly);
+            
+            const container = document.getElementById('sessions-table');
+            if (!result.success || !result.sessions?.length) {
+                container.innerHTML = '<p>Aucun stationnement.</p>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr><th>Client</th><th>Entrée</th><th>Sortie</th><th>Statut</th></tr>
+                    </thead>
+                    <tbody>
+                        ${result.sessions.map(s => `
+                            <tr>
+                                <td>${s.customer?.name || 'Anonyme'}</td>
+                                <td>${new Date(s.entryTime).toLocaleString('fr-FR')}</td>
+                                <td>${s.exitTime ? new Date(s.exitTime).toLocaleString('fr-FR') : '-'}</td>
+                                <td>${s.isActive ? '🟢 En cours' : '✅ Terminé'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // ====== DISPONIBILITÉ ======
+        async function checkAvailability() {
+            if (!currentParkingId) return;
+            const datetime = document.getElementById('availability-datetime').value;
+            if (!datetime) return;
+            
+            const result = await api.getParkingAvailability(currentParkingId, new Date(datetime).toISOString());
+            const container = document.getElementById('availability-result');
+            
+            if (result.success) {
+                container.innerHTML = `
+                    <div class="availability-card">
+                        <h4>Disponibilité au ${new Date(datetime).toLocaleString('fr-FR')}</h4>
+                        <p><strong>${result.availableSpaces}</strong> places disponibles sur ${result.totalSpaces}</p>
+                        <div class="availability-bar">
+                            <div class="availability-fill" style="width: ${(result.availableSpaces / result.totalSpaces) * 100}%"></div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `<p class="error">${result.error || result.message}</p>`;
+            }
+        }
+
+        // ====== REVENUS ======
+        async function loadRevenue() {
+            if (!currentParkingId) return;
+            const month = parseInt(document.getElementById('revenue-month').value);
+            const year = parseInt(document.getElementById('revenue-year').value);
+            
+            const result = await api.getParkingRevenue(currentParkingId, month, year);
+            const container = document.getElementById('revenue-result');
+            
+            if (result.success) {
+                container.innerHTML = `
+                    <div class="revenue-card">
+                        <h4>Chiffre d'affaires - ${getMonthName(month)} ${year}</h4>
+                        <div class="revenue-amount">${result.totalRevenue?.toFixed(2) || '0.00'}€</div>
+                        <p>Réservations: ${result.reservationsCount || 0}</p>
+                        <p>Abonnements: ${result.subscriptionsRevenue?.toFixed(2) || '0.00'}€</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `<p class="error">${result.error || result.message}</p>`;
+            }
+        }
+
+        function getMonthName(month) {
+            const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 
+                           'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+            return months[month - 1];
+        }
+
+        // ====== ABONNEMENTS ======
+        async function loadParkingSubscriptions() {
+            if (!currentParkingId) return;
+            const result = await api.getParkingSubscriptions(currentParkingId);
+            
+            const container = document.getElementById('subscription-types-list');
+            if (!result.success || !result.subscriptionTypes?.length) {
+                container.innerHTML = '<p>Aucun type d\'abonnement défini.</p>';
+                return;
+            }
+            
+            container.innerHTML = result.subscriptionTypes.map(st => `
+                <div class="subscription-type-card">
+                    <h4>${st.name}</h4>
+                    <p>${st.description || 'Pas de description'}</p>
+                    <p><strong>${st.monthlyPrice}€/mois</strong> - Durée: ${st.durationMonths} mois</p>
+                </div>
+            `).join('');
+        }
+
+        function showAddSubscriptionForm() {
+            document.getElementById('add-subscription-form').style.display = 'block';
+        }
+
+        function hideAddSubscriptionForm() {
+            document.getElementById('add-subscription-form').style.display = 'none';
+        }
+
+        async function addSubscriptionType() {
+            if (!currentParkingId) return;
+            
+            const result = await api.addSubscriptionType(
+                currentParkingId,
+                document.getElementById('sub-name').value,
+                document.getElementById('sub-description').value,
+                parseFloat(document.getElementById('sub-price').value),
+                parseInt(document.getElementById('sub-duration').value)
+            );
+            
+            if (result.success) {
+                alert('Type d\'abonnement créé !');
+                hideAddSubscriptionForm();
+                loadParkingSubscriptions();
+            } else {
+                alert('Erreur: ' + (result.error || result.message));
+            }
+        }
+
+        // ====== CONDUCTEURS NON AUTORISÉS ======
+        async function loadUnauthorizedDrivers() {
+            if (!currentParkingId) return;
+            const result = await api.getUnauthorizedDrivers(currentParkingId);
+            
+            const container = document.getElementById('unauthorized-list');
+            if (!result.success || !result.drivers?.length) {
+                container.innerHTML = '<p>✅ Aucun conducteur non autorisé détecté.</p>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr><th>Entrée</th><th>Durée</th></tr>
+                    </thead>
+                    <tbody>
+                        ${result.drivers.map(d => `
+                            <tr class="warning-row">
+                                <td>${new Date(d.entryTime).toLocaleString('fr-FR')}</td>
+                                <td>${d.duration || 'N/A'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // ====== TARIFICATION ======
+        function loadPricingTiers(tiers) {
+            const container = document.getElementById('pricing-tiers');
+            if (!tiers.length) {
+                container.innerHTML = '<p>Aucune grille tarifaire définie.</p>';
+                return;
+            }
+            
+            container.innerHTML = tiers.map((tier, i) => `
+                <div class="pricing-tier">
+                    <span>À partir de ${tier.time}</span>
+                    <input type="number" step="0.01" value="${tier.price}" data-tier-id="${tier.id}">€/h
+                </div>
+            `).join('');
+        }
+
+        async function updatePricing() {
+            if (!currentParkingId) return;
+            
+            const hourlyRate = parseFloat(document.getElementById('new-hourly-rate').value);
+            const tierInputs = document.querySelectorAll('#pricing-tiers input');
+            const pricingTiers = Array.from(tierInputs).map(input => ({
+                id: input.dataset.tierId,
+                price: parseFloat(input.value)
+            }));
+            
+            const result = await api.updateParkingPricing(currentParkingId, hourlyRate, pricingTiers);
+            if (result.success) {
+                alert('Tarifs mis à jour !');
+            } else {
+                alert('Erreur: ' + (result.error || result.message));
+            }
+        }
+    </script>
+</body>
+</html>

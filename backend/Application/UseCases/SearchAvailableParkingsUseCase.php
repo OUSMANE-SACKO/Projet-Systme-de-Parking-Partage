@@ -1,70 +1,50 @@
 <?php
     class SearchAvailableParkingsUseCase {
-        private IParkingRepository $parkingRepository;
-
-        public function __construct(IParkingRepository $parkingRepository) {
-            $this->parkingRepository = $parkingRepository;
-        }
-
-        /**
-         * @param float
-         * @param float
-         * @param float
-         * @param DateTime
-         * @return array
-         */
-        public function execute(float $latitude, float $longitude, float $radiusKm = 5.0, ?DateTime $checkTime = null): array {
-            if ($checkTime === null) {
-                $checkTime = new DateTime();
+            private $parkingRepo;
+            private $sessionRepo;
+            private $pdo;
+            public function __construct($pdo) {
+                $this->pdo = $pdo;
+                $this->parkingRepo = new ParkingRepository($pdo);
+                $this->sessionRepo = new SessionRepository($pdo);
             }
-
-            $parkings = $this->parkingRepository->findByLocation($latitude, $longitude, $radiusKm);
-            $results = [];
-
-            foreach ($parkings as $parking) {
-                $parkingLocation = $parking->getLocation();
-                
-                if (!isset($parkingLocation['latitude']) || !isset($parkingLocation['longitude'])) {
-                    continue;
+            public function execute(GetParkingsDTO $dto): array {
+                $sql = "SELECT id, name, address, city, latitude, longitude, total_spaces, hourly_rate FROM parkings";
+                $params = [];
+                $conditions = [];
+                if ($dto->city) {
+                    $conditions[] = "city LIKE ?";
+                    $params[] = '%' . $dto->city . '%';
                 }
-
-                $parkingLat = $parkingLocation['latitude'];
-                $parkingLon = $parkingLocation['longitude'];
-
-                $distance = $this->calculateDistance($latitude, $longitude, $parkingLat, $parkingLon);
-
-                if ($distance <= $radiusKm) {
-                    $availabilityUseCase = new GetParkingAvailabilityUseCase();
-                    $availability = $availabilityUseCase->execute($parking, $checkTime);
-
-                    if ($availability['availableSpaces'] > 0) {
-                        $results[] = [
-                            'parking' => $parking,
-                            'distance' => round($distance, 2),
-                            'availableSpaces' => $availability['availableSpaces'],
-                            'capacity' => $parking->getCapacity(),
-                            'location' => $parkingLocation,
-                        ];
-                    }
+                if (!empty($conditions)) {
+                    $sql .= " WHERE " . implode(" AND ", $conditions);
                 }
+                $sql .= " ORDER BY city, name LIMIT 100";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute($params);
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $parkings = [];
+                foreach ($rows as $row) {
+                    $occupied = $this->sessionRepo->countActiveSessions((int)$row['id']);
+                    $available = max(0, (int)$row['total_spaces'] - $occupied);
+                    $parkings[] = [
+                        'id' => (int)$row['id'],
+                        'name' => $row['name'],
+                        'address' => $row['address'],
+                        'city' => $row['city'],
+                        'lat' => (float)$row['latitude'],
+                        'lng' => (float)$row['longitude'],
+                        'totalSpaces' => (int)$row['total_spaces'],
+                        'availableSpaces' => $available,
+                        'price' => (float)$row['hourly_rate']
+                    ];
+                }
+                return [
+                    'parkings' => $parkings,
+                    'count' => count($parkings)
+                ];
             }
-
-            usort($results, function($a, $b) {
-                return $a['distance'] <=> $b['distance'];
-            });
-
-            return [
-                'parkings' => $results,
-                'count' => count($results),
-                'searchCenter' => [
-                    'latitude' => $latitude,
-                    'longitude' => $longitude,
-                ],
-                'radiusKm' => $radiusKm,
-                'checkTime' => $checkTime->format('Y-m-d H:i:s'),
-            ];
-        }
-
+            
         /**
          * @param float $lat1 Latitude point 1
          * @param float $lon1 Longitude point 1

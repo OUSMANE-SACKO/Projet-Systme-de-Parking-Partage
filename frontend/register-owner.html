@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaxawCar - Inscription Propriétaire</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-body">
+  <div class="auth-container">
+    <div class="auth-left">
+      <div class="auth-brand">
+        <span class="logo-icon">
+          <svg width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="20,5 35,13 35,27 20,35 5,27 5,13" fill="#8e24aa"/>
+            <circle cx="20" cy="20" r="7" fill="#fff" fill-opacity="0.92"/>
+            <circle cx="20" cy="20" r="3.5" fill="#8e24aa"/>
+          </svg>
+        </span>
+        <span class="auth-brand-name">TaxawCar</span>
+      </div>
+      <h1 class="auth-title">Inscription Propriétaire</h1>
+      <p class="auth-subtitle">Créez un compte pour gérer vos parkings</p>
+      
+      <form class="auth-form" id="owner-register-form" method="POST" autocomplete="on">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nom">Nom</label>
+            <input type="text" id="nom" name="nom" placeholder="Votre nom" required>
+          </div>
+          <div class="form-group">
+            <label for="prenom">Prénom</label>
+            <input type="text" id="prenom" name="prenom" placeholder="Votre prénom" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="email">Adresse e-mail</label>
+          <input type="email" id="email" name="email" placeholder="votre@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label for="password2">Confirmer le mot de passe</label>
+          <input type="password" id="password2" name="password2" placeholder="••••••••" required minlength="6">
+        </div>
+        <div id="form-errors" class="form-errors"></div>
+        <button type="submit" class="auth-btn">Créer mon compte propriétaire</button>
+        <p class="auth-link">Déjà inscrit ? <a href="index.html">Se connecter</a></p>
+        <p class="auth-link">Vous êtes un client ? <a href="register.html">Inscription client</a></p>
+      </form>
+    </div>
+    <div class="auth-right">
+      <div class="auth-visual">
+        <div class="auth-visual-content">
+          <h2>Gérez vos parkings</h2>
+          <p>Ajoutez vos places de parking, gérez les réservations et suivez vos revenus en temps réel.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

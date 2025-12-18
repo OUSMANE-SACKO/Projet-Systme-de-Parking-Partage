@@ -81,7 +81,28 @@ class SeedDatabase {
             ['Nathan', 'David', 'nathan.david@parking.fr'],
             ['Inès', 'Bertrand', 'ines.bertrand@parking.fr'],
             ['Théo', 'Roux', 'theo.roux@parking.fr'],
-            ['Jade', 'Vincent', 'jade.vincent@parking.fr']
+            ['Jade', 'Vincent', 'jade.vincent@parking.fr'],
+            ['Paul', 'Girard', 'paul.girard@parking.fr'],
+            ['Julie', 'Fontaine', 'julie.fontaine@parking.fr'],
+            ['Antoine', 'Lemoine', 'antoine.lemoine@parking.fr'],
+            ['Sabrina', 'Faure', 'sabrina.faure@parking.fr'],
+            ['Olivier', 'Perrot', 'olivier.perrot@parking.fr'],
+            ['Céline', 'Marchand', 'celine.marchand@parking.fr'],
+            ['Vincent', 'Garnier', 'vincent.garnier@parking.fr'],
+            ['Amandine', 'Chevalier', 'amandine.chevalier@parking.fr'],
+            ['Florent', 'Barbier', 'florent.barbier@parking.fr'],
+            ['Elodie', 'Renaud', 'elodie.renaud@parking.fr'],
+            ['Guillaume', 'Benoit', 'guillaume.benoit@parking.fr'],
+            ['Aurélie', 'Paris', 'aurelie.paris@parking.fr'],
+            ['Benoît', 'Muller', 'benoit.muller@parking.fr'],
+            ['Sandrine', 'Leclerc', 'sandrine.leclerc@parking.fr'],
+            ['Damien', 'Lopez', 'damien.lopez@parking.fr'],
+            ['Mickael', 'Dupuis', 'mickael.dupuis@parking.fr'],
+            ['Sonia', 'Morin', 'sonia.morin@parking.fr'],
+            ['Patrice', 'Guerin', 'patrice.guerin@parking.fr'],
+            ['Isabelle', 'Lemoine', 'isabelle.lemoine@parking.fr'],
+            ['Alexandre', 'Renard', 'alexandre.renard@parking.fr'],
+            ['Catherine', 'Roy', 'catherine.roy@parking.fr']
         ];
 
         $stmt = $pdo->prepare("INSERT INTO parking_owners (first_name, last_name, email, password) VALUES (?, ?, ?, ?)");
@@ -90,74 +111,73 @@ class SeedDatabase {
         foreach ($owners as $owner) {
             $stmt->execute([$owner[0], $owner[1], $owner[2], $hashedPassword]);
         }
-        echo "✓ 20 parking owners created\n";
+        echo "✓ 40 parking owners created\n";
     }
 
     private function seedUsers(PDO $pdo): void {
         $users = [
-            ['Alice', 'Blanc', 'alice.blanc@email.com'],
-            ['Bob', 'Noir', 'bob.noir@email.com'],
-            ['Claire', 'Rouge', 'claire.rouge@email.com'],
-            ['David', 'Vert', 'david.vert@email.com'],
-            ['Émilie', 'Bleu', 'emilie.bleu@email.com'],
-            ['François', 'Jaune', 'francois.jaune@email.com'],
-            ['Gaëlle', 'Orange', 'gaelle.orange@email.com'],
-            ['Henri', 'Violet', 'henri.violet@email.com'],
-            ['Isabelle', 'Rose', 'isabelle.rose@email.com'],
-            ['Jacques', 'Gris', 'jacques.gris@email.com'],
-            ['Karine', 'Marron', 'karine.marron@email.com'],
-            ['Laurent', 'Beige', 'laurent.beige@email.com'],
-            ['Mélanie', 'Turquoise', 'melanie.turquoise@email.com'],
-            ['Nicolas', 'Indigo', 'nicolas.indigo@email.com'],
-            ['Olivia', 'Corail', 'olivia.corail@email.com'],
-            ['Patrick', 'Lavande', 'patrick.lavande@email.com'],
-            ['Quentin', 'Menthe', 'quentin.menthe@email.com'],
-            ['Rachel', 'Saumon', 'rachel.saumon@email.com'],
-            ['Sébastien', 'Olive', 'sebastien.olive@email.com'],
-            ['Tiphaine', 'Cyan', 'tiphaine.cyan@email.com']
+            // admin
+            ['Admin', 'System', 'admin@taxawcar.com', 'admin'],
+            // users
+            ['Alice', 'Blanc', 'alice.blanc@email.com', 'user'],
+            ['Bob', 'Noir', 'bob.noir@email.com', 'user'],
+            ['Claire', 'Rouge', 'claire.rouge@email.com', 'user'],
+            ['David', 'Vert', 'david.vert@email.com', 'user'],
+            ['Émilie', 'Bleu', 'emilie.bleu@email.com', 'user'],
+            ['François', 'Jaune', 'francois.jaune@email.com', 'user'],
+            ['Gaëlle', 'Orange', 'gaelle.orange@email.com', 'user'],
+            ['Henri', 'Violet', 'henri.violet@email.com', 'user'],
+            ['Isabelle', 'Rose', 'isabelle.rose@email.com', 'user'],
+            ['Jacques', 'Gris', 'jacques.gris@email.com', 'user'],
+            ['Karine', 'Marron', 'karine.marron@email.com', 'user'],
+            ['Laurent', 'Beige', 'laurent.beige@email.com', 'user'],
+            ['Mélanie', 'Turquoise', 'melanie.turquoise@email.com', 'user'],
+            ['Nicolas', 'Indigo', 'nicolas.indigo@email.com', 'user'],
+            ['Olivia', 'Corail', 'olivia.corail@email.com', 'user'],
+            ['Patrick', 'Lavande', 'patrick.lavande@email.com', 'user'],
+            ['Quentin', 'Menthe', 'quentin.menthe@email.com', 'user'],
+            ['Rachel', 'Saumon', 'rachel.saumon@email.com', 'user'],
+            ['Sébastien', 'Olive', 'sebastien.olive@email.com', 'user'],
+            ['Tiphaine', 'Cyan', 'tiphaine.cyan@email.com', 'user']
         ];
 
-        $stmt = $pdo->prepare("INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO users (first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?)");
         $hashedPassword = password_hash('user123', PASSWORD_DEFAULT);
+        $hashedAdmin = password_hash('admin123', PASSWORD_DEFAULT);
         
         foreach ($users as $user) {
-            $stmt->execute([$user[0], $user[1], $user[2], $hashedPassword]);
+            $pass = ($user[3] === 'admin') ? $hashedAdmin : $hashedPassword;
+            $stmt->execute([$user[0], $user[1], $user[2], $pass, $user[3]]);
         }
-        echo "✓ 20 users (customers) created\n";
+        echo "✓ 21 users (customers/admin) created\n";
     }
 
     private function seedParkings(PDO $pdo): void {
-        // Parkings dans différentes villes françaises avec coordonnées réalistes
-        // [owner_id, latitude, longitude, capacity, hourly_rate]
-        $parkings = [
-            [1, 48.8566, 2.3522, 150, 4.50],   // Paris Centre
-            [1, 48.8606, 2.3376, 80, 5.00],    // Paris Louvre
-            [2, 43.2965, 5.3698, 200, 3.00],   // Marseille Vieux-Port
-            [2, 43.3002, 5.3825, 120, 2.50],   // Marseille Canebière
-            [3, 45.7640, 4.8357, 180, 3.50],   // Lyon Part-Dieu
-            [3, 45.7578, 4.8320, 100, 3.20],   // Lyon Bellecour
-            [4, 43.6047, 1.4442, 90, 2.80],    // Toulouse Capitole
-            [5, 44.8378, -0.5792, 160, 3.20],  // Bordeaux Centre
-            [6, 47.2184, -1.5536, 140, 2.90],  // Nantes Commerce
-            [7, 48.1173, -1.6778, 110, 2.70],  // Rennes République
-            [8, 43.7102, 7.2620, 70, 6.00],    // Nice Promenade
-            [9, 48.5734, 7.7521, 130, 3.10],   // Strasbourg Centre
-            [10, 43.6108, 3.8767, 95, 2.60],   // Montpellier Comédie
-            [11, 50.6292, 3.0573, 170, 2.40],  // Lille Grand Place
-            [12, 47.3220, 5.0415, 85, 2.20],   // Dijon Centre
-            [13, 49.4432, 1.0999, 145, 3.00],  // Rouen Cathédrale
-            [14, 47.4784, -0.5632, 125, 2.60], // Angers Centre
-            [15, 48.3904, -4.4861, 60, 2.30],  // Brest Centre
-            [16, 45.1885, 5.7245, 155, 3.20],  // Grenoble Gare
-            [17, 49.1829, -0.3707, 100, 2.80]  // Caen Centre
+        // Générer 40 parkings pour 40 propriétaires
+        $cities = [
+            ['Paris', 48.8566, 2.3522], ['Marseille', 43.2965, 5.3698], ['Lyon', 45.7640, 4.8357], ['Toulouse', 43.6047, 1.4442],
+            ['Bordeaux', 44.8378, -0.5792], ['Nantes', 47.2184, -1.5536], ['Rennes', 48.1173, -1.6778], ['Nice', 43.7102, 7.2620],
+            ['Strasbourg', 48.5734, 7.7521], ['Montpellier', 43.6108, 3.8767], ['Lille', 50.6292, 3.0573], ['Dijon', 47.3220, 5.0415],
+            ['Rouen', 49.4432, 1.0999], ['Angers', 47.4784, -0.5632], ['Brest', 48.3904, -4.4861], ['Grenoble', 45.1885, 5.7245],
+            ['Caen', 49.1829, -0.3707], ['Le Havre', 49.4944, 0.1079], ['Saint-Étienne', 45.4397, 4.3872], ['Toulon', 43.1242, 5.9280],
         ];
-
-        $stmt = $pdo->prepare("INSERT INTO parkings (owner_id, latitude, longitude, total_spaces, hourly_rate) VALUES (?, ?, ?, ?, ?)");
-        
+        $parkings = [];
+        for ($i = 1; $i <= 40; $i++) {
+            $cityIdx = ($i - 1) % count($cities);
+            $city = $cities[$cityIdx][0];
+            $lat = $cities[$cityIdx][1] + (mt_rand(-100, 100) / 10000);
+            $lng = $cities[$cityIdx][2] + (mt_rand(-100, 100) / 10000);
+            $name = "$city Parking " . chr(65 + (($i - 1) % 26));
+            $address = ($i * 3) . " Rue Principale";
+            $totalSpaces = 60 + ($i * 3) % 150;
+            $hourlyRate = round(2.0 + ($i % 10) * 0.35, 2);
+            $parkings[] = [$i, $name, $address, $city, $lat, $lng, $totalSpaces, $hourlyRate];
+        }
+        $stmt = $pdo->prepare("INSERT INTO parkings (owner_id, name, address, city, latitude, longitude, total_spaces, hourly_rate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         foreach ($parkings as $parking) {
             $stmt->execute($parking);
         }
-        echo "✓ 20 parkings created\n";
+        echo "✓ 40 parkings created\n";
     }
 
     private function seedParkingTiers(PDO $pdo): void {
@@ -271,32 +291,22 @@ class SeedDatabase {
 
     private function seedParkingSessions(PDO $pdo): void {
         $stmt = $pdo->prepare("INSERT INTO parkings_sessions (user_id, parking_id, reservation_id, entry_time, exit_time, is_overstay) VALUES (?, ?, ?, ?, ?, ?)");
-        
         for ($i = 0; $i < 20; $i++) {
             $userId = ($i % 20) + 1;
             $parkingId = (($i * 2) % 20) + 1;
-            
-            // Lier aux réservations complétées ou actives (IDs 1-15 environ)
             $reservationId = ($i < 12) ? $i + 1 : null;
-            
             $daysOffset = $i - 8;
             $entryDate = new DateTime();
             $entryDate->modify("{$daysOffset} days");
             $entryDate->setTime(9 + ($i % 8), 15 * ($i % 4));
-            
-            // Sessions terminées ou en cours
             $exitDate = null;
             if ($i < 16) {
                 $exitDate = clone $entryDate;
                 $duration = [1, 2, 2, 3, 4, 5][$i % 6];
                 $exitDate->modify("+{$duration} hours");
-                // Ajout de quelques minutes pour réalisme
                 $exitDate->modify("+" . (5 * ($i % 10)) . " minutes");
             }
-            
-            // Dépassement si durée réelle > durée réservée (1 sur 6)
             $isOverstay = ($i % 6 == 0 && $reservationId !== null) ? 1 : 0;
-            
             $stmt->execute([
                 $userId,
                 $parkingId,

@@ -15,13 +15,13 @@ RewriteRule ^ - [L]
 
 # Rediriger les fichiers statiques du frontend
 RewriteRule ^(styles\.css|app\.js|api\.js)$ frontend/$1 [L]
-RewriteRule ^(connexion|register|tarifs|dashboard|reserver|abonnement)\.html$ frontend/$1.html [L]
+RewriteRule ^(connexion|register|tarifs|dashboard|reserver|abonnement|mes-reservations|mes-stationnements)\.html$ frontend/$1.html [L]
 
 # Routes API vers le backend
 RewriteRule ^api/(.*)$ backend/Infrastructure/Controller/$1 [L,QSA]
 
-# Protection XSS - autoriser Google Maps API
-Header set Content-Security-Policy "default-src 'self'; script-src 'self' https://maps.googleapis.com https://maps.gstatic.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://maps.googleapis.com https://maps.gstatic.com; connect-src 'self' https://maps.googleapis.com; frame-src 'self'"
+# Protection XSS - autoriser Google Maps API et Google Fonts
+Header set Content-Security-Policy "default-src 'self'; script-src 'self' https://maps.googleapis.com https://maps.gstatic.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://maps.googleapis.com https://maps.gstatic.com; connect-src 'self' https://maps.googleapis.com; frame-src 'self'"
 Header set X-Content-Type-Options "nosniff"
 Header set X-Frame-Options "DENY"
 Header set X-XSS-Protection "1; mode=block"
