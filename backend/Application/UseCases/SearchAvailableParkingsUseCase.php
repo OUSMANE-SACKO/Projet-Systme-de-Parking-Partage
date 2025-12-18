@@ -40,7 +40,6 @@
                     ];
                 }
                 return [
-                    'success' => true,
                     'parkings' => $parkings,
                     'count' => count($parkings)
                 ];
