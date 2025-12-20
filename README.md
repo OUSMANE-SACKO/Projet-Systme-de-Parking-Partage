@@ -12,19 +12,16 @@ composer mutation   # runs mutation testing (Infection)
 composer open-mutation # runs the html results
 ```
 
-Exemples d'implémentation pour ces scripts (si besoin) :
-
-```bash
-# composer coverage -> lance PHPUnit avec couverture
-XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text
-
-# composer mutation -> lance Infection en utilisant la couverture
-XDEBUG_MODE=coverage ./vendor/bin/infection --threads=4 --min-msi=80
-```
-
 Sur PowerShell (Windows) :
 ```powershell
 $env:XDEBUG_MODE="coverage"; ./vendor/bin/infection --threads=4 --min-msi=80
+```
+
+Pour lancer le projet, utilisez Docker, en faisant les commandes suivantes:
+
+```
+docker compose build
+docker compose up
 ```
 
 Pour implémenter la BDD, il faut appeler les fichiers suivants:
@@ -33,3 +30,5 @@ Pour implémenter la BDD, il faut appeler les fichiers suivants:
 php SetupDatabase.php # Initialise la base de données
 php SeedDatabase.php # Concoie les tables
 ```
+
+Puis, vous pouvez utiliser le port 8080 et 8081 du localhost pour visualiser la BDD MySQL et le projet
