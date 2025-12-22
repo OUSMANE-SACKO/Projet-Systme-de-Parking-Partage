@@ -26,7 +26,7 @@
 | **Ousmane Sacko** 
 | **Hugo Martins** 
 | **N'DA Abouakou Yann** 
-| **SACKO Ousmane** 
+| **Issa Abdoulaye** 
 
 ---
 
