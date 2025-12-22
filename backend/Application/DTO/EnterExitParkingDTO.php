@@ -2,29 +2,32 @@
 
 class EnterExitParkingDTO {
     public string $parkingId;
-    public string $action; // 'enter' ou 'exit'
+    public string $vehiclePlate;
     public ?string $timestamp;
     public ?int $userId;
+    public string $action; // 'enter' ou 'exit'
 
-    public function __construct(string $parkingId, string $action = 'enter', ?string $timestamp = null, ?int $userId = null) {
+    public function __construct(string $parkingId, string $vehiclePlate = '', ?string $timestamp = null, ?int $userId = null, string $action = 'enter') {
         $this->parkingId = trim($parkingId);
-        $this->action = trim($action);
+        $this->vehiclePlate = trim($vehiclePlate);
         $this->timestamp = $timestamp;
         $this->userId = $userId;
+        $this->action = trim($action);
     }
 
     public static function fromArray(array $data): self {
         return new self(
             $data['parkingId'] ?? '',
-            $data['action'] ?? 'enter',
+            $data['vehiclePlate'] ?? '',
             $data['timestamp'] ?? null,
-            isset($data['userId']) ? (int)$data['userId'] : null
+            isset($data['userId']) ? (int)$data['userId'] : null,
+            $data['action'] ?? 'enter'
         );
     }
 
     public function validate(): void {
-        if ($this->parkingId === '') {
-            throw new InvalidArgumentException('Parking requis.');
+        if ($this->parkingId === '' || $this->vehiclePlate === '') {
+            throw new InvalidArgumentException('Parking et plaque requis.');
         }
         if (!in_array($this->action, ['enter', 'exit'])) {
             throw new InvalidArgumentException('Action invalide. Utilisez "enter" ou "exit".');
