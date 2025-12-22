@@ -1,11 +1,9 @@
 <?php
 
 require_once __DIR__ . '/../../Application/DTO/GetParkingsDTO.php';
-require_once __DIR__ . '/../../Application/UseCases/GetParkingSpacesUseCase.php';
-require_once __DIR__ . '/../../Domain/Repositories/IParkingRepository.php';
-require_once __DIR__ . '/../../Domain/Entities/Parking.php';
-require_once __DIR__ . '/../../Domain/Entities/ParkingSpace.php';
-require_once __DIR__ . '/../Repositories/MySQLParkingRepository.php';
+require_once __DIR__ . '/../../Application/UseCases/SearchAvailableParkingsUseCase.php';
+require_once __DIR__ . '/../Repositories/ParkingRepository.php';
+require_once __DIR__ . '/../Repositories/SessionRepository.php';
 
 class ParkingListController {
     private PDO $pdo;
@@ -16,14 +14,12 @@ class ParkingListController {
 
     public function getParkings(GetParkingsDTO $dto): array {
         try {
-            $parkingRepository = new MySQLParkingRepository($this->pdo);
-            $useCase = new GetParkingSpacesUseCase($parkingRepository);
-            
-            $parkings = $useCase->execute();
+            $useCase = new SearchAvailableParkingsUseCase($this->pdo);
+            $result = $useCase->execute($dto);
             
             return [
                 'success' => true,
-                'parkings' => $parkings
+                'parkings' => $result['parkings'] ?? []
             ];
         } catch (Exception $e) {
             error_log('GetParkings Error: ' . $e->getMessage());
